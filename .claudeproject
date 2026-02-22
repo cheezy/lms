@@ -1,0 +1,17 @@
+{
+  "name": "Lms Phoenix App",
+  "description": "A Phoenix/LiveView Learning Management System application",
+  "guidelines": [
+    {
+      "path": "AGENTS.md",
+      "description": "Project guidelines, usage rules, and best practices for Phoenix/Elixir development"
+    }
+  ],
+  "contextFiles": [
+    "AGENTS.md",
+    "mix.exs",
+    "README.md"
+  ],
+  "language": "elixir",
+  "framework": "phoenix"
+}
