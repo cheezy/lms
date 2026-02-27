@@ -128,7 +128,8 @@
       "WebFetch(domain:modelcontextprotocol.info)",
       "mcp__Tidewave__get_source_location",
       "Bash(mix deps.unlock:*)",
-      "WebFetch(domain:www.stridelikeaboss.com)"
+      "WebFetch(domain:www.stridelikeaboss.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": [],
     "ask": []
