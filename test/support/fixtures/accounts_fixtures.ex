@@ -41,6 +41,17 @@ defmodule Lms.AccountsFixtures do
     user
   end
 
+  def user_with_role_fixture(role, company_id \\ nil) do
+    user = user_fixture()
+
+    {1, _} =
+      Lms.Accounts.User
+      |> from(where: [id: ^user.id])
+      |> Lms.Repo.update_all(set: [role: role, company_id: company_id])
+
+    Lms.Repo.get!(Lms.Accounts.User, user.id)
+  end
+
   def user_scope_fixture do
     user = user_fixture()
     user_scope_fixture(user)
