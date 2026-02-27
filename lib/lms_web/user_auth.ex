@@ -197,7 +197,18 @@ defmodule LmsWeb.UserAuth do
     end
   end
 
-  defp signed_in_path(_conn), do: ~p"/"
+  @doc """
+  Returns the role-appropriate path for the signed-in user.
+  """
+  def signed_in_path(conn) do
+    case get_in(conn.assigns, [:current_scope, Access.key(:user), Access.key(:role)]) do
+      :system_admin -> ~p"/admin/companies"
+      :company_admin -> ~p"/dashboard"
+      :course_creator -> ~p"/courses"
+      :employee -> ~p"/my-learning"
+      _ -> ~p"/"
+    end
+  end
 
   @doc """
   Plug for routes that require the user to be authenticated.

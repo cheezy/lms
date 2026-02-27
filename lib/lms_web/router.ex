@@ -67,6 +67,42 @@ defmodule LmsWeb.Router do
     get "/users/settings/confirm-email/:token", UserSettingsController, :confirm_email
   end
 
+  ## Role-based dashboard routes
+  ## Each live_session uses on_mount to enforce role requirements so that
+  ## only users with the appropriate role can access these pages.
+
+  scope "/", LmsWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :admin,
+      on_mount: [{LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:system_admin]}}] do
+      live "/admin/companies", Admin.CompanyListLive
+    end
+
+    live_session :company_admin,
+      on_mount: [
+        {LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:company_admin, :system_admin]}}
+      ] do
+      live "/dashboard", DashboardLive
+    end
+
+    live_session :course_creator,
+      on_mount: [
+        {LmsWeb.Plugs.AuthorizationHooks,
+         {:require_role, [:course_creator, :company_admin, :system_admin]}}
+      ] do
+      live "/courses", CourseListLive
+    end
+
+    live_session :employee,
+      on_mount: [
+        {LmsWeb.Plugs.AuthorizationHooks,
+         {:require_role, [:employee, :course_creator, :company_admin, :system_admin]}}
+      ] do
+      live "/my-learning", Employee.MyLearningLive
+    end
+  end
+
   scope "/", LmsWeb do
     pipe_through [:browser]
 
