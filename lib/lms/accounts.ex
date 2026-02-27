@@ -82,6 +82,20 @@ defmodule Lms.Accounts do
     |> Repo.insert()
   end
 
+  @doc """
+  Creates a system admin user with email and password.
+
+  Returns `{:ok, user}` or `{:error, changeset}`.
+  """
+  def create_system_admin(attrs) do
+    %User{}
+    |> User.email_changeset(attrs)
+    |> User.password_changeset(attrs)
+    |> Ecto.Changeset.put_change(:role, :system_admin)
+    |> Ecto.Changeset.put_change(:confirmed_at, DateTime.utc_now(:second))
+    |> Repo.insert()
+  end
+
   ## Settings
 
   @doc """

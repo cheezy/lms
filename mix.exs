@@ -115,7 +115,15 @@ defmodule Lms.MixProject do
         LmsWeb.PageController,
         LmsWeb.PageHTML,
         LmsWeb.Router,
-        LmsWeb.Telemetry
+        LmsWeb.Telemetry,
+        # Placeholder LiveViews (stubs pending full implementation)
+        LmsWeb.Admin.CompanyListLive,
+        LmsWeb.CourseListLive,
+        LmsWeb.DashboardLive,
+        LmsWeb.Employee.MyLearningLive,
+        # Generated HTML modules
+        LmsWeb.UserRegistrationHTML,
+        LmsWeb.UserSettingsHTML
       ]
     ]
   end
