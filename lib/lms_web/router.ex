@@ -57,6 +57,10 @@ defmodule LmsWeb.Router do
 
     get "/users/register", UserRegistrationController, :new
     post "/users/register", UserRegistrationController, :create
+
+    live_session :company_registration do
+      live "/companies/register", CompanyRegistrationLive
+    end
   end
 
   scope "/", LmsWeb do
@@ -109,6 +113,7 @@ defmodule LmsWeb.Router do
     get "/users/log-in", UserSessionController, :new
     get "/users/log-in/:token", UserSessionController, :confirm
     post "/users/log-in", UserSessionController, :create
+    get "/users/registration-login", UserSessionController, :registration_login
     delete "/users/log-out", UserSessionController, :delete
   end
 end

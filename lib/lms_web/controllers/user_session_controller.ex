@@ -80,6 +80,23 @@ defmodule LmsWeb.UserSessionController do
     end
   end
 
+  def registration_login(conn, %{"token" => token}) do
+    case Phoenix.Token.verify(conn, "company_registration", token, max_age: 60) do
+      {:ok, user_id} ->
+        user = Accounts.get_user!(user_id)
+
+        conn
+        |> assign(:current_scope, Lms.Accounts.Scope.for_user(user))
+        |> put_flash(:info, "Company registered successfully!")
+        |> UserAuth.log_in_user(user)
+
+      {:error, _reason} ->
+        conn
+        |> put_flash(:error, "Registration link is invalid or has expired.")
+        |> redirect(to: ~p"/users/log-in")
+    end
+  end
+
   def delete(conn, _params) do
     conn
     |> put_flash(:info, "Logged out successfully.")
