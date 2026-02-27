@@ -42,6 +42,7 @@ defmodule Lms.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.1"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
@@ -101,7 +102,7 @@ defmodule Lms.MixProject do
     ]
   end
 
-    defp test_coverage do
+  defp test_coverage do
     [
       ignore_modules: [
         Lms.Application,
@@ -141,5 +142,4 @@ defmodule Lms.MixProject do
       ]
     ]
   end
-
 end

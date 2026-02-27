@@ -26,7 +26,7 @@ defmodule LmsWeb.Endpoint do
     gzip: not code_reloading?,
     only: LmsWeb.static_paths()
 
-    # Tidewave for development
+  # Tidewave for development
   if Code.ensure_loaded?(Tidewave) do
     plug Tidewave
   end
