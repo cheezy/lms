@@ -350,6 +350,8 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
   describe "Archived course" do
     test "shows read-only badge for archived course", %{conn: conn, company: company} do
       course = course_fixture(%{company: company, status: :draft})
+      chapter = chapter_fixture(%{course: course})
+      lesson_fixture(%{chapter: chapter})
       {:ok, published} = Training.publish_course(course)
       {:ok, archived} = Training.archive_course(published)
 
@@ -360,6 +362,8 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
     test "hides add chapter button for archived course", %{conn: conn, company: company} do
       course = course_fixture(%{company: company, status: :draft})
+      chapter = chapter_fixture(%{course: course})
+      lesson_fixture(%{chapter: chapter})
       {:ok, published} = Training.publish_course(course)
       {:ok, archived} = Training.archive_course(published)
 

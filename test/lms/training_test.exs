@@ -429,10 +429,25 @@ defmodule Lms.TrainingTest do
   ## Publishing and archiving
 
   describe "publish_course/1" do
-    test "publishes a draft course" do
+    test "publishes a draft course with content" do
       course = course_fixture(%{status: :draft})
+      chapter = chapter_fixture(%{course: course})
+      lesson_fixture(%{chapter: chapter})
+
       assert {:ok, published} = Training.publish_course(course)
       assert published.status == :published
+    end
+
+    test "returns error when course has no chapters" do
+      course = course_fixture(%{status: :draft})
+      assert {:error, :no_content} = Training.publish_course(course)
+    end
+
+    test "returns error when chapters have no lessons" do
+      course = course_fixture(%{status: :draft})
+      chapter_fixture(%{course: course})
+
+      assert {:error, :no_content} = Training.publish_course(course)
     end
 
     test "returns error when course is not draft" do
@@ -444,6 +459,28 @@ defmodule Lms.TrainingTest do
       course = course_fixture(%{status: :published})
       {:ok, archived} = Training.archive_course(course)
       assert {:error, :not_draft} = Training.publish_course(archived)
+    end
+  end
+
+  describe "has_publishable_content?/1" do
+    test "returns true when course has chapters with lessons" do
+      course = course_fixture()
+      chapter = chapter_fixture(%{course: course})
+      lesson_fixture(%{chapter: chapter})
+
+      assert Training.has_publishable_content?(course)
+    end
+
+    test "returns false when course has no chapters" do
+      course = course_fixture()
+      refute Training.has_publishable_content?(course)
+    end
+
+    test "returns false when chapters have no lessons" do
+      course = course_fixture()
+      chapter_fixture(%{course: course})
+
+      refute Training.has_publishable_content?(course)
     end
   end
 

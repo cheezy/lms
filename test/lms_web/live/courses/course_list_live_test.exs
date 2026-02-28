@@ -99,6 +99,8 @@ defmodule LmsWeb.Courses.CourseListLiveTest do
   describe "Course actions" do
     test "publishes a draft course", %{conn: conn, company: company} do
       course = course_fixture(%{company: company, status: :draft})
+      chapter = chapter_fixture(%{course: course})
+      lesson_fixture(%{chapter: chapter})
       {:ok, view, _html} = live(conn, ~p"/courses")
 
       view

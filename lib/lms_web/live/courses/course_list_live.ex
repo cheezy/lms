@@ -51,6 +51,14 @@ defmodule LmsWeb.Courses.CourseListLive do
          |> put_flash(:info, gettext("Course published successfully."))
          |> push_patch(to: build_path(socket.assigns))}
 
+      {:error, :no_content} ->
+        {:noreply,
+         put_flash(
+           socket,
+           :error,
+           gettext("Cannot publish: course needs at least one chapter with a lesson.")
+         )}
+
       {:error, _reason} ->
         {:noreply, put_flash(socket, :error, gettext("Could not publish course."))}
     end

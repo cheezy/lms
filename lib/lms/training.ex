@@ -87,15 +87,33 @@ defmodule Lms.Training do
   @doc """
   Publishes a draft course by setting its status to `:published`.
 
+  Requires the course to have at least one chapter with at least one lesson.
+
   Returns `{:error, :not_draft}` if the course is not in draft status.
+  Returns `{:error, :no_content}` if the course lacks chapters or lessons.
   """
   def publish_course(%Course{status: :draft} = course) do
-    course
-    |> Ecto.Changeset.change(%{status: :published})
-    |> Repo.update()
+    if has_publishable_content?(course) do
+      course
+      |> Ecto.Changeset.change(%{status: :published})
+      |> Repo.update()
+    else
+      {:error, :no_content}
+    end
   end
 
   def publish_course(%Course{}), do: {:error, :not_draft}
+
+  @doc """
+  Returns true if the course has at least one chapter with at least one lesson.
+  """
+  def has_publishable_content?(%Course{} = course) do
+    chapters = list_chapters(course.id)
+
+    Enum.any?(chapters, fn chapter ->
+      list_lessons(chapter.id) != []
+    end)
+  end
 
   @doc """
   Archives a published course by setting its status to `:archived`.
