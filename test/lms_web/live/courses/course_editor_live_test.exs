@@ -241,74 +241,67 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
   end
 
   describe "Chapter reordering" do
-    test "moves chapter up", %{conn: conn, course: course} do
+    test "reorders chapters via drag-and-drop event", %{conn: conn, course: course} do
       ch1 = chapter_fixture(%{course: course, title: "Chapter A"})
       ch2 = chapter_fixture(%{course: course, title: "Chapter B"})
 
       {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
 
-      view
-      |> element("button[phx-click='move_chapter_up'][phx-value-id='#{ch2.id}']")
-      |> render_click()
+      # Simulate Sortable.js reorder event (swap ch1 and ch2)
+      render_click(view, "reorder_chapters", %{
+        "ids" => [to_string(ch2.id), to_string(ch1.id)]
+      })
 
-      # Verify order changed
       ch1_updated = Training.get_chapter!(ch1.id)
       ch2_updated = Training.get_chapter!(ch2.id)
       assert ch2_updated.position < ch1_updated.position
     end
-
-    test "moves chapter down", %{conn: conn, course: course} do
-      ch1 = chapter_fixture(%{course: course, title: "Chapter A"})
-      ch2 = chapter_fixture(%{course: course, title: "Chapter B"})
-
-      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
-
-      view
-      |> element("button[phx-click='move_chapter_down'][phx-value-id='#{ch1.id}']")
-      |> render_click()
-
-      ch1_updated = Training.get_chapter!(ch1.id)
-      ch2_updated = Training.get_chapter!(ch2.id)
-      assert ch1_updated.position > ch2_updated.position
-    end
   end
 
   describe "Lesson reordering" do
-    test "moves lesson up within chapter", %{conn: conn, course: course} do
+    test "reorders lessons within chapter via drag-and-drop event", %{
+      conn: conn,
+      course: course
+    } do
       chapter = chapter_fixture(%{course: course})
       l1 = lesson_fixture(%{chapter: chapter, title: "Lesson 1"})
       l2 = lesson_fixture(%{chapter: chapter, title: "Lesson 2"})
 
       {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
 
-      view
-      |> element("button[phx-click='move_lesson_up'][phx-value-id='#{l2.id}']")
-      |> render_click()
+      # Simulate Sortable.js reorder event (swap l1 and l2)
+      render_click(view, "reorder_lessons", %{
+        "chapter_id" => to_string(chapter.id),
+        "ids" => [to_string(l2.id), to_string(l1.id)]
+      })
 
       l1_updated = Training.get_lesson!(l1.id)
       l2_updated = Training.get_lesson!(l2.id)
       assert l2_updated.position < l1_updated.position
     end
-
-    test "moves lesson down within chapter", %{conn: conn, course: course} do
-      chapter = chapter_fixture(%{course: course})
-      l1 = lesson_fixture(%{chapter: chapter, title: "Lesson 1"})
-      l2 = lesson_fixture(%{chapter: chapter, title: "Lesson 2"})
-
-      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
-
-      view
-      |> element("button[phx-click='move_lesson_down'][phx-value-id='#{l1.id}']")
-      |> render_click()
-
-      l1_updated = Training.get_lesson!(l1.id)
-      l2_updated = Training.get_lesson!(l2.id)
-      assert l1_updated.position > l2_updated.position
-    end
   end
 
   describe "Move lesson between chapters" do
-    test "moves lesson to another chapter", %{conn: conn, course: course} do
+    test "moves lesson to another chapter via drag-and-drop", %{conn: conn, course: course} do
+      ch1 = chapter_fixture(%{course: course, title: "Source Chapter"})
+      ch2 = chapter_fixture(%{course: course, title: "Target Chapter"})
+      lesson = lesson_fixture(%{chapter: ch1, title: "Moving Lesson"})
+
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      # Simulate Sortable.js cross-chapter drag event
+      render_click(view, "move_lesson_to_chapter_and_reorder", %{
+        "lesson_id" => to_string(lesson.id),
+        "from_chapter_id" => to_string(ch1.id),
+        "to_chapter_id" => to_string(ch2.id),
+        "ids" => [to_string(lesson.id)]
+      })
+
+      moved = Training.get_lesson!(lesson.id)
+      assert moved.chapter_id == ch2.id
+    end
+
+    test "moves lesson via dropdown menu", %{conn: conn, course: course} do
       ch1 = chapter_fixture(%{course: course, title: "Source Chapter"})
       ch2 = chapter_fixture(%{course: course, title: "Target Chapter"})
       lesson = lesson_fixture(%{chapter: ch1, title: "Moving Lesson"})
@@ -320,7 +313,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
       |> render_click()
 
-      # Move it
+      # Move it via dropdown
       view
       |> element(
         "button[phx-click='move_lesson_to_chapter'][phx-value-lesson-id='#{lesson.id}'][phx-value-chapter-id='#{ch2.id}']"
