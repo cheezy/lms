@@ -2,6 +2,7 @@ import { Editor } from "@tiptap/core"
 import StarterKit from "@tiptap/starter-kit"
 import Link from "@tiptap/extension-link"
 import Image from "@tiptap/extension-image"
+import VideoEmbed, { parseVideoUrl } from "./video_embed"
 
 const TipTapEditor = {
   mounted() {
@@ -22,6 +23,7 @@ const TipTapEditor = {
           allowBase64: false,
           HTMLAttributes: { class: "max-w-full rounded-lg" },
         }),
+        VideoEmbed,
       ],
       content,
       editorProps: {
@@ -86,6 +88,7 @@ const TipTapEditor = {
       { label: "HR", command: () => this.editor.chain().focus().setHorizontalRule().run(), active: () => false },
       { type: "separator" },
       { label: "Link", command: () => this._toggleLink(), active: () => this.editor.isActive("link") },
+      { label: "Video", command: () => this._insertVideo(), active: () => this.editor.isActive("videoEmbed") },
     ]
 
     buttons.forEach(btn => {
@@ -137,6 +140,18 @@ const TipTapEditor = {
       if (url) {
         this.editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run()
       }
+    }
+  },
+
+  _insertVideo() {
+    const url = window.prompt("Enter YouTube or Vimeo URL:")
+    if (!url) return
+
+    const embedUrl = parseVideoUrl(url)
+    if (embedUrl) {
+      this.editor.chain().focus().setVideoEmbed({ src: embedUrl }).run()
+    } else {
+      window.alert("Please enter a valid YouTube or Vimeo URL.")
     }
   },
 }

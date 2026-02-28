@@ -391,6 +391,83 @@ defmodule Lms.Training.LessonRendererTest do
       refute result =~ ~s[href="javascript:alert("xss")"]
     end
 
+    test "renders YouTube video embed" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "videoEmbed",
+            "attrs" => %{"src" => "https://www.youtube.com/embed/dQw4w9WgXcQ"}
+          }
+        ]
+      }
+
+      html = LessonRenderer.render(doc)
+      assert html =~ ~s(src="https://www.youtube.com/embed/dQw4w9WgXcQ")
+      assert html =~ "iframe"
+      assert html =~ "allowfullscreen"
+      assert html =~ ~s(class="relative w-full pb-[56.25%])
+    end
+
+    test "renders Vimeo video embed" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "videoEmbed",
+            "attrs" => %{"src" => "https://player.vimeo.com/video/123456789"}
+          }
+        ]
+      }
+
+      html = LessonRenderer.render(doc)
+      assert html =~ ~s(src="https://player.vimeo.com/video/123456789")
+      assert html =~ "iframe"
+    end
+
+    test "rejects invalid video embed URLs" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "videoEmbed",
+            "attrs" => %{"src" => "https://evil.com/malware.js"}
+          }
+        ]
+      }
+
+      assert LessonRenderer.render(doc) == ""
+    end
+
+    test "rejects video embed with javascript: URL" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "videoEmbed",
+            "attrs" => %{"src" => "javascript:alert(1)"}
+          }
+        ]
+      }
+
+      assert LessonRenderer.render(doc) == ""
+    end
+
+    test "rejects video embed with tampered YouTube URL" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "videoEmbed",
+            "attrs" => %{"src" => "https://www.youtube.com/embed/dQw4w9WgXcQ\" onload=\"alert(1)"}
+          }
+        ]
+      }
+
+      # The URL won't match the strict pattern so it gets rejected
+      assert LessonRenderer.render(doc) == ""
+    end
+
     test "renders unknown types gracefully" do
       doc = %{
         "type" => "doc",

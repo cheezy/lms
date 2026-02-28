@@ -61,6 +61,20 @@ defmodule Lms.Training.LessonRenderer do
     "<img src=\"#{safe_src}\" alt=\"#{alt}\"/>"
   end
 
+  defp render_node(%{"type" => "videoEmbed", "attrs" => %{"src" => src}}) do
+    case validate_embed_url(src) do
+      {:ok, safe_src} ->
+        ~s(<div class="relative w-full pb-[56.25%] h-0 overflow-hidden rounded-lg my-4">) <>
+          ~s(<iframe src="#{safe_src}" class="absolute top-0 left-0 w-full h-full" ) <>
+          ~s(frameborder="0" allowfullscreen="true" ) <>
+          ~s(allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">) <>
+          ~s(</iframe></div>)
+
+      :error ->
+        ""
+    end
+  end
+
   defp render_node(%{"type" => "horizontalRule"}), do: "<hr/>"
 
   defp render_node(%{"type" => "hardBreak"}), do: "<br/>"
@@ -108,4 +122,17 @@ defmodule Lms.Training.LessonRenderer do
   end
 
   defp escape_html(_), do: ""
+
+  @youtube_embed_pattern ~r/^https:\/\/www\.youtube\.com\/embed\/[a-zA-Z0-9_-]{11}$/
+  @vimeo_embed_pattern ~r/^https:\/\/player\.vimeo\.com\/video\/\d+$/
+
+  defp validate_embed_url(url) when is_binary(url) do
+    cond do
+      Regex.match?(@youtube_embed_pattern, url) -> {:ok, url}
+      Regex.match?(@vimeo_embed_pattern, url) -> {:ok, url}
+      true -> :error
+    end
+  end
+
+  defp validate_embed_url(_), do: :error
 end
