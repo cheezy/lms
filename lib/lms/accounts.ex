@@ -526,6 +526,126 @@ defmodule Lms.Accounts do
     |> Repo.update()
   end
 
+  ## CSV Bulk Invite
+
+  @email_regex ~r/^[^@,;\s]+@[^@,;\s]+$/
+
+  @doc """
+  Parses CSV content and validates each row for bulk employee invitation.
+
+  Expects CSV with columns: name, email (with or without header row).
+  Returns a list of maps with `:name`, `:email`, `:valid?`, and `:errors` keys.
+
+  Validates:
+  - Name is present
+  - Email format
+  - Duplicate emails within the CSV
+  - Emails already registered in the system
+  """
+  def parse_and_validate_csv(%Lms.Accounts.Scope{user: admin}, csv_content)
+      when is_binary(csv_content) do
+    csv_content
+    |> String.trim()
+    |> strip_bom()
+    |> String.split(~r/\r?\n/)
+    |> maybe_skip_header()
+    |> Enum.map(&parse_csv_row/1)
+    |> validate_rows(admin.company_id)
+  end
+
+  defp strip_bom(<<0xEF, 0xBB, 0xBF, rest::binary>>), do: rest
+  defp strip_bom(content), do: content
+
+  defp maybe_skip_header([first | rest] = rows) do
+    trimmed = first |> String.trim() |> String.downcase()
+
+    if trimmed =~ ~r/^name\s*[,]\s*email/ do
+      rest
+    else
+      rows
+    end
+  end
+
+  defp maybe_skip_header([]), do: []
+
+  defp parse_csv_row(line) do
+    case String.split(line, ",", parts: 2) do
+      [name, email] ->
+        %{name: String.trim(name), email: String.trim(email)}
+
+      _ ->
+        %{name: "", email: String.trim(line)}
+    end
+  end
+
+  defp validate_rows(rows, company_id) do
+    existing_emails =
+      User
+      |> where([u], u.company_id == ^company_id)
+      |> select([u], u.email)
+      |> Repo.all()
+      |> MapSet.new(&String.downcase/1)
+
+    {validated, _seen} =
+      Enum.reduce(rows, {[], MapSet.new()}, fn row, {acc, seen} ->
+        errors = []
+        lower_email = String.downcase(row.email)
+
+        errors =
+          if String.trim(row.name) == "",
+            do: ["Name is required" | errors],
+            else: errors
+
+        errors =
+          if Regex.match?(@email_regex, row.email),
+            do: errors,
+            else: ["Invalid email format" | errors]
+
+        errors =
+          if lower_email in seen,
+            do: ["Duplicate email in CSV" | errors],
+            else: errors
+
+        errors =
+          if lower_email in existing_emails,
+            do: ["Employee already exists" | errors],
+            else: errors
+
+        validated_row = Map.merge(row, %{valid?: errors == [], errors: Enum.reverse(errors)})
+        {acc ++ [validated_row], MapSet.put(seen, lower_email)}
+      end)
+
+    validated
+  end
+
+  @doc """
+  Bulk invites employees from a list of validated rows.
+
+  Takes only the valid rows, creates user records and sends invitation emails.
+  Returns `{invited_count, skipped_count, results}` where results is a list
+  of `{:ok, user}` or `{:error, reason}` tuples.
+  """
+  def bulk_invite_employees(%Lms.Accounts.Scope{} = scope, validated_rows, invitation_url_fun)
+      when is_function(invitation_url_fun, 1) do
+    valid_rows = Enum.filter(validated_rows, & &1.valid?)
+    skipped_count = length(validated_rows) - length(valid_rows)
+
+    results =
+      Enum.map(valid_rows, fn row ->
+        case deliver_employee_invitation(
+               scope,
+               %{name: row.name, email: row.email},
+               invitation_url_fun
+             ) do
+          {:ok, user, _token} -> {:ok, user}
+          {:error, changeset} -> {:error, changeset}
+        end
+      end)
+
+    invited_count = Enum.count(results, &match?({:ok, _}, &1))
+    {invited_count, skipped_count, results}
+  end
+
   ## Token helper
 
   defp update_user_and_delete_all_tokens(changeset) do

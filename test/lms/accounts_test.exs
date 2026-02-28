@@ -671,4 +671,143 @@ defmodule Lms.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "parse_and_validate_csv/2" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      %{scope: scope, company: company}
+    end
+
+    test "parses valid CSV with header row", %{scope: scope} do
+      csv = "name,email\nAlice Smith,alice@example.com\nBob Jones,bob@example.com"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 2
+      assert Enum.all?(result, & &1.valid?)
+      assert hd(result).name == "Alice Smith"
+      assert hd(result).email == "alice@example.com"
+    end
+
+    test "parses valid CSV without header row", %{scope: scope} do
+      csv = "Alice Smith,alice@example.com\nBob Jones,bob@example.com"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 2
+      assert Enum.all?(result, & &1.valid?)
+    end
+
+    test "handles CSV with BOM marker", %{scope: scope} do
+      csv = "\uFEFFname,email\nAlice Smith,alice@example.com"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 1
+      assert hd(result).valid?
+    end
+
+    test "catches invalid email format", %{scope: scope} do
+      csv = "Alice Smith,not-an-email"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 1
+      refute hd(result).valid?
+      assert "Invalid email format" in hd(result).errors
+    end
+
+    test "catches missing name", %{scope: scope} do
+      csv = ",alice@example.com"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 1
+      refute hd(result).valid?
+      assert "Name is required" in hd(result).errors
+    end
+
+    test "catches duplicate emails within CSV", %{scope: scope} do
+      csv = "Alice,alice@example.com\nBob,alice@example.com"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 2
+      assert Enum.at(result, 0).valid?
+      refute Enum.at(result, 1).valid?
+      assert "Duplicate email in CSV" in Enum.at(result, 1).errors
+    end
+
+    test "catches existing employees", %{scope: scope, company: company} do
+      existing = user_with_role_fixture(:employee, company.id)
+      csv = "Existing User,#{existing.email}"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 1
+      refute hd(result).valid?
+      assert "Employee already exists" in hd(result).errors
+    end
+
+    test "handles empty CSV", %{scope: scope} do
+      csv = "name,email"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert result == []
+    end
+
+    test "handles CSV with Windows line endings", %{scope: scope} do
+      csv = "name,email\r\nAlice,alice@example.com\r\nBob,bob@example.com"
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert length(result) == 2
+      assert Enum.all?(result, & &1.valid?)
+    end
+
+    test "trims whitespace from fields", %{scope: scope} do
+      csv = "  Alice Smith  ,  alice@example.com  "
+      result = Accounts.parse_and_validate_csv(scope, csv)
+
+      assert hd(result).name == "Alice Smith"
+      assert hd(result).email == "alice@example.com"
+      assert hd(result).valid?
+    end
+  end
+
+  describe "bulk_invite_employees/3" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      %{scope: scope}
+    end
+
+    test "invites valid rows and skips invalid ones", %{scope: scope} do
+      validated_rows = [
+        %{name: "Alice", email: "alice-bulk@example.com", valid?: true, errors: []},
+        %{name: "", email: "bad", valid?: false, errors: ["Invalid email"]},
+        %{name: "Bob", email: "bob-bulk@example.com", valid?: true, errors: []}
+      ]
+
+      {invited_count, skipped_count, results} =
+        Accounts.bulk_invite_employees(scope, validated_rows, &"/invitations/#{&1}")
+
+      assert invited_count == 2
+      assert skipped_count == 1
+      assert length(results) == 2
+      assert Enum.all?(results, &match?({:ok, _}, &1))
+    end
+
+    test "creates users with invited status", %{scope: scope} do
+      validated_rows = [
+        %{name: "Test User", email: "test-bulk@example.com", valid?: true, errors: []}
+      ]
+
+      {1, 0, [{:ok, user}]} =
+        Accounts.bulk_invite_employees(scope, validated_rows, &"/invitations/#{&1}")
+
+      assert user.status == :invited
+      assert user.role == :employee
+      assert user.name == "Test User"
+    end
+
+    test "handles empty validated rows", %{scope: scope} do
+      {0, 0, []} = Accounts.bulk_invite_employees(scope, [], &"/invitations/#{&1}")
+    end
+  end
 end

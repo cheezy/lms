@@ -12,6 +12,7 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
       socket
       |> assign(:page_title, gettext("Employees"))
       |> assign(:show_invite_modal, false)
+      |> assign(:show_bulk_upload_modal, false)
 
     {:ok, socket}
   end
@@ -50,6 +51,13 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
     {:noreply,
      socket
      |> assign(:show_invite_modal, false)
+     |> push_patch(to: build_path(socket.assigns))}
+  end
+
+  def handle_info({LmsWeb.Admin.EmployeeLive.BulkUploadComponent, :done}, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_bulk_upload_modal, false)
      |> push_patch(to: build_path(socket.assigns))}
   end
 
@@ -93,6 +101,14 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
 
   def handle_event("close_invite_modal", _params, socket) do
     {:noreply, assign(socket, :show_invite_modal, false)}
+  end
+
+  def handle_event("open_bulk_upload_modal", _params, socket) do
+    {:noreply, assign(socket, :show_bulk_upload_modal, true)}
+  end
+
+  def handle_event("close_bulk_upload_modal", _params, socket) do
+    {:noreply, assign(socket, :show_bulk_upload_modal, false)}
   end
 
   @impl true
@@ -221,10 +237,16 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
               {gettext("Manage your team members and send invitations.")}
             </p>
           </div>
-          <.button variant="primary" phx-click="open_invite_modal">
-            <.icon name="hero-plus" class="size-4 mr-1" />
-            {gettext("Invite Employee")}
-          </.button>
+          <div class="flex gap-2">
+            <button class="btn btn-outline btn-sm" phx-click="open_bulk_upload_modal">
+              <.icon name="hero-arrow-up-tray" class="size-4 mr-1" />
+              {gettext("Bulk Upload")}
+            </button>
+            <.button variant="primary" phx-click="open_invite_modal">
+              <.icon name="hero-plus" class="size-4 mr-1" />
+              {gettext("Invite Employee")}
+            </.button>
+          </div>
         </div>
 
         <%!-- Search and filter bar --%>
@@ -402,6 +424,13 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
           :if={@show_invite_modal}
           module={LmsWeb.Admin.EmployeeLive.InviteFormComponent}
           id="invite-form"
+          current_scope={@current_scope}
+        />
+
+        <.live_component
+          :if={@show_bulk_upload_modal}
+          module={LmsWeb.Admin.EmployeeLive.BulkUploadComponent}
+          id="bulk-upload"
           current_scope={@current_scope}
         />
       </div>
