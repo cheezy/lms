@@ -720,4 +720,93 @@ defmodule Lms.TrainingTest do
       assert moved.position == 1
     end
   end
+
+  describe "Lesson Images" do
+    setup do
+      lesson = lesson_fixture()
+      %{lesson: lesson}
+    end
+
+    test "create_lesson_image/1 with valid attrs", %{lesson: lesson} do
+      attrs = %{
+        filename: "test.jpg",
+        file_path: "/tmp/test.jpg",
+        content_type: "image/jpeg",
+        file_size: 1_000,
+        lesson_id: lesson.id
+      }
+
+      assert {:ok, image} = Training.create_lesson_image(attrs)
+      assert image.filename == "test.jpg"
+      assert image.content_type == "image/jpeg"
+      assert image.lesson_id == lesson.id
+    end
+
+    test "create_lesson_image/1 with invalid attrs returns error" do
+      assert {:error, %Ecto.Changeset{}} = Training.create_lesson_image(%{})
+    end
+
+    test "list_lesson_images/1 returns images for a lesson", %{lesson: lesson} do
+      attrs = %{
+        filename: "img1.jpg",
+        file_path: "/tmp/img1.jpg",
+        content_type: "image/jpeg",
+        file_size: 1_000,
+        lesson_id: lesson.id
+      }
+
+      {:ok, _} = Training.create_lesson_image(attrs)
+
+      attrs2 = %{
+        attrs
+        | filename: "img2.png",
+          file_path: "/tmp/img2.png",
+          content_type: "image/png"
+      }
+
+      {:ok, _} = Training.create_lesson_image(attrs2)
+
+      images = Training.list_lesson_images(lesson.id)
+      assert length(images) == 2
+    end
+
+    test "list_lesson_images/1 returns empty list when no images", %{lesson: lesson} do
+      assert Training.list_lesson_images(lesson.id) == []
+    end
+
+    test "delete_lesson_image/1 removes the record", %{lesson: lesson} do
+      # Create a temporary file so delete doesn't fail
+      tmp_path =
+        Path.join(System.tmp_dir!(), "test_delete_#{System.unique_integer([:positive])}.jpg")
+
+      File.write!(tmp_path, "fake image data")
+
+      attrs = %{
+        filename: "delete_me.jpg",
+        file_path: tmp_path,
+        content_type: "image/jpeg",
+        file_size: 15,
+        lesson_id: lesson.id
+      }
+
+      {:ok, image} = Training.create_lesson_image(attrs)
+      assert {:ok, _} = Training.delete_lesson_image(image)
+      assert Training.list_lesson_images(lesson.id) == []
+      refute File.exists?(tmp_path)
+    end
+
+    test "delete_lesson_image/1 succeeds even when file is missing", %{lesson: lesson} do
+      attrs = %{
+        filename: "ghost.jpg",
+        file_path: "/tmp/nonexistent_#{System.unique_integer([:positive])}.jpg",
+        content_type: "image/jpeg",
+        file_size: 1_000,
+        lesson_id: lesson.id
+      }
+
+      {:ok, image} = Training.create_lesson_image(attrs)
+      assert {:ok, _} = Training.delete_lesson_image(image)
+      assert Training.list_lesson_images(lesson.id) == []
+    end
+  end
 end

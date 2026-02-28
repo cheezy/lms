@@ -11,6 +11,7 @@ defmodule Lms.Training do
   alias Lms.Training.Chapter
   alias Lms.Training.Course
   alias Lms.Training.Lesson
+  alias Lms.Training.LessonImage
 
   ## Courses
 
@@ -375,4 +376,31 @@ defmodule Lms.Training do
 
   defp normalize_attrs(attrs) when is_list(attrs), do: Map.new(attrs)
   defp normalize_attrs(attrs) when is_map(attrs), do: attrs
+
+  ## Lesson Images
+
+  def create_lesson_image(attrs) do
+    %LessonImage{}
+    |> LessonImage.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def list_lesson_images(lesson_id) do
+    LessonImage
+    |> where([li], li.lesson_id == ^lesson_id)
+    |> order_by([li], asc: li.inserted_at)
+    |> Repo.all()
+  end
+
+  def delete_lesson_image(%LessonImage{} = image) do
+    file_path = image.file_path
+
+    with {:ok, deleted} <- Repo.delete(image) do
+      if File.exists?(file_path) do
+        File.rm(file_path)
+      end
+
+      {:ok, deleted}
+    end
+  end
 end

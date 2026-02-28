@@ -1,6 +1,7 @@
 import { Editor } from "@tiptap/core"
 import StarterKit from "@tiptap/starter-kit"
 import Link from "@tiptap/extension-link"
+import Image from "@tiptap/extension-image"
 
 const TipTapEditor = {
   mounted() {
@@ -15,6 +16,11 @@ const TipTapEditor = {
         Link.configure({
           openOnClick: false,
           HTMLAttributes: { class: "link link-primary" },
+        }),
+        Image.configure({
+          inline: false,
+          allowBase64: false,
+          HTMLAttributes: { class: "max-w-full rounded-lg" },
         }),
       ],
       content,
@@ -35,15 +41,17 @@ const TipTapEditor = {
       this.editor.commands.setContent(json)
     })
 
+    this.handleEvent("image_uploaded", ({ url }) => {
+      this.editor.chain().focus().setImage({ src: url }).run()
+    })
+
     this._renderToolbar()
   },
 
   updated() {
-    // Re-read readOnly state from data attribute
     const readOnly = this.el.dataset.readonly === "true"
     this.editor.setEditable(!readOnly)
 
-    // Toggle toolbar visibility
     const toolbar = this.el.querySelector("[data-toolbar]")
     if (toolbar) {
       toolbar.style.display = readOnly ? "none" : ""
@@ -101,7 +109,6 @@ const TipTapEditor = {
       toolbar.appendChild(button)
     })
 
-    // Update active states on selection change
     this.editor.on("selectionUpdate", () => this._updateToolbarState(toolbar, buttons))
     this.editor.on("transaction", () => this._updateToolbarState(toolbar, buttons))
   },

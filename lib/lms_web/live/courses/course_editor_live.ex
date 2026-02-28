@@ -25,6 +25,12 @@ defmodule LmsWeb.Courses.CourseEditorLive do
         |> assign(:expanded_chapters, expand_all(course))
         |> assign(:form, nil)
         |> assign(:editor_content, nil)
+        |> allow_upload(:image,
+          accept: ~w(.jpg .jpeg .png .gif .webp),
+          max_entries: 1,
+          max_file_size: 5_000_000,
+          auto_upload: true
+        )
 
       {:ok, socket}
     end
@@ -239,6 +245,41 @@ defmodule LmsWeb.Courses.CourseEditorLive do
 
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, gettext("Could not save lesson."))}
+    end
+  end
+
+  # -- Image upload --
+
+  def handle_event("upload_image", _params, socket) do
+    lesson = socket.assigns.selected_lesson
+
+    if lesson == nil || socket.assigns.archived do
+      {:noreply, socket}
+    else
+      uploaded_urls =
+        consume_uploaded_entries(socket, :image, fn %{path: path}, entry ->
+          dest = upload_dest(entry)
+          File.cp!(path, dest)
+
+          {:ok, _image} =
+            Training.create_lesson_image(%{
+              filename: entry.client_name,
+              file_path: dest,
+              content_type: entry.client_type,
+              file_size: entry.client_size,
+              lesson_id: lesson.id
+            })
+
+          {:ok, ~p"/uploads/#{Path.basename(dest)}"}
+        end)
+
+      case uploaded_urls do
+        [url | _] ->
+          {:noreply, push_event(socket, "image_uploaded", %{url: url})}
+
+        [] ->
+          {:noreply, socket}
+      end
     end
   end
 
@@ -691,7 +732,35 @@ defmodule LmsWeb.Courses.CourseEditorLive do
                   <div data-editor></div>
                 </div>
 
-                <div :if={!@archived} class="mt-4 flex justify-end">
+                <%!-- Hidden image upload --%>
+                <form
+                  :if={!@archived}
+                  id="image-upload-form"
+                  phx-change="upload_image"
+                  phx-submit="upload_image"
+                  class="hidden"
+                >
+                  <.live_file_input upload={@uploads.image} />
+                </form>
+
+                <%!-- Upload errors --%>
+                <div
+                  :for={entry <- @uploads.image.entries}
+                  :if={entry.valid? == false}
+                  class="text-error text-sm mt-1"
+                >
+                  {error_to_string(entry)}
+                </div>
+
+                <div :if={!@archived} class="mt-4 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    phx-click={JS.dispatch("click", to: "#image-upload-form input[type=file]")}
+                    class="btn btn-ghost"
+                  >
+                    <.icon name="hero-photo" class="size-4 mr-1" />
+                    {gettext("Image")}
+                  </button>
                   <button
                     type="button"
                     phx-click="save_content"
@@ -730,6 +799,12 @@ defmodule LmsWeb.Courses.CourseEditorLive do
 
   # -- Private helpers --
 
+  defp upload_dest(entry) do
+    ext = Path.extname(entry.client_name)
+    filename = "#{System.unique_integer([:positive])}#{ext}"
+    Path.join(["priv/static/uploads", filename])
+  end
+
   defp reload_course(socket) do
     course = Training.get_course_with_contents!(socket.assigns.course.id)
     assign(socket, :course, course)
@@ -750,6 +825,10 @@ defmodule LmsWeb.Courses.CourseEditorLive do
     course.chapters
     |> Enum.map(& &1.id)
     |> MapSet.new()
+  end
+
+  defp error_to_string(%{client_name: name, valid?: false}) do
+    gettext("Error uploading %{name}: file must be an image under 5MB", name: name)
   end
 
   defp render_lesson_content(nil), do: ""

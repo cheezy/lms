@@ -278,6 +278,58 @@ defmodule Lms.Training.LessonRendererTest do
       assert LessonRenderer.render(doc) == "<p>Above</p><hr/><p>Below</p>"
     end
 
+    test "renders image node" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "image",
+            "attrs" => %{"src" => "/uploads/photo.jpg", "alt" => "A photo"}
+          }
+        ]
+      }
+
+      assert LessonRenderer.render(doc) ==
+               ~s(<img src="/uploads/photo.jpg" alt="A photo"/>)
+    end
+
+    test "renders image node without alt text" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "image",
+            "attrs" => %{"src" => "/uploads/photo.jpg"}
+          }
+        ]
+      }
+
+      assert LessonRenderer.render(doc) ==
+               ~s(<img src="/uploads/photo.jpg" alt=""/>)
+    end
+
+    test "escapes HTML in image attributes" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "image",
+            "attrs" => %{
+              "src" => "/uploads/test.jpg\" onload=\"alert(1)",
+              "alt" => "bad<script>"
+            }
+          }
+        ]
+      }
+
+      html = LessonRenderer.render(doc)
+      # Quotes are escaped so the attribute injection is neutralized
+      refute html =~ ~s(onload="alert)
+      refute html =~ "<script>"
+      assert html =~ "&quot;"
+      assert html =~ "&lt;script&gt;"
+    end
+
     test "renders hard break" do
       doc = %{
         "type" => "doc",

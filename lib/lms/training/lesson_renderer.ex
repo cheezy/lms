@@ -55,6 +55,12 @@ defmodule Lms.Training.LessonRenderer do
     "<pre><code>#{content}</code></pre>"
   end
 
+  defp render_node(%{"type" => "image", "attrs" => %{"src" => src}} = node) do
+    safe_src = escape_html(src)
+    alt = escape_html(node["attrs"]["alt"] || "")
+    "<img src=\"#{safe_src}\" alt=\"#{alt}\"/>"
+  end
+
   defp render_node(%{"type" => "horizontalRule"}), do: "<hr/>"
 
   defp render_node(%{"type" => "hardBreak"}), do: "<br/>"
