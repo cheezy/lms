@@ -24,7 +24,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
         |> assign(:adding, nil)
         |> assign(:expanded_chapters, expand_all(course))
         |> assign(:form, nil)
-        |> assign(:content_form, nil)
+        |> assign(:editor_content, nil)
 
       {:ok, socket}
     end
@@ -104,7 +104,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
         if selected && selected.chapter_id == chapter.id do
           socket
           |> assign(:selected_lesson, nil)
-          |> assign(:content_form, nil)
+          |> assign(:editor_content, nil)
         else
           socket
         end
@@ -189,7 +189,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
         if socket.assigns.selected_lesson && socket.assigns.selected_lesson.id == lesson.id do
           socket
           |> assign(:selected_lesson, nil)
-          |> assign(:content_form, nil)
+          |> assign(:editor_content, nil)
         else
           socket
         end
@@ -205,37 +205,40 @@ defmodule LmsWeb.Courses.CourseEditorLive do
 
   def handle_event("select_lesson", %{"id" => id}, socket) do
     lesson = Training.get_lesson!(id)
-    content_form = to_form(Training.change_lesson(lesson, %{}), as: :lesson)
 
     {:noreply,
      socket
      |> assign(:selected_lesson, lesson)
-     |> assign(:content_form, content_form)
+     |> assign(:editor_content, lesson.content)
      |> assign(:editing, nil)
      |> assign(:adding, nil)
      |> assign(:form, nil)}
   end
 
-  def handle_event("save_content", %{"lesson" => params}, socket) do
+  def handle_event("editor_updated", %{"content" => content_json}, socket) do
+    case Jason.decode(content_json) do
+      {:ok, content} ->
+        {:noreply, assign(socket, :editor_content, content)}
+
+      _ ->
+        {:noreply, socket}
+    end
+  end
+
+  def handle_event("save_content", _params, socket) do
     lesson = socket.assigns.selected_lesson
+    content = socket.assigns.editor_content
 
-    params =
-      case Jason.decode(params["content"] || "") do
-        {:ok, decoded} -> Map.put(params, "content", decoded)
-        _ -> params
-      end
-
-    case Training.update_lesson(lesson, params) do
+    case Training.update_lesson(lesson, %{content: content}) do
       {:ok, updated} ->
         {:noreply,
          socket
          |> assign(:selected_lesson, updated)
-         |> assign(:content_form, to_form(Training.change_lesson(updated, %{}), as: :lesson))
          |> put_flash(:info, gettext("Lesson saved."))
          |> reload_course()}
 
-      {:error, changeset} ->
-        {:noreply, assign(socket, :content_form, to_form(changeset, as: :lesson))}
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, gettext("Could not save lesson."))}
     end
   end
 
@@ -630,37 +633,41 @@ defmodule LmsWeb.Courses.CourseEditorLive do
                   </div>
                 </div>
 
-                <.form
-                  :if={!@archived}
-                  for={@content_form}
-                  phx-submit="save_content"
-                  id="content-form"
+                <%!-- TipTap rich text editor --%>
+                <div
+                  id={"editor-#{@selected_lesson.id}"}
+                  phx-hook="TipTapEditor"
+                  phx-update="ignore"
+                  data-content={
+                    Jason.encode!(@selected_lesson.content || %{"type" => "doc", "content" => []})
+                  }
+                  data-readonly={to_string(@archived)}
                 >
-                  <input
-                    type="hidden"
-                    name={@content_form[:title].name}
-                    value={@selected_lesson.title}
-                  />
-                  <.input
-                    field={@content_form[:content]}
-                    type="textarea"
-                    label={gettext("Content")}
-                    rows="20"
-                    class="textarea textarea-bordered w-full bg-base-100 text-base-content font-mono text-sm"
-                    placeholder={gettext("Write your lesson content here...")}
-                    value={format_content(@selected_lesson.content)}
-                  />
-                  <div class="mt-4 flex justify-end">
-                    <.button variant="primary" type="submit">
-                      <.icon name="hero-check" class="size-4 mr-1" />
-                      {gettext("Save")}
-                    </.button>
+                  <div
+                    :if={!@archived}
+                    data-toolbar
+                    class="flex flex-wrap gap-0.5 p-2 bg-base-100 border border-base-300 rounded-t-lg"
+                  >
                   </div>
-                </.form>
+                  <div data-editor></div>
+                </div>
+
+                <div :if={!@archived} class="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    phx-click="save_content"
+                    class="btn btn-primary"
+                  >
+                    <.icon name="hero-check" class="size-4 mr-1" />
+                    {gettext("Save")}
+                  </button>
+                </div>
 
                 <%!-- Read-only view for archived courses --%>
-                <div :if={@archived} class="prose max-w-none">
-                  <pre class="whitespace-pre-wrap text-sm text-base-content bg-base-100 p-4 rounded-lg">{format_content(@selected_lesson.content)}</pre>
+                <div :if={@archived} class="prose max-w-none mt-4">
+                  <div class="text-sm text-base-content bg-base-100 p-4 rounded-lg">
+                    {raw(render_lesson_content(@selected_lesson.content))}
+                  </div>
                 </div>
               </div>
             <% else %>
@@ -767,7 +774,11 @@ defmodule LmsWeb.Courses.CourseEditorLive do
 
   defp swap(list, _index, _direction), do: list
 
-  defp format_content(nil), do: ""
-  defp format_content(content) when is_map(content), do: Jason.encode!(content, pretty: true)
-  defp format_content(content) when is_binary(content), do: content
+  defp render_lesson_content(nil), do: ""
+
+  defp render_lesson_content(content) when is_map(content) do
+    Lms.Training.LessonRenderer.render(content)
+  end
+
+  defp render_lesson_content(content) when is_binary(content), do: content
 end

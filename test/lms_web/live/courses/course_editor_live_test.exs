@@ -143,7 +143,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       html = render(view)
       assert html =~ "Selected Lesson"
-      assert has_element?(view, "#content-form")
+      assert has_element?(view, "[phx-hook='TipTapEditor']")
     end
 
     test "edits a lesson title", %{conn: conn, course: course, chapter: chapter} do
@@ -188,7 +188,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
       |> render_click()
 
-      assert has_element?(view, "#content-form")
+      assert has_element?(view, "[phx-hook='TipTapEditor']")
 
       # Delete it
       view
@@ -214,16 +214,27 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
       |> render_click()
 
-      content =
+      assert has_element?(view, "[phx-hook='TipTapEditor']")
+
+      content_json =
         Jason.encode!(%{
           "type" => "doc",
-          "content" => [%{"type" => "paragraph", "text" => "Hello"}]
+          "content" => [
+            %{
+              "type" => "paragraph",
+              "content" => [%{"type" => "text", "text" => "Hello"}]
+            }
+          ]
         })
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => content_json})
 
       html =
         view
-        |> form("#content-form", lesson: %{content: content})
-        |> render_submit()
+        |> element("button[phx-click='save_content']")
+        |> render_click()
 
       assert html =~ "Lesson saved"
     end
@@ -387,7 +398,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
       |> render_click()
 
-      assert has_element?(view, "#content-form")
+      assert has_element?(view, "[phx-hook='TipTapEditor']")
 
       # Delete the chapter
       view

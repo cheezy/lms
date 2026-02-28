@@ -126,6 +126,7 @@ defmodule Lms.MixProject do
         LmsWeb.Employee.MyLearningLive,
         # Generated HTML modules
         LmsWeb.UserRegistrationHTML,
+        LmsWeb.UserSessionHTML,
         LmsWeb.UserSettingsHTML
       ]
     ]
