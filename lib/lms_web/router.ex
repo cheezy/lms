@@ -79,19 +79,25 @@ defmodule LmsWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :admin,
-      on_mount: [{LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:system_admin]}}] do
+      on_mount: [
+        {LmsWeb.UserAuth, :ensure_authenticated},
+        {LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:system_admin]}}
+      ] do
       live "/admin/companies", Admin.CompanyListLive
     end
 
     live_session :company_admin,
       on_mount: [
+        {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:company_admin, :system_admin]}}
       ] do
       live "/dashboard", DashboardLive
+      live "/admin/employees", Admin.EmployeeLive.Index
     end
 
     live_session :course_creator,
       on_mount: [
+        {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks,
          {:require_role, [:course_creator, :company_admin, :system_admin]}}
       ] do
@@ -100,6 +106,7 @@ defmodule LmsWeb.Router do
 
     live_session :employee,
       on_mount: [
+        {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks,
          {:require_role, [:employee, :course_creator, :company_admin, :system_admin]}}
       ] do
@@ -109,6 +116,11 @@ defmodule LmsWeb.Router do
 
   scope "/", LmsWeb do
     pipe_through [:browser]
+
+    live_session :invitation,
+      on_mount: [{LmsWeb.UserAuth, :mount_current_scope}] do
+      live "/invitations/:token", InvitationLive.Accept
+    end
 
     get "/users/log-in", UserSessionController, :new
     get "/users/log-in/:token", UserSessionController, :confirm

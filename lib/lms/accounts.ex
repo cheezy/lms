@@ -300,6 +300,102 @@ defmodule Lms.Accounts do
     :ok
   end
 
+  ## Employee Invitation
+
+  @invitation_validity_in_days 7
+
+  @doc """
+  Lists all employees for the given scope's company.
+  """
+  def list_employees(%Lms.Accounts.Scope{user: admin}) do
+    User
+    |> where([u], u.company_id == ^admin.company_id)
+    |> where([u], u.role == :employee)
+    |> order_by([u], asc: u.name)
+    |> Repo.all()
+  end
+
+  @doc """
+  Invites an employee to the admin's company.
+
+  Creates a user record with role :employee, status :invited, and a hashed
+  invitation token. Returns `{:ok, user, encoded_token}` or `{:error, changeset}`.
+  The encoded token is the raw base64url-encoded value to include in the invitation URL.
+  """
+  def invite_employee(%Lms.Accounts.Scope{user: admin}, attrs) when is_map(attrs) do
+    raw_token = :crypto.strong_rand_bytes(32)
+    encoded_token = Base.url_encode64(raw_token, padding: false)
+    hashed_token = :crypto.hash(:sha256, raw_token) |> Base.encode16(case: :lower)
+
+    result =
+      %User{}
+      |> User.invitation_changeset(%{
+        email: attrs[:email] || attrs["email"],
+        name: attrs[:name] || attrs["name"],
+        role: :employee,
+        company_id: admin.company_id,
+        status: :invited,
+        invitation_token: hashed_token,
+        invitation_sent_at: DateTime.utc_now(:second)
+      })
+      |> Repo.insert()
+
+    case result do
+      {:ok, user} -> {:ok, user, encoded_token}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  @doc """
+  Invites an employee and delivers the invitation email.
+
+  Wraps `invite_employee/2` and sends the invitation email using the
+  given URL function to build the invitation link.
+  """
+  def deliver_employee_invitation(%Lms.Accounts.Scope{} = scope, attrs, invitation_url_fun)
+      when is_function(invitation_url_fun, 1) do
+    case invite_employee(scope, attrs) do
+      {:ok, user, encoded_token} ->
+        UserNotifier.deliver_invitation_instructions(user, invitation_url_fun.(encoded_token))
+        {:ok, user, encoded_token}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  @doc """
+  Gets a user by their invitation token.
+
+  The raw (base64url-encoded) token is hashed and compared against the
+  stored hash. Returns nil if the token is invalid or expired.
+  """
+  def get_user_by_invitation_token(encoded_token) do
+    case Base.url_decode64(encoded_token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(:sha256, decoded_token) |> Base.encode16(case: :lower)
+        cutoff = DateTime.utc_now(:second) |> DateTime.add(-@invitation_validity_in_days, :day)
+
+        User
+        |> where([u], u.invitation_token == ^hashed_token)
+        |> where([u], u.invitation_sent_at > ^cutoff)
+        |> where([u], u.status == :invited)
+        |> Repo.one()
+
+      :error ->
+        nil
+    end
+  end
+
+  @doc """
+  Accepts an invitation by setting the user's password and activating the account.
+  """
+  def accept_invitation(%User{} = user, attrs) do
+    user
+    |> User.accept_invitation_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## Token helper
 
   defp update_user_and_delete_all_tokens(changeset) do

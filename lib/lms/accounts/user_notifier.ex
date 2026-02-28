@@ -65,6 +65,28 @@ defmodule Lms.Accounts.UserNotifier do
     """)
   end
 
+  @doc """
+  Deliver invitation instructions to a new employee.
+  """
+  def deliver_invitation_instructions(user, url) do
+    deliver(user.email, "You've been invited to join Lms", """
+
+    ==============================
+
+    Hi #{user.name},
+
+    You've been invited to join Lms. You can set up your account by visiting the URL below:
+
+    #{url}
+
+    This invitation will expire in 7 days.
+
+    If you weren't expecting this invitation, please ignore this email.
+
+    ==============================
+    """)
+  end
+
   defp deliver_confirmation_instructions(user, url) do
     deliver(user.email, "Confirmation instructions", """
 

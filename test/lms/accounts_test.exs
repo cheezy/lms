@@ -395,6 +395,153 @@ defmodule Lms.AccountsTest do
     end
   end
 
+  describe "list_employees/1" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      %{scope: scope, company: company}
+    end
+
+    test "returns employees for the admin's company", %{scope: scope, company: company} do
+      employee = user_with_role_fixture(:employee, company.id)
+
+      other_company = Lms.CompaniesFixtures.company_fixture()
+      _other_employee = user_with_role_fixture(:employee, other_company.id)
+
+      employees = Accounts.list_employees(scope)
+      assert length(employees) == 1
+      assert hd(employees).id == employee.id
+    end
+
+    test "includes invited employees", %{scope: scope} do
+      {invited, _token} = invited_user_fixture(scope)
+
+      employees = Accounts.list_employees(scope)
+      employee_ids = Enum.map(employees, & &1.id)
+      assert invited.id in employee_ids
+    end
+  end
+
+  describe "invite_employee/2" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      %{scope: scope, company: company}
+    end
+
+    test "creates an invited user with invitation token", %{scope: scope} do
+      attrs = %{name: "Jane Doe", email: "jane@example.com"}
+      assert {:ok, user, _raw_token} = Accounts.invite_employee(scope, attrs)
+      assert user.email == "jane@example.com"
+      assert user.name == "Jane Doe"
+      assert user.role == :employee
+      assert user.status == :invited
+      assert user.company_id == scope.user.company_id
+      assert user.invitation_token != nil
+      assert user.invitation_sent_at != nil
+      assert is_nil(user.hashed_password)
+      assert is_nil(user.confirmed_at)
+    end
+
+    test "returns raw token that is base64url encoded", %{scope: scope} do
+      attrs = %{name: "Jane Doe", email: "jane@example.com"}
+      assert {:ok, _user, raw_token} = Accounts.invite_employee(scope, attrs)
+      assert {:ok, decoded} = Base.url_decode64(raw_token, padding: false)
+      assert byte_size(decoded) == 32
+    end
+
+    test "invitation token in DB is SHA-256 hash of raw token", %{scope: scope} do
+      attrs = %{name: "Jane Doe", email: "jane@example.com"}
+      assert {:ok, user, raw_token} = Accounts.invite_employee(scope, attrs)
+      {:ok, decoded} = Base.url_decode64(raw_token, padding: false)
+      expected_hash = :crypto.hash(:sha256, decoded) |> Base.encode16(case: :lower)
+      assert user.invitation_token == expected_hash
+    end
+
+    test "scopes invitation to admin's company", %{scope: scope} do
+      attrs = %{name: "Jane Doe", email: "jane@example.com"}
+      {:ok, user, _raw_token} = Accounts.invite_employee(scope, attrs)
+      assert user.company_id == scope.user.company_id
+    end
+
+    test "returns error for duplicate email", %{scope: scope} do
+      attrs = %{name: "Jane Doe", email: "jane@example.com"}
+      {:ok, _user, _raw_token} = Accounts.invite_employee(scope, attrs)
+      assert {:error, changeset} = Accounts.invite_employee(scope, attrs)
+      assert "has already been taken" in errors_on(changeset).email
+    end
+
+    test "returns error for invalid email", %{scope: scope} do
+      attrs = %{name: "Jane Doe", email: "not-valid"}
+      assert {:error, changeset} = Accounts.invite_employee(scope, attrs)
+      assert "must have the @ sign and no spaces" in errors_on(changeset).email
+    end
+
+    test "returns error for empty name", %{scope: scope} do
+      attrs = %{name: "", email: "jane@example.com"}
+      assert {:error, changeset} = Accounts.invite_employee(scope, attrs)
+      assert errors_on(changeset).name != []
+    end
+  end
+
+  describe "get_user_by_invitation_token/1" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      {user, raw_token} = invited_user_fixture(scope)
+      %{user: user, raw_token: raw_token}
+    end
+
+    test "returns user for valid token", %{user: user, raw_token: raw_token} do
+      assert found_user = Accounts.get_user_by_invitation_token(raw_token)
+      assert found_user.id == user.id
+    end
+
+    test "returns nil for invalid token" do
+      refute Accounts.get_user_by_invitation_token("invalid-token")
+    end
+
+    test "returns nil for expired token", %{user: user, raw_token: raw_token} do
+      expired_at = DateTime.utc_now(:second) |> DateTime.add(-8, :day)
+
+      User
+      |> from(where: [id: ^user.id])
+      |> Repo.update_all(set: [invitation_sent_at: expired_at])
+
+      refute Accounts.get_user_by_invitation_token(raw_token)
+    end
+  end
+
+  describe "accept_invitation/2" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      {user, raw_token} = invited_user_fixture(scope)
+      %{user: user, raw_token: raw_token}
+    end
+
+    test "accepts invitation and sets password", %{user: user} do
+      assert {:ok, accepted_user} =
+               Accounts.accept_invitation(user, %{password: "valid password 123"})
+
+      assert accepted_user.status == :active
+      assert accepted_user.confirmed_at != nil
+      assert accepted_user.invitation_token == nil
+      assert accepted_user.invitation_accepted_at != nil
+      assert accepted_user.hashed_password != nil
+      assert User.valid_password?(accepted_user, "valid password 123")
+    end
+
+    test "returns error for short password", %{user: user} do
+      assert {:error, changeset} = Accounts.accept_invitation(user, %{password: "short"})
+      assert "should be at least 12 character(s)" in errors_on(changeset).password
+    end
+  end
+
   describe "inspect/2 for the User module" do
     test "does not include password" do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""

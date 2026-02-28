@@ -86,6 +86,19 @@ defmodule Lms.AccountsFixtures do
     {encoded_token, user_token.token}
   end
 
+  def invited_user_fixture(scope, attrs \\ %{}) do
+    attrs =
+      Enum.into(attrs, %{
+        name: "Invited User #{System.unique_integer([:positive])}",
+        email: unique_user_email()
+      })
+
+    {:ok, user, raw_token} =
+      Accounts.invite_employee(scope, attrs)
+
+    {user, raw_token}
+  end
+
   def offset_user_token(token, amount_to_add, unit) do
     dt =
       :second

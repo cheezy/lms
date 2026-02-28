@@ -3,6 +3,7 @@ defmodule Lms.Accounts.User do
   import Ecto.Changeset
 
   @roles [:system_admin, :company_admin, :course_creator, :employee]
+  @statuses [:active, :invited, :deactivated]
 
   schema "users" do
     field :email, :string
@@ -12,6 +13,7 @@ defmodule Lms.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
     field :role, Ecto.Enum, values: @roles, default: :employee
+    field :status, Ecto.Enum, values: @statuses, default: :active
     field :invitation_token, :string
     field :invitation_sent_at, :utc_datetime
     field :invitation_accepted_at, :utc_datetime
@@ -25,6 +27,11 @@ defmodule Lms.Accounts.User do
   Returns the list of valid roles.
   """
   def roles, do: @roles
+
+  @doc """
+  Returns the list of valid statuses.
+  """
+  def statuses, do: @statuses
 
   @doc """
   A user changeset for registering or changing the email.
@@ -164,5 +171,50 @@ defmodule Lms.Accounts.User do
   def valid_password?(_, _) do
     Bcrypt.no_user_verify()
     false
+  end
+
+  @doc """
+  A changeset for creating an invited user.
+
+  Validates name, email, company_id. Does not set a password.
+  Token generation is handled by the Accounts context.
+  """
+  def invitation_changeset(user, attrs) do
+    user
+    |> cast(attrs, [
+      :email,
+      :name,
+      :role,
+      :company_id,
+      :status,
+      :invitation_token,
+      :invitation_sent_at
+    ])
+    |> validate_required([:email, :name, :company_id])
+    |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+$/,
+      message: "must have the @ sign and no spaces"
+    )
+    |> validate_length(:email, max: 160)
+    |> validate_length(:name, min: 1, max: 255)
+    |> unsafe_validate_unique(:email, Lms.Repo)
+    |> unique_constraint(:email)
+    |> foreign_key_constraint(:company_id)
+  end
+
+  @doc """
+  A changeset for accepting an invitation.
+
+  Sets the password, clears the invitation token, marks the invitation
+  as accepted, sets status to :active, and confirms the user.
+  """
+  def accept_invitation_changeset(user, attrs) do
+    now = DateTime.utc_now(:second)
+
+    user
+    |> password_changeset(attrs)
+    |> put_change(:invitation_token, nil)
+    |> put_change(:invitation_accepted_at, now)
+    |> put_change(:status, :active)
+    |> put_change(:confirmed_at, now)
   end
 end
