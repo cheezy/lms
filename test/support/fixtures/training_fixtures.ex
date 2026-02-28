@@ -38,8 +38,7 @@ defmodule Lms.TrainingFixtures do
   def valid_chapter_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
       title: unique_chapter_title(),
-      description: "A test chapter description",
-      position: 0
+      description: "A test chapter description"
     })
   end
 
@@ -59,8 +58,7 @@ defmodule Lms.TrainingFixtures do
   def valid_lesson_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
       title: unique_lesson_title(),
-      content: %{"type" => "doc", "content" => []},
-      position: 0
+      content: %{"type" => "doc", "content" => []}
     })
   end
 

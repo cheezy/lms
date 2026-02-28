@@ -599,4 +599,88 @@ defmodule Lms.TrainingTest do
       assert {:ok, _} = Training.reorder_lessons(chapter.id, [])
     end
   end
+
+  describe "delete_chapter_and_reorder/1" do
+    test "deletes chapter and reorders remaining" do
+      course = course_fixture()
+      ch1 = chapter_fixture(%{course: course, title: "Chapter 1"})
+      ch2 = chapter_fixture(%{course: course, title: "Chapter 2"})
+      ch3 = chapter_fixture(%{course: course, title: "Chapter 3"})
+
+      {:ok, _} = Training.delete_chapter_and_reorder(ch2)
+
+      ch1_updated = Training.get_chapter!(ch1.id)
+      ch3_updated = Training.get_chapter!(ch3.id)
+      assert ch1_updated.position == 0
+      assert ch3_updated.position == 1
+    end
+
+    test "deletes chapter with lessons (cascade)" do
+      course = course_fixture()
+      chapter = chapter_fixture(%{course: course})
+      lesson = lesson_fixture(%{chapter: chapter})
+
+      {:ok, _} = Training.delete_chapter_and_reorder(chapter)
+
+      assert_raise Ecto.NoResultsError, fn -> Training.get_lesson!(lesson.id) end
+    end
+  end
+
+  describe "delete_lesson_and_reorder/1" do
+    test "deletes lesson and reorders remaining" do
+      chapter = chapter_fixture()
+      l1 = lesson_fixture(%{chapter: chapter, title: "Lesson 1"})
+      l2 = lesson_fixture(%{chapter: chapter, title: "Lesson 2"})
+      l3 = lesson_fixture(%{chapter: chapter, title: "Lesson 3"})
+
+      {:ok, _} = Training.delete_lesson_and_reorder(l2)
+
+      l1_updated = Training.get_lesson!(l1.id)
+      l3_updated = Training.get_lesson!(l3.id)
+      assert l1_updated.position == 0
+      assert l3_updated.position == 1
+    end
+  end
+
+  describe "move_lesson_to_chapter/2" do
+    test "moves lesson to a different chapter" do
+      course = course_fixture()
+      ch1 = chapter_fixture(%{course: course})
+      ch2 = chapter_fixture(%{course: course})
+      lesson = lesson_fixture(%{chapter: ch1, title: "Mobile Lesson"})
+
+      {:ok, moved} = Training.move_lesson_to_chapter(lesson, ch2.id)
+
+      assert moved.chapter_id == ch2.id
+    end
+
+    test "reorders old chapter lessons after move" do
+      course = course_fixture()
+      ch1 = chapter_fixture(%{course: course})
+      ch2 = chapter_fixture(%{course: course})
+      l1 = lesson_fixture(%{chapter: ch1, title: "Stay"})
+      l2 = lesson_fixture(%{chapter: ch1, title: "Move"})
+      l3 = lesson_fixture(%{chapter: ch1, title: "Stay Too"})
+
+      {:ok, _} = Training.move_lesson_to_chapter(l2, ch2.id)
+
+      l1_updated = Training.get_lesson!(l1.id)
+      l3_updated = Training.get_lesson!(l3.id)
+      assert l1_updated.position == 0
+      assert l3_updated.position == 1
+    end
+
+    test "assigns correct position in new chapter" do
+      course = course_fixture()
+      ch1 = chapter_fixture(%{course: course})
+      ch2 = chapter_fixture(%{course: course})
+      _existing = lesson_fixture(%{chapter: ch2, title: "Existing"})
+      lesson = lesson_fixture(%{chapter: ch1, title: "Newcomer"})
+
+      {:ok, moved} = Training.move_lesson_to_chapter(lesson, ch2.id)
+
+      # Should be placed after existing lesson
+      assert moved.position == 1
+    end
+  end
 end

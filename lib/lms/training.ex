@@ -157,6 +157,24 @@ defmodule Lms.Training do
   end
 
   @doc """
+  Deletes a chapter and reorders remaining chapters in the course.
+  """
+  def delete_chapter_and_reorder(%Chapter{} = chapter) do
+    Repo.transaction(fn ->
+      {:ok, _} = Repo.delete(chapter)
+
+      remaining_ids =
+        Chapter
+        |> where([ch], ch.course_id == ^chapter.course_id and ch.id != ^chapter.id)
+        |> order_by([ch], asc: ch.position)
+        |> select([ch], ch.id)
+        |> Repo.all()
+
+      {:ok, _} = reorder_chapters(chapter.course_id, remaining_ids)
+    end)
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for tracking chapter changes.
   """
   def change_chapter(%Chapter{} = chapter, attrs \\ %{}) do
@@ -210,10 +228,58 @@ defmodule Lms.Training do
   end
 
   @doc """
+  Deletes a lesson and reorders remaining lessons in the chapter.
+  """
+  def delete_lesson_and_reorder(%Lesson{} = lesson) do
+    Repo.transaction(fn ->
+      {:ok, _} = Repo.delete(lesson)
+
+      remaining_ids =
+        Lesson
+        |> where([l], l.chapter_id == ^lesson.chapter_id and l.id != ^lesson.id)
+        |> order_by([l], asc: l.position)
+        |> select([l], l.id)
+        |> Repo.all()
+
+      {:ok, _} = reorder_lessons(lesson.chapter_id, remaining_ids)
+    end)
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for tracking lesson changes.
   """
   def change_lesson(%Lesson{} = lesson, attrs \\ %{}) do
     Lesson.changeset(lesson, attrs)
+  end
+
+  @doc """
+  Moves a lesson to a different chapter. Reorders lessons in both the
+  old and new chapters.
+  """
+  def move_lesson_to_chapter(%Lesson{} = lesson, new_chapter_id) do
+    old_chapter_id = lesson.chapter_id
+
+    Repo.transaction(fn ->
+      # Assign lesson to new chapter with next position
+      next_pos = next_position(Lesson, :chapter_id, new_chapter_id)
+
+      {:ok, updated} =
+        lesson
+        |> Ecto.Changeset.change(%{chapter_id: new_chapter_id, position: next_pos})
+        |> Repo.update()
+
+      # Reorder remaining lessons in old chapter
+      old_remaining =
+        Lesson
+        |> where([l], l.chapter_id == ^old_chapter_id and l.id != ^lesson.id)
+        |> order_by([l], asc: l.position)
+        |> select([l], l.id)
+        |> Repo.all()
+
+      {:ok, _} = reorder_lessons(old_chapter_id, old_remaining)
+
+      updated
+    end)
   end
 
   ## Position Management

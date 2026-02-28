@@ -104,6 +104,7 @@ defmodule LmsWeb.Router do
       live "/courses", Courses.CourseListLive
       live "/courses/new", Courses.CourseFormLive, :new
       live "/courses/:id/edit", Courses.CourseFormLive, :edit
+      live "/courses/:id/editor", Courses.CourseEditorLive
     end
 
     live_session :employee,
