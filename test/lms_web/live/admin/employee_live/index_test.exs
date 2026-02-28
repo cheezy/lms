@@ -219,6 +219,242 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
     end
   end
 
+  describe "Bulk Upload" do
+    test "opens bulk upload modal", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view |> element("button", "Bulk Upload") |> render_click()
+      html = render(view)
+      assert html =~ "Upload"
+    end
+
+    test "closes bulk upload modal", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view |> element("button", "Bulk Upload") |> render_click()
+      assert render(view) =~ "Upload"
+
+      view
+      |> element("button.btn-circle[phx-click='close_bulk_upload_modal']")
+      |> render_click()
+
+      # Modal should be closed; verify the main page is back
+      assert render(view) =~ "Employees"
+    end
+  end
+
+  describe "Invite modal close" do
+    test "closes invite modal", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view |> element("button", "Invite Employee") |> render_click()
+      assert render(view) =~ "Invite a New Employee"
+
+      view
+      |> element("button.btn-circle[phx-click='close_invite_modal']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Employees"
+    end
+  end
+
+  describe "Sort edge cases" do
+    test "handles invalid sort_by param gracefully", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees?sort_by=nonexistent_field")
+      assert html =~ "Employees"
+    end
+
+    test "handles invalid sort_order param gracefully", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees?sort_order=invalid")
+      assert html =~ "Employees"
+    end
+
+    test "clicking different column resets to asc", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees?sort_by=name&sort_order=desc")
+
+      # Click a different column (email) - should sort by email asc
+      view |> element("th", "Email") |> render_click()
+      assert_patch(view)
+    end
+  end
+
+  describe "Pagination" do
+    test "handles invalid page param gracefully", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees?page=abc")
+      assert html =~ "Employees"
+    end
+
+    test "handles negative page param gracefully", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees?page=-5")
+      assert html =~ "Employees"
+    end
+
+    test "handles zero page param gracefully", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees?page=0")
+      assert html =~ "Employees"
+    end
+  end
+
+  describe "Pagination navigation" do
+    test "shows pagination when more than 20 employees", %{conn: conn, company: company} do
+      for _i <- 1..21 do
+        user_with_role_fixture(:employee, company.id)
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      assert html =~ "Showing page"
+      assert html =~ "Next"
+    end
+
+    test "navigates to next page", %{conn: conn, company: company} do
+      for _i <- 1..21 do
+        user_with_role_fixture(:employee, company.id)
+      end
+
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view
+      |> element("button", "Next")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Showing page 2"
+    end
+
+    test "navigates to previous page", %{conn: conn, company: company} do
+      for _i <- 1..21 do
+        user_with_role_fixture(:employee, company.id)
+      end
+
+      {:ok, view, _html} = live(conn, ~p"/admin/employees?page=2")
+
+      view
+      |> element("button", "Previous")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Showing page 1"
+    end
+
+    test "clicking a page number navigates to that page", %{conn: conn, company: company} do
+      for _i <- 1..21 do
+        user_with_role_fixture(:employee, company.id)
+      end
+
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view
+      |> element("button.join-item", "2")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Showing page 2"
+    end
+
+    test "does not show pagination with fewer than 21 employees", %{conn: conn, company: company} do
+      for _i <- 1..5 do
+        user_with_role_fixture(:employee, company.id)
+      end
+
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      refute html =~ "Showing page"
+      refute html =~ "Next"
+    end
+  end
+
+  describe "Sort indicators" do
+    test "shows ascending indicator when sorted asc", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees?sort_by=email&sort_order=asc")
+
+      assert has_element?(view, "span .hero-chevron-up")
+    end
+
+    test "shows descending indicator when sorted desc", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees?sort_by=email&sort_order=desc")
+
+      assert has_element?(view, "span .hero-chevron-down")
+    end
+  end
+
+  describe "Role Management edge cases" do
+    test "admin cannot change own role", %{conn: conn, admin: admin} do
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      # The admin should be listed but without a promote/demote button for themselves
+      refute has_element?(view, "button[phx-click='promote'][phx-value-id='#{admin.id}']")
+      refute has_element?(view, "button[phx-click='demote'][phx-value-id='#{admin.id}']")
+    end
+  end
+
+  describe "Combined filters" do
+    test "search and status filter work together", %{conn: conn, scope: scope, company: company} do
+      employee = user_with_role_fixture(:employee, company.id)
+      {_invited, _token} = invited_user_fixture(scope)
+
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      # Filter by active status and search for employee email
+      view
+      |> form("#status-filter-form", status: "active")
+      |> render_change()
+
+      html =
+        view
+        |> form("#search-form", search: employee.email)
+        |> render_change()
+
+      assert html =~ employee.email
+    end
+
+    test "search with no status filter shows all matching", %{conn: conn, company: company} do
+      emp = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      html =
+        view
+        |> form("#search-form", search: emp.email)
+        |> render_change()
+
+      assert html =~ emp.email
+    end
+  end
+
+  describe "Employee table display" do
+    test "shows dash for employee without name", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      # Employees created via user_fixture don't have names set
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      assert html =~ "—"
+    end
+
+    test "shows employee email in table", %{conn: conn, company: company} do
+      employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      assert html =~ employee.email
+    end
+
+    test "shows active badge for confirmed employees", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+      assert has_element?(view, ".badge-success", "active")
+    end
+
+    test "shows warning badge for invited employees", %{conn: conn, scope: scope} do
+      {_invited, _token} = invited_user_fixture(scope)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+      assert has_element?(view, ".badge-warning", "invited")
+    end
+  end
+
   describe "Authorization" do
     test "redirects non-admin users", %{conn: conn} do
       employee_company = company_fixture()

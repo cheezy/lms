@@ -101,7 +101,9 @@ defmodule LmsWeb.Router do
         {LmsWeb.Plugs.AuthorizationHooks,
          {:require_role, [:course_creator, :company_admin, :system_admin]}}
       ] do
-      live "/courses", CourseListLive
+      live "/courses", Courses.CourseListLive
+      live "/courses/new", Courses.CourseFormLive, :new
+      live "/courses/:id/edit", Courses.CourseFormLive, :edit
     end
 
     live_session :employee,

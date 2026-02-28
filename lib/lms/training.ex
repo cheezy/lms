@@ -16,11 +16,16 @@ defmodule Lms.Training do
 
   @doc """
   Returns the list of courses for a given company.
+
+  ## Options
+
+    * `:status` - Filter by status atom (e.g., `:draft`, `:published`, `:archived`)
   """
-  def list_courses(company_id) do
+  def list_courses(company_id, opts \\ %{}) do
     Course
     |> where([c], c.company_id == ^company_id)
-    |> order_by([c], asc: c.inserted_at)
+    |> maybe_filter_status(opts[:status])
+    |> order_by([c], desc: c.updated_at)
     |> Repo.all()
   end
 
@@ -78,6 +83,32 @@ defmodule Lms.Training do
   def change_course(%Course{} = course, attrs \\ %{}) do
     Course.changeset(course, attrs)
   end
+
+  @doc """
+  Publishes a draft course by setting its status to `:published`.
+
+  Returns `{:error, :not_draft}` if the course is not in draft status.
+  """
+  def publish_course(%Course{status: :draft} = course) do
+    course
+    |> Ecto.Changeset.change(%{status: :published})
+    |> Repo.update()
+  end
+
+  def publish_course(%Course{}), do: {:error, :not_draft}
+
+  @doc """
+  Archives a published course by setting its status to `:archived`.
+
+  Returns `{:error, :not_published}` if the course is not in published status.
+  """
+  def archive_course(%Course{status: :published} = course) do
+    course
+    |> Ecto.Changeset.change(%{status: :archived})
+    |> Repo.update()
+  end
+
+  def archive_course(%Course{}), do: {:error, :not_published}
 
   ## Chapters
 
@@ -253,6 +284,10 @@ defmodule Lms.Training do
       end)
     end)
   end
+
+  defp maybe_filter_status(query, nil), do: query
+  defp maybe_filter_status(query, ""), do: query
+  defp maybe_filter_status(query, status), do: where(query, [c], c.status == ^status)
 
   defp normalize_attrs(attrs) when is_list(attrs), do: Map.new(attrs)
   defp normalize_attrs(attrs) when is_map(attrs), do: attrs

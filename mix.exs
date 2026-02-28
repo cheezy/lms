@@ -105,10 +105,13 @@ defmodule Lms.MixProject do
   defp test_coverage do
     [
       ignore_modules: [
+        Lms.AccountsFixtures,
         Lms.Application,
         Lms.DataCase,
         Lms.Repo,
+        Lms.CompaniesFixtures,
         Lms.ConnCase,
+        Lms.TrainingFixtures,
         LmsWeb.CoreComponents,
         LmsWeb.ErrorHTML,
         LmsWeb.Layouts,

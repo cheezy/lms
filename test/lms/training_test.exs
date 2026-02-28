@@ -12,6 +12,12 @@ defmodule Lms.TrainingTest do
 
   ## Courses
 
+  describe "Course.statuses/0" do
+    test "returns the list of valid statuses" do
+      assert Course.statuses() == [:draft, :published, :archived]
+    end
+  end
+
   describe "list_courses/1" do
     test "returns all courses for a company" do
       company = company_fixture()
@@ -420,6 +426,94 @@ defmodule Lms.TrainingTest do
     end
   end
 
+  ## Publishing and archiving
+
+  describe "publish_course/1" do
+    test "publishes a draft course" do
+      course = course_fixture(%{status: :draft})
+      assert {:ok, published} = Training.publish_course(course)
+      assert published.status == :published
+    end
+
+    test "returns error when course is not draft" do
+      course = course_fixture(%{status: :published})
+      assert {:error, :not_draft} = Training.publish_course(course)
+    end
+
+    test "returns error when course is archived" do
+      course = course_fixture(%{status: :published})
+      {:ok, archived} = Training.archive_course(course)
+      assert {:error, :not_draft} = Training.publish_course(archived)
+    end
+  end
+
+  describe "archive_course/1" do
+    test "archives a published course" do
+      course = course_fixture(%{status: :published})
+      assert {:ok, archived} = Training.archive_course(course)
+      assert archived.status == :archived
+    end
+
+    test "returns error when course is not published" do
+      course = course_fixture(%{status: :draft})
+      assert {:error, :not_published} = Training.archive_course(course)
+    end
+
+    test "returns error when course is already archived" do
+      course = course_fixture(%{status: :published})
+      {:ok, archived} = Training.archive_course(course)
+      assert {:error, :not_published} = Training.archive_course(archived)
+    end
+  end
+
+  describe "list_courses/2 with status filter" do
+    test "filters courses by status" do
+      company = company_fixture()
+      _draft = course_fixture(%{company: company, status: :draft})
+      published = course_fixture(%{company: company, status: :published})
+
+      courses = Training.list_courses(company.id, %{status: :published})
+      assert length(courses) == 1
+      assert hd(courses).id == published.id
+    end
+
+    test "returns all courses when no status filter" do
+      company = company_fixture()
+      course_fixture(%{company: company, status: :draft})
+      course_fixture(%{company: company, status: :published})
+
+      courses = Training.list_courses(company.id)
+      assert length(courses) == 2
+    end
+
+    test "filters with empty string status returns all courses" do
+      company = company_fixture()
+      course_fixture(%{company: company, status: :draft})
+      course_fixture(%{company: company, status: :published})
+
+      courses = Training.list_courses(company.id, %{status: ""})
+      assert length(courses) == 2
+    end
+
+    test "returns courses ordered by updated_at descending" do
+      company = company_fixture()
+      course1 = course_fixture(%{company: company, title: "First"})
+      _course2 = course_fixture(%{company: company, title: "Second"})
+
+      # Manually set course1's updated_at to be 1 hour in the future
+      future =
+        DateTime.utc_now(:second)
+        |> DateTime.add(3600, :second)
+
+      Course
+      |> where([c], c.id == ^course1.id)
+      |> Lms.Repo.update_all(set: [updated_at: future])
+
+      courses = Training.list_courses(company.id)
+      assert hd(courses).id == course1.id
+    end
+  end
+
   ## Edge cases
 
   describe "edge cases" do
@@ -443,6 +537,66 @@ defmodule Lms.TrainingTest do
                Training.create_course(%{title: long_title, company_id: company.id})
 
       assert %{title: ["should be at most 255 character(s)"]} = errors_on(changeset)
+    end
+
+    test "create_chapter with keyword list attrs" do
+      course = course_fixture()
+      attrs = [title: "Keyword Chapter", course_id: course.id]
+
+      assert {:ok, %Chapter{} = chapter} = Training.create_chapter(attrs)
+      assert chapter.title == "Keyword Chapter"
+      assert chapter.position == 0
+    end
+
+    test "create_lesson with keyword list attrs" do
+      chapter = chapter_fixture()
+      attrs = [title: "Keyword Lesson", chapter_id: chapter.id]
+
+      assert {:ok, %Lesson{} = lesson} = Training.create_lesson(attrs)
+      assert lesson.title == "Keyword Lesson"
+      assert lesson.position == 0
+    end
+
+    test "create_chapter without parent_id gets position 0" do
+      assert {:error, changeset} = Training.create_chapter(%{title: "No Parent"})
+      # Without course_id, it should fail on validation but position gets 0
+      assert %{course_id: _} = errors_on(changeset)
+    end
+
+    test "create_lesson without parent_id gets position 0" do
+      assert {:error, changeset} = Training.create_lesson(%{title: "No Parent"})
+      assert %{chapter_id: _} = errors_on(changeset)
+    end
+
+    test "change_course with attrs" do
+      course = course_fixture()
+      changeset = Training.change_course(course, %{title: "New Title"})
+      assert %Ecto.Changeset{} = changeset
+      assert Ecto.Changeset.get_change(changeset, :title) == "New Title"
+    end
+
+    test "change_chapter with attrs" do
+      chapter = chapter_fixture()
+      changeset = Training.change_chapter(chapter, %{title: "New Title"})
+      assert %Ecto.Changeset{} = changeset
+      assert Ecto.Changeset.get_change(changeset, :title) == "New Title"
+    end
+
+    test "change_lesson with attrs" do
+      lesson = lesson_fixture()
+      changeset = Training.change_lesson(lesson, %{title: "New Title"})
+      assert %Ecto.Changeset{} = changeset
+      assert Ecto.Changeset.get_change(changeset, :title) == "New Title"
+    end
+
+    test "reorder_chapters with empty list" do
+      course = course_fixture()
+      assert {:ok, _} = Training.reorder_chapters(course.id, [])
+    end
+
+    test "reorder_lessons with empty list" do
+      chapter = chapter_fixture()
+      assert {:ok, _} = Training.reorder_lessons(chapter.id, [])
     end
   end
 end

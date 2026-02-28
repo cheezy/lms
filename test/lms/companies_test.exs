@@ -208,5 +208,63 @@ defmodule Lms.CompaniesTest do
       assert {:ok, %{company: company}} = Companies.register_company(attrs)
       assert company.slug == "lentreprise-caf-co"
     end
+
+    test "handles company name with leading/trailing spaces" do
+      attrs = %{@valid_registration_attrs | "company_name" => "  Padded Company  "}
+
+      assert {:ok, %{company: company}} = Companies.register_company(attrs)
+      assert company.slug == "padded-company"
+    end
+
+    test "handles company name with multiple consecutive spaces" do
+      attrs = %{@valid_registration_attrs | "company_name" => "Too   Many    Spaces"}
+
+      assert {:ok, %{company: company}} = Companies.register_company(attrs)
+      assert company.slug == "too-many-spaces"
+    end
+
+    test "handles duplicate company slug via unique constraint" do
+      assert {:ok, _} = Companies.register_company(@valid_registration_attrs)
+
+      # Different email but same company name → same slug
+      attrs = %{
+        @valid_registration_attrs
+        | "email" => "other@testcompany.com"
+      }
+
+      assert {:error, changeset} = Companies.register_company(attrs)
+      assert %{company_name: _} = errors_on(changeset)
+    end
+  end
+
+  describe "change_registration/1 edge cases" do
+    test "validates company_name max length" do
+      long_name = String.duplicate("a", 256)
+      changeset = Companies.change_registration(%{"company_name" => long_name})
+      assert %{company_name: ["should be at most 255 character(s)"]} = errors_on(changeset)
+    end
+
+    test "validates name max length" do
+      long_name = String.duplicate("a", 256)
+      changeset = Companies.change_registration(%{"name" => long_name})
+      assert %{name: ["should be at most 255 character(s)"]} = errors_on(changeset)
+    end
+
+    test "validates email max length" do
+      long_email = String.duplicate("a", 150) <> "@example.com"
+      changeset = Companies.change_registration(%{"email" => long_email})
+      assert %{email: ["should be at most 160 character(s)"]} = errors_on(changeset)
+    end
+
+    test "validates password max length" do
+      long_password = String.duplicate("a", 73)
+      changeset = Companies.change_registration(%{"password" => long_password})
+      assert %{password: ["should be at most 72 character(s)"]} = errors_on(changeset)
+    end
+
+    test "returns changeset with no attrs" do
+      changeset = Companies.change_registration()
+      assert %Ecto.Changeset{} = changeset
+    end
   end
 end

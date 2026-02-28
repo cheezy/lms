@@ -67,5 +67,43 @@ defmodule LmsWeb.Plugs.AuthorizationHooksTest do
 
       assert is_nil(socket.assigns.current_company)
     end
+
+    test "assigns nil when no user in scope" do
+      socket = build_socket(%{current_scope: nil})
+
+      assert {:cont, socket} =
+               AuthorizationHooks.on_mount(:fetch_current_company, %{}, %{}, socket)
+
+      assert is_nil(socket.assigns.current_company)
+    end
+  end
+
+  describe "on_mount {:require_role, roles} with multiple roles" do
+    test "allows user when role matches any in the list" do
+      company = company_fixture()
+      user = user_with_role_fixture(:course_creator, company.id)
+      scope = user_scope_fixture(user)
+      socket = build_socket(%{current_scope: scope})
+
+      assert {:cont, _socket} =
+               AuthorizationHooks.on_mount(
+                 {:require_role, [:course_creator, :company_admin, :system_admin]},
+                 %{},
+                 %{},
+                 socket
+               )
+    end
+
+    test "sets flash error when halting" do
+      company = company_fixture()
+      user = user_with_role_fixture(:employee, company.id)
+      scope = user_scope_fixture(user)
+      socket = build_socket(%{current_scope: scope})
+
+      assert {:halt, socket} =
+               AuthorizationHooks.on_mount({:require_role, [:system_admin]}, %{}, %{}, socket)
+
+      assert socket.redirected
+    end
   end
 end

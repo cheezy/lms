@@ -17,6 +17,26 @@ defmodule LmsWeb.UserSessionControllerTest do
       assert response =~ "Log in with email"
     end
 
+    test "shows local mail adapter notice when configured", %{conn: conn} do
+      original = Application.get_env(:lms, Lms.Mailer)
+      Application.put_env(:lms, Lms.Mailer, adapter: Swoosh.Adapters.Local)
+
+      try do
+        conn = get(conn, ~p"/users/log-in")
+        response = html_response(conn, 200)
+        assert response =~ "You are running the local mail adapter"
+        assert response =~ "/dev/mailbox"
+      after
+        Application.put_env(:lms, Lms.Mailer, original)
+      end
+    end
+
+    test "does not show local mail adapter notice in test env", %{conn: conn} do
+      conn = get(conn, ~p"/users/log-in")
+      response = html_response(conn, 200)
+      refute response =~ "You are running the local mail adapter"
+    end
+
     test "renders login page with email filled in (sudo mode)", %{conn: conn, user: user} do
       html =
         conn
