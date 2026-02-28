@@ -300,6 +300,36 @@ defmodule Lms.Accounts do
     :ok
   end
 
+  ## Employee Management
+
+  @promotable_roles [:employee, :course_creator]
+
+  @doc """
+  Updates an employee's role within the admin's company.
+
+  Only allows promoting/demoting between :employee and :course_creator.
+  Returns `{:error, :cannot_change_own_role}` if the admin tries to change their own role.
+  Returns `{:error, :invalid_role}` if the target role is not promotable.
+  Returns `{:error, :not_in_company}` if the user is not in the admin's company.
+  """
+  def update_user_role(%Lms.Accounts.Scope{user: admin}, %User{} = user, new_role) do
+    cond do
+      user.id == admin.id ->
+        {:error, :cannot_change_own_role}
+
+      user.company_id != admin.company_id ->
+        {:error, :not_in_company}
+
+      new_role not in @promotable_roles ->
+        {:error, :invalid_role}
+
+      true ->
+        user
+        |> Ecto.Changeset.change(%{role: new_role})
+        |> Repo.update()
+    end
+  end
+
   ## Employee Invitation
 
   @invitation_validity_in_days 7
@@ -330,7 +360,7 @@ defmodule Lms.Accounts do
     base_query =
       User
       |> where([u], u.company_id == ^admin.company_id)
-      |> where([u], u.role == :employee)
+      |> where([u], u.role in [:employee, :course_creator])
       |> maybe_search(search)
       |> maybe_filter_status(status)
 

@@ -111,6 +111,38 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
     end
   end
 
+  def handle_event("promote", %{"id" => id}, socket) do
+    change_role(socket, id, :course_creator, gettext("promoted to Course Creator"))
+  end
+
+  def handle_event("demote", %{"id" => id}, socket) do
+    change_role(socket, id, :employee, gettext("demoted to Employee"))
+  end
+
+  defp change_role(socket, user_id, new_role, success_label) do
+    user = Accounts.get_user!(user_id)
+
+    case Accounts.update_user_role(socket.assigns.current_scope, user, new_role) do
+      {:ok, _user} ->
+        {:noreply,
+         socket
+         |> put_flash(
+           :info,
+           gettext("%{name} has been %{action}.",
+             name: user.name || user.email,
+             action: success_label
+           )
+         )
+         |> push_patch(to: build_path(socket.assigns))}
+
+      {:error, :cannot_change_own_role} ->
+        {:noreply, put_flash(socket, :error, gettext("You cannot change your own role."))}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, gettext("Could not update role."))}
+    end
+  end
+
   defp parse_sort_by(nil), do: :name
 
   defp parse_sort_by(field) when is_binary(field) do
@@ -284,15 +316,45 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
                 </td>
                 <td class="capitalize">{employee.role}</td>
                 <td>
-                  <button
-                    :if={employee.status == :invited}
-                    phx-click="resend_invitation"
-                    phx-value-id={employee.id}
-                    class="btn btn-ghost btn-xs text-primary"
-                  >
-                    <.icon name="hero-arrow-path" class="size-3.5 mr-1" />
-                    {gettext("Resend")}
-                  </button>
+                  <div class="flex gap-1">
+                    <button
+                      :if={employee.status == :invited}
+                      phx-click="resend_invitation"
+                      phx-value-id={employee.id}
+                      class="btn btn-ghost btn-xs text-primary"
+                    >
+                      <.icon name="hero-arrow-path" class="size-3.5 mr-1" />
+                      {gettext("Resend")}
+                    </button>
+                    <button
+                      :if={employee.role == :employee && employee.status == :active}
+                      phx-click="promote"
+                      phx-value-id={employee.id}
+                      data-confirm={
+                        gettext("Promote %{name} to Course Creator?",
+                          name: employee.name || employee.email
+                        )
+                      }
+                      class="btn btn-ghost btn-xs text-primary"
+                    >
+                      <.icon name="hero-arrow-up-circle" class="size-3.5 mr-1" />
+                      {gettext("Promote")}
+                    </button>
+                    <button
+                      :if={employee.role == :course_creator}
+                      phx-click="demote"
+                      phx-value-id={employee.id}
+                      data-confirm={
+                        gettext("Demote %{name} to Employee?",
+                          name: employee.name || employee.email
+                        )
+                      }
+                      class="btn btn-ghost btn-xs text-warning"
+                    >
+                      <.icon name="hero-arrow-down-circle" class="size-3.5 mr-1" />
+                      {gettext("Demote")}
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>

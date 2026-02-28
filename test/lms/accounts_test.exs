@@ -395,6 +395,45 @@ defmodule Lms.AccountsTest do
     end
   end
 
+  describe "update_user_role/3" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      employee = user_with_role_fixture(:employee, company.id)
+      %{scope: scope, company: company, admin: admin, employee: employee}
+    end
+
+    test "promotes employee to course_creator", %{scope: scope, employee: employee} do
+      assert {:ok, updated} = Accounts.update_user_role(scope, employee, :course_creator)
+      assert updated.role == :course_creator
+    end
+
+    test "demotes course_creator to employee", %{scope: scope, company: company} do
+      course_creator = user_with_role_fixture(:course_creator, company.id)
+      assert {:ok, updated} = Accounts.update_user_role(scope, course_creator, :employee)
+      assert updated.role == :employee
+    end
+
+    test "returns error when changing own role", %{scope: scope, admin: admin} do
+      assert {:error, :cannot_change_own_role} =
+               Accounts.update_user_role(scope, admin, :employee)
+    end
+
+    test "returns error for invalid role", %{scope: scope, employee: employee} do
+      assert {:error, :invalid_role} =
+               Accounts.update_user_role(scope, employee, :company_admin)
+    end
+
+    test "returns error for user in different company", %{scope: scope} do
+      other_company = Lms.CompaniesFixtures.company_fixture()
+      other_employee = user_with_role_fixture(:employee, other_company.id)
+
+      assert {:error, :not_in_company} =
+               Accounts.update_user_role(scope, other_employee, :course_creator)
+    end
+  end
+
   describe "list_employees/2" do
     setup do
       company = Lms.CompaniesFixtures.company_fixture()

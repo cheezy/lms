@@ -140,6 +140,50 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
     end
   end
 
+  describe "Role Management" do
+    test "shows promote button for active employees", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      assert html =~ "Promote"
+    end
+
+    test "shows demote button for course creators", %{conn: conn, company: company} do
+      _creator = user_with_role_fixture(:course_creator, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      assert html =~ "Demote"
+    end
+
+    test "does not show promote button for invited users", %{conn: conn, scope: scope} do
+      {_invited, _token} = invited_user_fixture(scope)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      refute html =~ "Promote"
+    end
+
+    test "promotes employee to course creator", %{conn: conn, company: company} do
+      employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view
+      |> element("button[phx-click='promote'][phx-value-id='#{employee.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "promoted to Course Creator"
+    end
+
+    test "demotes course creator to employee", %{conn: conn, company: company} do
+      creator = user_with_role_fixture(:course_creator, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view
+      |> element("button[phx-click='demote'][phx-value-id='#{creator.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "demoted to Employee"
+    end
+  end
+
   describe "Invite Employee" do
     test "opens invite modal", %{conn: conn} do
       {:ok, view, _html} = live(conn, ~p"/admin/employees")
