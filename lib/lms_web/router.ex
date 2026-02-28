@@ -93,6 +93,7 @@ defmodule LmsWeb.Router do
       ] do
       live "/dashboard", DashboardLive
       live "/admin/employees", Admin.EmployeeLive.Index
+      live "/admin/enrollments", Admin.EnrollmentLive.Index
     end
 
     live_session :course_creator,

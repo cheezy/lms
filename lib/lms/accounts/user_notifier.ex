@@ -87,6 +87,24 @@ defmodule Lms.Accounts.UserNotifier do
     """)
   end
 
+  @doc """
+  Deliver enrollment notification to an employee.
+  """
+  def deliver_enrollment_notification(user, course_title) do
+    deliver(user.email, "You've been enrolled in #{course_title}", """
+
+    ==============================
+
+    Hi #{user.name || user.email},
+
+    You have been enrolled in the course "#{course_title}".
+
+    Log in to your account to start learning.
+
+    ==============================
+    """)
+  end
+
   defp deliver_confirmation_instructions(user, url) do
     deliver(user.email, "Confirmation instructions", """
 
