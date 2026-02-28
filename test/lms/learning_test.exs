@@ -236,7 +236,7 @@ defmodule Lms.LearningTest do
       user = user_fixture()
       enrollment = enrollment_fixture(%{user: user, course: course})
 
-      assert {:ok, %LessonProgress{} = progress} =
+      assert {:ok, %{lesson_progress: progress}} =
                Learning.complete_lesson(enrollment, lesson.id)
 
       assert progress.enrollment_id == enrollment.id
@@ -249,9 +249,28 @@ defmodule Lms.LearningTest do
       user = user_fixture()
       enrollment = enrollment_fixture(%{user: user, course: course})
 
-      assert {:ok, _progress} = Learning.complete_lesson(enrollment, lesson.id)
-      assert {:error, changeset} = Learning.complete_lesson(enrollment, lesson.id)
+      assert {:ok, _} = Learning.complete_lesson(enrollment, lesson.id)
+
+      assert {:error, :lesson_progress, changeset, _} =
+               Learning.complete_lesson(enrollment, lesson.id)
+
       assert errors_on(changeset)[:enrollment_id]
+    end
+
+    test "sets enrollment completed_at when all lessons are done" do
+      %{course: course, lesson1: lesson1, lesson2: lesson2} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      assert {:ok, %{enrollment: partial}} =
+               Learning.complete_lesson(enrollment, lesson1.id)
+
+      assert partial.completed_at == nil
+
+      assert {:ok, %{enrollment: completed}} =
+               Learning.complete_lesson(enrollment, lesson2.id)
+
+      assert completed.completed_at != nil
     end
   end
 
@@ -274,6 +293,105 @@ defmodule Lms.LearningTest do
 
       assert {:ok, _} = Learning.delete_enrollment(enrollment)
       assert Repo.all(LessonProgress) == []
+    end
+  end
+
+  describe "check_course_completion/1" do
+    test "sets completed_at when all lessons are done" do
+      %{course: course, lesson1: lesson1, lesson2: lesson2} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      {:ok, _} = Learning.complete_lesson(enrollment, lesson1.id)
+      {:ok, _} = Learning.complete_lesson(enrollment, lesson2.id)
+
+      {:ok, updated} = Learning.check_course_completion(enrollment)
+      assert updated.completed_at != nil
+    end
+
+    test "does not set completed_at when lessons remain" do
+      %{course: course, lesson1: lesson1} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      {:ok, _} = Learning.complete_lesson(enrollment, lesson1.id)
+
+      {:ok, updated} = Learning.check_course_completion(enrollment)
+      assert updated.completed_at == nil
+    end
+
+    test "returns unchanged enrollment if already completed" do
+      %{course: course} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      now = DateTime.utc_now(:second)
+
+      enrollment
+      |> Ecto.Changeset.change(%{completed_at: now})
+      |> Repo.update!()
+
+      enrollment = %{enrollment | completed_at: now}
+      {:ok, result} = Learning.check_course_completion(enrollment)
+      assert result.completed_at == now
+    end
+  end
+
+  describe "get_enrollment_for_user!/2" do
+    test "returns enrollment for user and course" do
+      user = user_fixture()
+      course = course_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      fetched = Learning.get_enrollment_for_user!(user.id, course.id)
+      assert fetched.id == enrollment.id
+      assert %Lms.Training.Course{} = fetched.course
+    end
+
+    test "raises for non-existent enrollment" do
+      assert_raise Ecto.NoResultsError, fn ->
+        Learning.get_enrollment_for_user!(-1, -1)
+      end
+    end
+  end
+
+  describe "lesson_completed?/2" do
+    test "returns false when lesson is not completed" do
+      %{course: course, lesson1: lesson} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      refute Learning.lesson_completed?(enrollment, lesson.id)
+    end
+
+    test "returns true when lesson is completed" do
+      %{course: course, lesson1: lesson} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      {:ok, _} = Learning.complete_lesson(enrollment, lesson.id)
+
+      assert Learning.lesson_completed?(enrollment, lesson.id)
+    end
+  end
+
+  describe "completed_lesson_ids/1" do
+    test "returns empty set when no lessons completed" do
+      enrollment = enrollment_fixture()
+      ids = Learning.completed_lesson_ids(enrollment)
+      assert MapSet.size(ids) == 0
+    end
+
+    test "returns set of completed lesson IDs" do
+      %{course: course, lesson1: lesson1, lesson2: lesson2} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+
+      {:ok, _} = Learning.complete_lesson(enrollment, lesson1.id)
+
+      ids = Learning.completed_lesson_ids(enrollment)
+      assert MapSet.member?(ids, lesson1.id)
+      refute MapSet.member?(ids, lesson2.id)
     end
   end
 

@@ -144,6 +144,20 @@ defmodule Lms.Learning do
   end
 
   @doc """
+  Lists enrollments for a user with course and progress data.
+
+  Returns enrollments with `:progress` virtual field set and course preloaded.
+  """
+  def list_user_enrollments(user_id) do
+    Enrollment
+    |> where([e], e.user_id == ^user_id)
+    |> preload([:course, :lesson_progress])
+    |> order_by([e], desc: e.enrolled_at)
+    |> Repo.all()
+    |> Enum.map(&Map.put(&1, :progress, calculate_progress(&1)))
+  end
+
+  @doc """
   Gets a single enrollment with lesson progress preloaded.
 
   Raises `Ecto.NoResultsError` if the Enrollment does not exist.
@@ -183,19 +197,82 @@ defmodule Lms.Learning do
   end
 
   @doc """
-  Marks a lesson as completed for an enrollment.
+  Marks a lesson as completed for an enrollment and checks for course completion.
 
-  Sets `completed_at` to the current UTC time.
-  Returns `{:error, changeset}` if the lesson was already completed.
+  Uses `Ecto.Multi` to atomically create the LessonProgress record and
+  set `enrollment.completed_at` when all lessons are done.
+
+  Returns `{:ok, %{lesson_progress: progress, enrollment: enrollment}}` on success,
+  or `{:error, :lesson_progress, changeset, _}` if the lesson was already completed.
   """
   def complete_lesson(%Enrollment{} = enrollment, lesson_id) do
-    %LessonProgress{}
-    |> LessonProgress.changeset(%{
-      enrollment_id: enrollment.id,
-      lesson_id: lesson_id,
-      completed_at: DateTime.utc_now(:second)
-    })
-    |> Repo.insert()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:lesson_progress, fn _changes ->
+      LessonProgress.changeset(%LessonProgress{}, %{
+        enrollment_id: enrollment.id,
+        lesson_id: lesson_id,
+        completed_at: DateTime.utc_now(:second)
+      })
+    end)
+    |> Ecto.Multi.run(:enrollment, fn _repo, _changes ->
+      check_course_completion(enrollment)
+    end)
+    |> Repo.transaction()
+  end
+
+  @doc """
+  Checks if all lessons in a course are completed and sets enrollment.completed_at.
+
+  Returns `{:ok, enrollment}`. If already completed or not all lessons done,
+  returns the enrollment unchanged.
+  """
+  def check_course_completion(%Enrollment{} = enrollment) do
+    if enrollment.completed_at != nil do
+      {:ok, enrollment}
+    else
+      total = count_course_lessons(enrollment.course_id)
+      completed = count_completed_lessons(enrollment.id)
+
+      if total > 0 and completed >= total do
+        enrollment
+        |> Ecto.Changeset.change(%{completed_at: DateTime.utc_now(:second)})
+        |> Repo.update()
+      else
+        {:ok, enrollment}
+      end
+    end
+  end
+
+  @doc """
+  Gets the enrollment for a user and course.
+
+  Raises `Ecto.NoResultsError` if no enrollment exists.
+  """
+  def get_enrollment_for_user!(user_id, course_id) do
+    Enrollment
+    |> where([e], e.user_id == ^user_id and e.course_id == ^course_id)
+    |> preload([:course, :lesson_progress])
+    |> Repo.one!()
+  end
+
+  @doc """
+  Returns true if the given lesson has been completed for the enrollment.
+  """
+  def lesson_completed?(%Enrollment{} = enrollment, lesson_id) do
+    LessonProgress
+    |> where([lp], lp.enrollment_id == ^enrollment.id and lp.lesson_id == ^lesson_id)
+    |> Repo.exists?()
+  end
+
+  @doc """
+  Returns a MapSet of completed lesson IDs for the given enrollment.
+  """
+  def completed_lesson_ids(%Enrollment{} = enrollment) do
+    LessonProgress
+    |> where([lp], lp.enrollment_id == ^enrollment.id)
+    |> select([lp], lp.lesson_id)
+    |> Repo.all()
+    |> MapSet.new()
   end
 
   @doc """

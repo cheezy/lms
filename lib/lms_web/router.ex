@@ -115,6 +115,7 @@ defmodule LmsWeb.Router do
          {:require_role, [:employee, :course_creator, :company_admin, :system_admin]}}
       ] do
       live "/my-learning", Employee.MyLearningLive
+      live "/my-learning/:course_id", Employee.CourseViewerLive
     end
   end
 
