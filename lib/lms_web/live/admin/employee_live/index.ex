@@ -3,44 +3,185 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
 
   alias Lms.Accounts
 
+  @sort_fields ~w(name email status role)a
+  @sort_orders ~w(asc desc)a
+
   @impl true
   def mount(_params, _session, socket) do
-    employees = Accounts.list_employees(socket.assigns.current_scope)
-
     socket =
       socket
       |> assign(:page_title, gettext("Employees"))
-      |> assign(:employees, employees)
       |> assign(:show_invite_modal, false)
 
     {:ok, socket}
   end
 
   @impl true
-  def handle_info({LmsWeb.Admin.EmployeeLive.InviteFormComponent, {:invited, _user}}, socket) do
-    employees = Accounts.list_employees(socket.assigns.current_scope)
+  def handle_params(params, _uri, socket) do
+    opts = %{
+      search: params["search"],
+      sort_by: parse_sort_by(params["sort_by"]),
+      sort_order: parse_sort_order(params["sort_order"]),
+      status: params["status"],
+      page: parse_page(params["page"])
+    }
 
-    {:noreply,
-     socket
-     |> assign(:employees, employees)
-     |> assign(:show_invite_modal, false)}
+    {employees, total_count} =
+      Accounts.list_employees(socket.assigns.current_scope, opts)
+
+    total_pages = max(ceil(total_count / 20), 1)
+
+    socket =
+      socket
+      |> assign(:employees, employees)
+      |> assign(:total_count, total_count)
+      |> assign(:total_pages, total_pages)
+      |> assign(:search, opts.search || "")
+      |> assign(:sort_by, opts.sort_by)
+      |> assign(:sort_order, opts.sort_order)
+      |> assign(:status_filter, opts.status || "")
+      |> assign(:page, opts.page)
+
+    {:noreply, socket}
   end
 
   @impl true
+  def handle_info({LmsWeb.Admin.EmployeeLive.InviteFormComponent, {:invited, _user}}, socket) do
+    {:noreply,
+     socket
+     |> assign(:show_invite_modal, false)
+     |> push_patch(to: build_path(socket.assigns))}
+  end
+
+  def handle_info({:email, _email}, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("search", %{"search" => search}, socket) do
+    params = %{socket.assigns | search: search, page: 1}
+    {:noreply, push_patch(socket, to: build_path(params))}
+  end
+
+  def handle_event("filter_status", %{"status" => status}, socket) do
+    params = %{socket.assigns | status_filter: status, page: 1}
+    {:noreply, push_patch(socket, to: build_path(params))}
+  end
+
+  def handle_event("sort", %{"field" => field}, socket) do
+    field = String.to_existing_atom(field)
+
+    {sort_by, sort_order} =
+      if socket.assigns.sort_by == field do
+        {field, toggle_order(socket.assigns.sort_order)}
+      else
+        {field, :asc}
+      end
+
+    params = %{socket.assigns | sort_by: sort_by, sort_order: sort_order}
+    {:noreply, push_patch(socket, to: build_path(params))}
+  end
+
+  def handle_event("page", %{"page" => page}, socket) do
+    params = %{socket.assigns | page: String.to_integer(page)}
+    {:noreply, push_patch(socket, to: build_path(params))}
+  end
+
   def handle_event("open_invite_modal", _params, socket) do
     {:noreply, assign(socket, :show_invite_modal, true)}
   end
 
-  @impl true
   def handle_event("close_invite_modal", _params, socket) do
     {:noreply, assign(socket, :show_invite_modal, false)}
+  end
+
+  @impl true
+  def handle_event("resend_invitation", %{"id" => id}, socket) do
+    user = Accounts.get_user!(id)
+
+    case Accounts.resend_invitation(user, &url(~p"/invitations/#{&1}")) do
+      {:ok, _user} ->
+        {:noreply,
+         socket
+         |> put_flash(:info, gettext("Invitation resent to %{email}.", email: user.email))
+         |> push_patch(to: build_path(socket.assigns))}
+
+      {:error, _reason} ->
+        {:noreply, put_flash(socket, :error, gettext("Could not resend invitation."))}
+    end
+  end
+
+  defp parse_sort_by(nil), do: :name
+
+  defp parse_sort_by(field) when is_binary(field) do
+    field_atom = String.to_existing_atom(field)
+    if field_atom in @sort_fields, do: field_atom, else: :name
+  rescue
+    ArgumentError -> :name
+  end
+
+  defp parse_sort_order(nil), do: :asc
+
+  defp parse_sort_order(order) when is_binary(order) do
+    order_atom = String.to_existing_atom(order)
+    if order_atom in @sort_orders, do: order_atom, else: :asc
+  rescue
+    ArgumentError -> :asc
+  end
+
+  defp parse_page(nil), do: 1
+
+  defp parse_page(page) when is_binary(page) do
+    case Integer.parse(page) do
+      {n, _} when n > 0 -> n
+      _ -> 1
+    end
+  end
+
+  defp toggle_order(:asc), do: :desc
+  defp toggle_order(:desc), do: :asc
+
+  defp build_path(assigns) do
+    params =
+      %{}
+      |> maybe_put(:search, assigns.search)
+      |> maybe_put(:sort_by, to_string(assigns.sort_by), "name")
+      |> maybe_put(:sort_order, to_string(assigns.sort_order), "asc")
+      |> maybe_put(:status, assigns.status_filter)
+      |> maybe_put(:page, to_string(assigns.page), "1")
+
+    ~p"/admin/employees?#{params}"
+  end
+
+  defp maybe_put(params, _key, nil), do: params
+  defp maybe_put(params, _key, ""), do: params
+  defp maybe_put(params, key, value), do: Map.put(params, key, value)
+
+  defp maybe_put(params, _key, default, default), do: params
+  defp maybe_put(params, key, value, _default), do: Map.put(params, key, value)
+
+  defp sort_indicator(assigns) do
+    ~H"""
+    <span :if={@sort_by == @field} class="ml-1">
+      <.icon
+        :if={@sort_order == :asc}
+        name="hero-chevron-up"
+        class="size-3 inline"
+      />
+      <.icon
+        :if={@sort_order == :desc}
+        name="hero-chevron-down"
+        class="size-3 inline"
+      />
+    </span>
+    """
   end
 
   @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-4xl">
+      <div class="mx-auto max-w-5xl">
         <div class="flex items-center justify-between mb-8">
           <div>
             <h1 class="text-2xl font-bold text-base-content">{gettext("Employees")}</h1>
@@ -54,26 +195,146 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
           </.button>
         </div>
 
-        <div :if={@employees == []} class="text-center py-12">
+        <%!-- Search and filter bar --%>
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+          <form id="search-form" phx-change="search" phx-submit="search" class="flex-1">
+            <.input
+              type="text"
+              name="search"
+              value={@search}
+              placeholder={gettext("Search by name or email...")}
+              phx-debounce="300"
+            />
+          </form>
+          <form id="status-filter-form" phx-change="filter_status" class="w-full sm:w-48">
+            <select
+              name="status"
+              class="select select-bordered w-full bg-base-100 text-base-content border-base-300"
+            >
+              <option value="" selected={@status_filter == ""}>
+                {gettext("All statuses")}
+              </option>
+              <option value="active" selected={@status_filter == "active"}>
+                {gettext("Active")}
+              </option>
+              <option value="invited" selected={@status_filter == "invited"}>
+                {gettext("Invited")}
+              </option>
+            </select>
+          </form>
+        </div>
+
+        <%!-- Empty state --%>
+        <div :if={@employees == [] && @search == "" && @status_filter == ""} class="text-center py-12">
           <.icon name="hero-users" class="size-12 text-base-content/30 mx-auto mb-4" />
           <p class="text-base-content/60">
             {gettext("No employees yet. Invite your first team member!")}
           </p>
         </div>
 
-        <.table :if={@employees != []} id="employees" rows={@employees}>
-          <:col :let={employee} label={gettext("Name")}>{employee.name}</:col>
-          <:col :let={employee} label={gettext("Email")}>{employee.email}</:col>
-          <:col :let={employee} label={gettext("Status")}>
-            <span class={[
-              "badge badge-sm",
-              employee.status == :active && "badge-success",
-              employee.status == :invited && "badge-warning"
-            ]}>
-              {employee.status}
-            </span>
-          </:col>
-        </.table>
+        <%!-- No results state --%>
+        <div
+          :if={@employees == [] && (@search != "" || @status_filter != "")}
+          class="text-center py-12"
+        >
+          <.icon name="hero-magnifying-glass" class="size-12 text-base-content/30 mx-auto mb-4" />
+          <p class="text-base-content/60">
+            {gettext("No employees match your search criteria.")}
+          </p>
+        </div>
+
+        <%!-- Employee table --%>
+        <div :if={@employees != []} class="overflow-x-auto">
+          <table class="table table-zebra" id="employees">
+            <thead>
+              <tr>
+                <th
+                  :for={
+                    {label, field} <- [
+                      {gettext("Name"), :name},
+                      {gettext("Email"), :email},
+                      {gettext("Status"), :status},
+                      {gettext("Role"), :role}
+                    ]
+                  }
+                  phx-click="sort"
+                  phx-value-field={field}
+                  class="cursor-pointer select-none hover:bg-base-200 transition-colors"
+                >
+                  {label}
+                  <.sort_indicator sort_by={@sort_by} sort_order={@sort_order} field={field} />
+                </th>
+                <th>
+                  <span class="sr-only">{gettext("Actions")}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr :for={employee <- @employees} id={"employee-#{employee.id}"}>
+                <td class="font-medium">{employee.name || "—"}</td>
+                <td>{employee.email}</td>
+                <td>
+                  <span class={[
+                    "badge badge-sm",
+                    employee.status == :active && "badge-success",
+                    employee.status == :invited && "badge-warning"
+                  ]}>
+                    {employee.status}
+                  </span>
+                </td>
+                <td class="capitalize">{employee.role}</td>
+                <td>
+                  <button
+                    :if={employee.status == :invited}
+                    phx-click="resend_invitation"
+                    phx-value-id={employee.id}
+                    class="btn btn-ghost btn-xs text-primary"
+                  >
+                    <.icon name="hero-arrow-path" class="size-3.5 mr-1" />
+                    {gettext("Resend")}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <%!-- Pagination --%>
+        <div :if={@total_pages > 1} class="flex items-center justify-between mt-6">
+          <p class="text-sm text-base-content/60">
+            {gettext("Showing page %{page} of %{total} (%{count} employees)",
+              page: @page,
+              total: @total_pages,
+              count: @total_count
+            )}
+          </p>
+          <div class="join">
+            <button
+              :if={@page > 1}
+              phx-click="page"
+              phx-value-page={@page - 1}
+              class="join-item btn btn-sm"
+            >
+              {gettext("Previous")}
+            </button>
+            <button
+              :for={p <- pagination_range(@page, @total_pages)}
+              phx-click="page"
+              phx-value-page={p}
+              class={["join-item btn btn-sm", p == @page && "btn-active"]}
+            >
+              {p}
+            </button>
+            <button
+              :if={@page < @total_pages}
+              phx-click="page"
+              phx-value-page={@page + 1}
+              class="join-item btn btn-sm"
+            >
+              {gettext("Next")}
+            </button>
+          </div>
+        </div>
 
         <.live_component
           :if={@show_invite_modal}
@@ -84,5 +345,11 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
       </div>
     </Layouts.app>
     """
+  end
+
+  defp pagination_range(current_page, total_pages) do
+    start_page = max(1, current_page - 2)
+    end_page = min(total_pages, current_page + 2)
+    Enum.to_list(start_page..end_page)
   end
 end

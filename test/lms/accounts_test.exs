@@ -395,7 +395,7 @@ defmodule Lms.AccountsTest do
     end
   end
 
-  describe "list_employees/1" do
+  describe "list_employees/2" do
     setup do
       company = Lms.CompaniesFixtures.company_fixture()
       admin = user_with_role_fixture(:company_admin, company.id)
@@ -409,17 +409,53 @@ defmodule Lms.AccountsTest do
       other_company = Lms.CompaniesFixtures.company_fixture()
       _other_employee = user_with_role_fixture(:employee, other_company.id)
 
-      employees = Accounts.list_employees(scope)
-      assert length(employees) == 1
+      {employees, total_count} = Accounts.list_employees(scope)
+      assert total_count == 1
       assert hd(employees).id == employee.id
     end
 
     test "includes invited employees", %{scope: scope} do
       {invited, _token} = invited_user_fixture(scope)
 
-      employees = Accounts.list_employees(scope)
+      {employees, _total_count} = Accounts.list_employees(scope)
       employee_ids = Enum.map(employees, & &1.id)
       assert invited.id in employee_ids
+    end
+
+    test "searches by name", %{scope: scope, company: company} do
+      emp1 = user_with_role_fixture(:employee, company.id)
+      _emp2 = user_with_role_fixture(:employee, company.id)
+
+      {employees, _total_count} = Accounts.list_employees(scope, %{search: emp1.email})
+      assert length(employees) == 1
+      assert hd(employees).id == emp1.id
+    end
+
+    test "filters by status", %{scope: scope, company: company} do
+      _active_employee = user_with_role_fixture(:employee, company.id)
+      {invited, _token} = invited_user_fixture(scope)
+
+      {employees, total_count} = Accounts.list_employees(scope, %{status: :invited})
+      assert total_count == 1
+      assert hd(employees).id == invited.id
+    end
+
+    test "sorts by email descending", %{scope: scope, company: company} do
+      _emp1 = user_with_role_fixture(:employee, company.id)
+      _emp2 = user_with_role_fixture(:employee, company.id)
+
+      {employees, _total_count} =
+        Accounts.list_employees(scope, %{sort_by: :email, sort_order: :desc})
+
+      emails = Enum.map(employees, & &1.email)
+      assert emails == Enum.sort(emails, :desc)
+    end
+
+    test "returns total count for pagination", %{scope: scope, company: company} do
+      for _ <- 1..3, do: user_with_role_fixture(:employee, company.id)
+
+      {_employees, total_count} = Accounts.list_employees(scope)
+      assert total_count == 3
     end
   end
 
@@ -562,6 +598,32 @@ defmodule Lms.AccountsTest do
 
     test "returns false for invalid token" do
       refute Accounts.invitation_already_accepted?("invalid-token")
+    end
+  end
+
+  describe "resend_invitation/2" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      {user, _raw_token} = invited_user_fixture(scope)
+      %{user: user}
+    end
+
+    test "resends invitation for invited user", %{user: user} do
+      original_token = user.invitation_token
+      url_fun = fn token -> "http://test.com/invitations/#{token}" end
+
+      assert {:ok, updated_user} = Accounts.resend_invitation(user, url_fun)
+      assert updated_user.invitation_token != original_token
+      assert updated_user.invitation_sent_at != nil
+    end
+
+    test "returns error for non-invited user" do
+      active_user = user_fixture()
+      url_fun = fn token -> "http://test.com/invitations/#{token}" end
+
+      assert {:error, :not_invited} = Accounts.resend_invitation(active_user, url_fun)
     end
   end
 

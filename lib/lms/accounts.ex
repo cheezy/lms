@@ -304,16 +304,59 @@ defmodule Lms.Accounts do
 
   @invitation_validity_in_days 7
 
+  @employees_per_page 20
+
   @doc """
-  Lists all employees for the given scope's company.
+  Lists employees for the given scope's company with search, sort, filter, and pagination.
+
+  ## Options
+
+    * `:search` - Search by name or email (case-insensitive)
+    * `:sort_by` - Sort field: `:name`, `:email`, `:status`, or `:role` (default: `:name`)
+    * `:sort_order` - Sort direction: `:asc` or `:desc` (default: `:asc`)
+    * `:status` - Filter by status: `:active`, `:invited`, etc.
+    * `:page` - Page number (default: `1`)
+
+  Returns `{employees, total_count}`.
   """
-  def list_employees(%Lms.Accounts.Scope{user: admin}) do
-    User
-    |> where([u], u.company_id == ^admin.company_id)
-    |> where([u], u.role == :employee)
-    |> order_by([u], asc: u.name)
-    |> Repo.all()
+  def list_employees(%Lms.Accounts.Scope{user: admin}, opts \\ %{}) do
+    search = opts[:search]
+    sort_by = opts[:sort_by] || :name
+    sort_order = opts[:sort_order] || :asc
+    status = opts[:status]
+    page = max(opts[:page] || 1, 1)
+    offset = (page - 1) * @employees_per_page
+
+    base_query =
+      User
+      |> where([u], u.company_id == ^admin.company_id)
+      |> where([u], u.role == :employee)
+      |> maybe_search(search)
+      |> maybe_filter_status(status)
+
+    total_count = Repo.aggregate(base_query, :count, :id)
+
+    employees =
+      base_query
+      |> order_by([u], [{^sort_order, ^sort_by}])
+      |> limit(^@employees_per_page)
+      |> offset(^offset)
+      |> Repo.all()
+
+    {employees, total_count}
   end
+
+  defp maybe_search(query, nil), do: query
+  defp maybe_search(query, ""), do: query
+
+  defp maybe_search(query, search) do
+    search_term = "%#{search}%"
+    where(query, [u], ilike(u.name, ^search_term) or ilike(u.email, ^search_term))
+  end
+
+  defp maybe_filter_status(query, nil), do: query
+  defp maybe_filter_status(query, ""), do: query
+  defp maybe_filter_status(query, status), do: where(query, [u], u.status == ^status)
 
   @doc """
   Invites an employee to the admin's company.
@@ -408,6 +451,41 @@ defmodule Lms.Accounts do
         false
     end
   end
+
+  @doc """
+  Resends an invitation email for an invited user.
+
+  Generates a new token and updates the invitation_sent_at timestamp,
+  then sends the email. Only works for users with status :invited.
+  """
+  def resend_invitation(%User{status: :invited} = user, invitation_url_fun)
+      when is_function(invitation_url_fun, 1) do
+    raw_token = :crypto.strong_rand_bytes(32)
+    encoded_token = Base.url_encode64(raw_token, padding: false)
+    hashed_token = :crypto.hash(:sha256, raw_token) |> Base.encode16(case: :lower)
+
+    changeset =
+      user
+      |> Ecto.Changeset.change(%{
+        invitation_token: hashed_token,
+        invitation_sent_at: DateTime.utc_now(:second)
+      })
+
+    case Repo.update(changeset) do
+      {:ok, updated_user} ->
+        UserNotifier.deliver_invitation_instructions(
+          updated_user,
+          invitation_url_fun.(encoded_token)
+        )
+
+        {:ok, updated_user}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  def resend_invitation(%User{}, _invitation_url_fun), do: {:error, :not_invited}
 
   @doc """
   Accepts an invitation by setting the user's password and activating the account.

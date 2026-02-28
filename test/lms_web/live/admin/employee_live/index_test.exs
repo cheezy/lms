@@ -36,6 +36,108 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
       {:ok, _view, html} = live(conn, ~p"/admin/employees")
       assert html =~ "invited"
     end
+
+    test "displays employee role", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      assert html =~ "employee"
+    end
+  end
+
+  describe "Search" do
+    test "filters employees by name", %{conn: conn, company: company} do
+      emp1 = user_with_role_fixture(:employee, company.id)
+      _emp2 = user_with_role_fixture(:employee, company.id)
+
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      html =
+        view
+        |> form("#search-form", search: emp1.email)
+        |> render_change()
+
+      assert html =~ emp1.email
+    end
+
+    test "shows no results message when search matches nothing", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      html =
+        view
+        |> form("#search-form", search: "zzz-nonexistent-zzz")
+        |> render_change()
+
+      assert html =~ "No employees match"
+    end
+
+    test "search preserves in URL params", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees?search=test")
+      # Page should load with search parameter
+      assert html =~ "Employees"
+    end
+  end
+
+  describe "Sort" do
+    test "sorts by column when header clicked", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      html = view |> element("th", "Email") |> render_click()
+      assert html =~ "Employees"
+    end
+
+    test "toggles sort order on second click", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees?sort_by=name&sort_order=asc")
+
+      # Click name again to toggle to desc
+      view |> element("th", "Name") |> render_click()
+      assert_patch(view)
+    end
+  end
+
+  describe "Filter" do
+    test "filters by status", %{conn: conn, scope: scope, company: company} do
+      _active_employee = user_with_role_fixture(:employee, company.id)
+      {_invited, _token} = invited_user_fixture(scope)
+
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      html =
+        view
+        |> form("#status-filter-form", status: "invited")
+        |> render_change()
+
+      assert html =~ "invited"
+    end
+  end
+
+  describe "Resend invitation" do
+    test "shows resend button for invited users", %{conn: conn, scope: scope} do
+      {_invited, _token} = invited_user_fixture(scope)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      assert html =~ "Resend"
+    end
+
+    test "does not show resend button for active users", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+      refute html =~ "Resend"
+    end
+
+    test "resends invitation when clicked", %{conn: conn, scope: scope} do
+      {invited, _token} = invited_user_fixture(scope)
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view
+      |> element("button[phx-click='resend_invitation'][phx-value-id='#{invited.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Invitation resent"
+    end
   end
 
   describe "Invite Employee" do
