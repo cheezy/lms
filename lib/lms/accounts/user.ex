@@ -204,15 +204,15 @@ defmodule Lms.Accounts.User do
   @doc """
   A changeset for accepting an invitation.
 
-  Sets the password, clears the invitation token, marks the invitation
-  as accepted, sets status to :active, and confirms the user.
+  Sets the password, marks the invitation as accepted, sets status to :active,
+  and confirms the user. The invitation_token is kept in the DB so that
+  already-accepted invitations can be detected and show appropriate messages.
   """
   def accept_invitation_changeset(user, attrs) do
     now = DateTime.utc_now(:second)
 
     user
     |> password_changeset(attrs)
-    |> put_change(:invitation_token, nil)
     |> put_change(:invitation_accepted_at, now)
     |> put_change(:status, :active)
     |> put_change(:confirmed_at, now)

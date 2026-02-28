@@ -97,6 +97,23 @@ defmodule LmsWeb.UserSessionController do
     end
   end
 
+  def invitation_login(conn, %{"token" => token}) do
+    case Phoenix.Token.verify(conn, "invitation_login", token, max_age: 60) do
+      {:ok, user_id} ->
+        user = Accounts.get_user!(user_id)
+
+        conn
+        |> assign(:current_scope, Lms.Accounts.Scope.for_user(user))
+        |> put_flash(:info, "Account activated successfully!")
+        |> UserAuth.log_in_user(user)
+
+      {:error, _reason} ->
+        conn
+        |> put_flash(:error, "Login link is invalid or has expired.")
+        |> redirect(to: ~p"/users/log-in")
+    end
+  end
+
   def delete(conn, _params) do
     conn
     |> put_flash(:info, "Logged out successfully.")

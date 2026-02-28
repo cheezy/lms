@@ -388,6 +388,28 @@ defmodule Lms.Accounts do
   end
 
   @doc """
+  Checks whether an invitation token has already been accepted.
+
+  Decodes and hashes the token, then looks for a user with that token hash
+  who has status :active (meaning the invitation was already accepted and
+  the token was cleared, or the user was activated).
+  """
+  def invitation_already_accepted?(encoded_token) do
+    case Base.url_decode64(encoded_token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(:sha256, decoded_token) |> Base.encode16(case: :lower)
+
+        User
+        |> where([u], u.invitation_token == ^hashed_token)
+        |> where([u], u.status != :invited)
+        |> Repo.exists?()
+
+      :error ->
+        false
+    end
+  end
+
+  @doc """
   Accepts an invitation by setting the user's password and activating the account.
   """
   def accept_invitation(%User{} = user, attrs) do

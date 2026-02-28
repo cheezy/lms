@@ -530,7 +530,7 @@ defmodule Lms.AccountsTest do
 
       assert accepted_user.status == :active
       assert accepted_user.confirmed_at != nil
-      assert accepted_user.invitation_token == nil
+      assert accepted_user.invitation_token != nil
       assert accepted_user.invitation_accepted_at != nil
       assert accepted_user.hashed_password != nil
       assert User.valid_password?(accepted_user, "valid password 123")
@@ -539,6 +539,29 @@ defmodule Lms.AccountsTest do
     test "returns error for short password", %{user: user} do
       assert {:error, changeset} = Accounts.accept_invitation(user, %{password: "short"})
       assert "should be at least 12 character(s)" in errors_on(changeset).password
+    end
+  end
+
+  describe "invitation_already_accepted?/1" do
+    setup do
+      company = Lms.CompaniesFixtures.company_fixture()
+      admin = user_with_role_fixture(:company_admin, company.id)
+      scope = Lms.Accounts.Scope.for_user(admin)
+      {user, raw_token} = invited_user_fixture(scope)
+      %{user: user, raw_token: raw_token}
+    end
+
+    test "returns false for pending invitation", %{raw_token: raw_token} do
+      refute Accounts.invitation_already_accepted?(raw_token)
+    end
+
+    test "returns true for accepted invitation", %{user: user, raw_token: raw_token} do
+      {:ok, _user} = Accounts.accept_invitation(user, %{password: "valid password 123"})
+      assert Accounts.invitation_already_accepted?(raw_token)
+    end
+
+    test "returns false for invalid token" do
+      refute Accounts.invitation_already_accepted?("invalid-token")
     end
   end
 

@@ -126,6 +126,7 @@ defmodule LmsWeb.Router do
     get "/users/log-in/:token", UserSessionController, :confirm
     post "/users/log-in", UserSessionController, :create
     get "/users/registration-login", UserSessionController, :registration_login
+    get "/users/invitation-login", UserSessionController, :invitation_login
     delete "/users/log-out", UserSessionController, :delete
   end
 end

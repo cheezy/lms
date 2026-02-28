@@ -7,10 +7,17 @@ defmodule LmsWeb.InvitationLive.Accept do
   def mount(%{"token" => token}, _session, socket) do
     case Accounts.get_user_by_invitation_token(token) do
       nil ->
+        message =
+          if Accounts.invitation_already_accepted?(token) do
+            gettext("This invitation has already been accepted. Please log in.")
+          else
+            gettext("Invitation link is invalid or has expired.")
+          end
+
         {:ok,
          socket
-         |> put_flash(:error, gettext("Invitation link is invalid or has expired."))
-         |> redirect(to: ~p"/")}
+         |> put_flash(:error, message)
+         |> redirect(to: ~p"/users/log-in")}
 
       user ->
         changeset = Accounts.change_user_password(user)
@@ -40,11 +47,13 @@ defmodule LmsWeb.InvitationLive.Accept do
   @impl true
   def handle_event("save", %{"user" => params}, socket) do
     case Accounts.accept_invitation(socket.assigns.user, params) do
-      {:ok, _user} ->
+      {:ok, user} ->
+        token = Phoenix.Token.sign(LmsWeb.Endpoint, "invitation_login", user.id)
+
         {:noreply,
          socket
-         |> put_flash(:info, gettext("Account activated! Please log in."))
-         |> redirect(to: ~p"/users/log-in")}
+         |> put_flash(:info, gettext("Account activated successfully!"))
+         |> redirect(to: ~p"/users/invitation-login?token=#{token}")}
 
       {:error, changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
@@ -72,6 +81,15 @@ defmodule LmsWeb.InvitationLive.Accept do
 
         <div class="card bg-base-200 shadow-sm">
           <div class="card-body">
+            <div class="mb-4">
+              <label class="label text-base-content font-medium text-sm">
+                {gettext("Email")}
+              </label>
+              <div class="px-3 py-2 rounded-lg bg-base-300 text-base-content/70 text-sm">
+                {@user.email}
+              </div>
+            </div>
+
             <.form
               for={@form}
               id="accept-invitation-form"
