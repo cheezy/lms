@@ -146,7 +146,8 @@ defmodule Lms.Learning do
   @doc """
   Lists enrollments for a user with course and progress data.
 
-  Returns enrollments with `:progress` virtual field set and course preloaded.
+  Returns enrollments with `:progress` virtual field set, course preloaded,
+  and `:last_activity` set to the most recent lesson completion timestamp.
   """
   def list_user_enrollments(user_id) do
     Enrollment
@@ -154,8 +155,23 @@ defmodule Lms.Learning do
     |> preload([:course, :lesson_progress])
     |> order_by([e], desc: e.enrolled_at)
     |> Repo.all()
-    |> Enum.map(&Map.put(&1, :progress, calculate_progress(&1)))
+    |> Enum.map(fn enrollment ->
+      enrollment
+      |> Map.put(:progress, calculate_progress(enrollment))
+      |> Map.put(:last_activity, last_activity(enrollment))
+      |> Map.put(:total_lessons, count_course_lessons(enrollment.course_id))
+      |> Map.put(:completed_lessons, count_completed_lessons(enrollment.id))
+    end)
   end
+
+  defp last_activity(%Enrollment{lesson_progress: progress}) when is_list(progress) do
+    case progress do
+      [] -> nil
+      records -> records |> Enum.max_by(& &1.completed_at, DateTime) |> Map.get(:completed_at)
+    end
+  end
+
+  defp last_activity(_), do: nil
 
   @doc """
   Gets a single enrollment with lesson progress preloaded.

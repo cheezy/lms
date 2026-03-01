@@ -95,6 +95,26 @@ defmodule Lms.LearningTest do
     end
   end
 
+  describe "list_user_enrollments/1" do
+    test "returns enrollments with progress and lesson counts" do
+      %{course: course, lesson1: lesson1} = create_course_with_lessons()
+      user = user_fixture()
+      enrollment = enrollment_fixture(%{user: user, course: course})
+      {:ok, _} = Learning.complete_lesson(enrollment, lesson1.id)
+
+      [result] = Learning.list_user_enrollments(user.id)
+      assert result.id == enrollment.id
+      assert result.progress == 50.0
+      assert result.total_lessons == 2
+      assert result.completed_lessons == 1
+      assert result.last_activity != nil
+    end
+
+    test "returns empty list when user has no enrollments" do
+      assert [] == Learning.list_user_enrollments(-1)
+    end
+  end
+
   describe "list_enrollments/1" do
     test "returns all enrollments" do
       enrollment = enrollment_fixture()
