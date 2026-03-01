@@ -292,6 +292,15 @@ defmodule Lms.Learning do
   end
 
   @doc """
+  Updates the last viewed lesson for an enrollment.
+  """
+  def update_last_lesson(%Enrollment{} = enrollment, lesson_id) do
+    enrollment
+    |> Ecto.Changeset.change(%{last_lesson_id: lesson_id})
+    |> Repo.update()
+  end
+
+  @doc """
   Deletes an enrollment and all associated lesson progress.
   """
   def delete_enrollment(%Enrollment{} = enrollment) do

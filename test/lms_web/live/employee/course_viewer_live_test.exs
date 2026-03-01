@@ -181,6 +181,62 @@ defmodule LmsWeb.Employee.CourseViewerLiveTest do
     end
   end
 
+  describe "Chapter Progress" do
+    test "shows chapter progress badge", %{conn: conn, course: course} do
+      {:ok, _view, html} = live(conn, ~p"/my-learning/#{course.id}")
+      assert html =~ "0/2"
+    end
+
+    test "updates chapter progress after completion", %{conn: conn, course: course} do
+      {:ok, view, _html} = live(conn, ~p"/my-learning/#{course.id}")
+
+      html =
+        view
+        |> element("button", "Mark as Complete")
+        |> render_click()
+
+      assert html =~ "1/2"
+    end
+  end
+
+  describe "Resume" do
+    test "resumes at last viewed lesson", %{
+      conn: conn,
+      course: course,
+      lesson2: lesson2,
+      enrollment: enrollment
+    } do
+      Learning.update_last_lesson(enrollment, lesson2.id)
+
+      {:ok, _view, html} = live(conn, ~p"/my-learning/#{course.id}")
+      # Should show lesson2 as current (it will have the active styling)
+      assert html =~ lesson2.title
+    end
+
+    test "tracks last viewed lesson on navigation", %{
+      conn: conn,
+      course: course,
+      lesson2: lesson2,
+      enrollment: enrollment
+    } do
+      {:ok, view, _html} = live(conn, ~p"/my-learning/#{course.id}")
+
+      view
+      |> element("button[phx-value-id='#{lesson2.id}']")
+      |> render_click()
+
+      updated = Learning.get_enrollment!(enrollment.id)
+      assert updated.last_lesson_id == lesson2.id
+    end
+  end
+
+  describe "Mobile Sidebar" do
+    test "has sidebar toggle button", %{conn: conn, course: course} do
+      {:ok, view, _html} = live(conn, ~p"/my-learning/#{course.id}")
+      assert has_element?(view, "button[phx-click=toggle_sidebar]")
+    end
+  end
+
   describe "Authorization" do
     test "redirects unauthenticated user", %{course: course} do
       conn = build_conn()

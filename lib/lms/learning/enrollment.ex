@@ -9,6 +9,7 @@ defmodule Lms.Learning.Enrollment do
 
     belongs_to :user, Lms.Accounts.User
     belongs_to :course, Lms.Training.Course
+    belongs_to :last_lesson, Lms.Training.Lesson
 
     has_many :lesson_progress, Lms.Learning.LessonProgress
 
@@ -20,10 +21,11 @@ defmodule Lms.Learning.Enrollment do
   """
   def changeset(enrollment, attrs) do
     enrollment
-    |> cast(attrs, [:due_date, :enrolled_at, :completed_at, :user_id, :course_id])
+    |> cast(attrs, [:due_date, :enrolled_at, :completed_at, :user_id, :course_id, :last_lesson_id])
     |> validate_required([:enrolled_at, :user_id, :course_id])
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:course_id)
+    |> foreign_key_constraint(:last_lesson_id)
     |> unique_constraint([:user_id, :course_id])
   end
 end

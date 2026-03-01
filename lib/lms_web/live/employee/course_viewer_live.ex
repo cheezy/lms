@@ -11,7 +11,11 @@ defmodule LmsWeb.Employee.CourseViewerLive do
     course = Training.get_course_with_contents!(enrollment.course_id)
     completed_ids = Learning.completed_lesson_ids(enrollment)
     progress = Learning.calculate_progress(enrollment)
-    first_lesson = find_first_lesson(course)
+    initial_lesson = resume_lesson(course, enrollment)
+
+    if initial_lesson && enrollment.last_lesson_id != initial_lesson.id do
+      Learning.update_last_lesson(enrollment, initial_lesson.id)
+    end
 
     socket =
       socket
@@ -20,7 +24,8 @@ defmodule LmsWeb.Employee.CourseViewerLive do
       |> assign(:course, course)
       |> assign(:completed_ids, completed_ids)
       |> assign(:progress, progress)
-      |> assign(:current_lesson, first_lesson)
+      |> assign(:current_lesson, initial_lesson)
+      |> assign(:sidebar_open, false)
 
     {:ok, socket}
   end
@@ -29,7 +34,14 @@ defmodule LmsWeb.Employee.CourseViewerLive do
   def handle_event("select_lesson", %{"id" => id}, socket) do
     lesson_id = String.to_integer(id)
     lesson = find_lesson(socket.assigns.course, lesson_id)
-    {:noreply, assign(socket, :current_lesson, lesson)}
+    Learning.update_last_lesson(socket.assigns.enrollment, lesson_id)
+
+    socket =
+      socket
+      |> assign(:current_lesson, lesson)
+      |> assign(:sidebar_open, false)
+
+    {:noreply, socket}
   end
 
   def handle_event("mark_complete", _params, socket) do
@@ -57,15 +69,35 @@ defmodule LmsWeb.Employee.CourseViewerLive do
 
   def handle_event("next_lesson", _params, socket) do
     case next_lesson(socket.assigns.course, socket.assigns.current_lesson) do
-      nil -> {:noreply, socket}
-      lesson -> {:noreply, assign(socket, :current_lesson, lesson)}
+      nil ->
+        {:noreply, socket}
+
+      lesson ->
+        Learning.update_last_lesson(socket.assigns.enrollment, lesson.id)
+        {:noreply, assign(socket, :current_lesson, lesson)}
     end
   end
 
   def handle_event("prev_lesson", _params, socket) do
     case prev_lesson(socket.assigns.course, socket.assigns.current_lesson) do
-      nil -> {:noreply, socket}
-      lesson -> {:noreply, assign(socket, :current_lesson, lesson)}
+      nil ->
+        {:noreply, socket}
+
+      lesson ->
+        Learning.update_last_lesson(socket.assigns.enrollment, lesson.id)
+        {:noreply, assign(socket, :current_lesson, lesson)}
+    end
+  end
+
+  def handle_event("toggle_sidebar", _params, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
+  end
+
+  defp resume_lesson(course, enrollment) do
+    if enrollment.last_lesson_id do
+      find_lesson(course, enrollment.last_lesson_id) || find_first_lesson(course)
+    else
+      find_first_lesson(course)
     end
   end
 
@@ -114,6 +146,17 @@ defmodule LmsWeb.Employee.CourseViewerLive do
     MapSet.member?(completed_ids, lesson_id)
   end
 
+  defp chapter_progress(completed_ids, chapter) do
+    total = length(chapter.lessons)
+
+    if total == 0 do
+      {0, 0}
+    else
+      completed = Enum.count(chapter.lessons, &MapSet.member?(completed_ids, &1.id))
+      {completed, total}
+    end
+  end
+
   defp render_lesson_content(nil), do: ""
 
   defp render_lesson_content(content) when is_map(content) do
@@ -141,13 +184,22 @@ defmodule LmsWeb.Employee.CourseViewerLive do
       <div class="mx-auto max-w-6xl">
         <%!-- Header with back link and progress --%>
         <div class="mb-6">
-          <.link
-            navigate={~p"/my-learning"}
-            class="text-sm text-primary hover:underline mb-2 inline-flex items-center gap-1"
-          >
-            <.icon name="hero-arrow-left" class="size-4" />
-            {gettext("Back to My Learning")}
-          </.link>
+          <div class="flex items-center justify-between">
+            <.link
+              navigate={~p"/my-learning"}
+              class="text-sm text-primary hover:underline inline-flex items-center gap-1"
+            >
+              <.icon name="hero-arrow-left" class="size-4" />
+              {gettext("Back to My Learning")}
+            </.link>
+            <button
+              phx-click="toggle_sidebar"
+              class="lg:hidden btn btn-ghost btn-sm"
+              aria-label={gettext("Toggle navigation")}
+            >
+              <.icon name="hero-bars-3" class="size-5" />
+            </button>
+          </div>
           <h1 class="text-2xl font-bold text-base-content mt-2">{@course.title}</h1>
           <div class="mt-3 flex items-center gap-3">
             <div class="flex-1 max-w-xs">
@@ -168,14 +220,39 @@ defmodule LmsWeb.Employee.CourseViewerLive do
           </div>
         </div>
 
-        <div class="flex gap-6">
+        <div class="flex gap-6 relative">
+          <%!-- Mobile sidebar overlay --%>
+          <div
+            :if={@sidebar_open}
+            class="fixed inset-0 bg-base-200/80 z-40 lg:hidden"
+            phx-click="toggle_sidebar"
+          >
+          </div>
+
           <%!-- Sidebar: chapter/lesson navigation --%>
-          <aside class="w-72 shrink-0 hidden lg:block">
+          <aside class={[
+            "w-72 shrink-0 z-50",
+            "lg:relative lg:block",
+            @sidebar_open && "fixed inset-y-0 left-0 bg-base-100 shadow-xl p-4 overflow-y-auto",
+            !@sidebar_open && "hidden lg:block"
+          ]}>
+            <div class="flex items-center justify-between mb-4 lg:hidden">
+              <span class="font-semibold text-base-content">{gettext("Navigation")}</span>
+              <button phx-click="toggle_sidebar" class="btn btn-ghost btn-sm">
+                <.icon name="hero-x-mark" class="size-5" />
+              </button>
+            </div>
             <nav class="sticky top-4 space-y-4">
               <div :for={chapter <- @course.chapters} class="space-y-1">
-                <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider px-3 py-1">
-                  {chapter.title}
-                </h3>
+                <div class="flex items-center justify-between px-3 py-1">
+                  <h3 class="text-xs font-semibold text-base-content/50 uppercase tracking-wider">
+                    {chapter.title}
+                  </h3>
+                  <.chapter_progress_badge
+                    completed_ids={@completed_ids}
+                    chapter={chapter}
+                  />
+                </div>
                 <button
                   :for={lesson <- chapter.lessons}
                   phx-click="select_lesson"
@@ -265,6 +342,22 @@ defmodule LmsWeb.Employee.CourseViewerLive do
         </div>
       </div>
     </Layouts.app>
+    """
+  end
+
+  defp chapter_progress_badge(assigns) do
+    {completed, total} = chapter_progress(assigns.completed_ids, assigns.chapter)
+    assigns = assign(assigns, :completed, completed)
+    assigns = assign(assigns, :total, total)
+
+    ~H"""
+    <span class={[
+      "text-xs px-1.5 py-0.5 rounded",
+      @completed == @total && @total > 0 && "bg-success/10 text-success",
+      !(@completed == @total && @total > 0) && "bg-base-200 text-base-content/50"
+    ]}>
+      {@completed}/{@total}
+    </span>
     """
   end
 end
