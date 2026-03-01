@@ -89,6 +89,132 @@ defmodule Lms.Companies do
   end
 
   @doc """
+  Returns dashboard stats for a company.
+
+  Returns a map with:
+  - `:total_employees` - Total number of users in the company
+  - `:active_employees` - Users with active status
+  - `:total_courses` - Total courses
+  - `:published_courses` - Published courses
+  - `:draft_courses` - Draft courses
+  - `:total_enrollments` - Total enrollments
+  - `:completed_enrollments` - Enrollments with completed_at set
+  - `:overdue_enrollments` - Enrollments past due date and not completed
+  - `:completion_rate` - Percentage of completed enrollments (float)
+  - `:recent_enrollments` - Last 5 enrollments with user and course preloaded
+  - `:recent_completions` - Last 5 completed enrollments with user and course preloaded
+  """
+  def company_dashboard_stats(company_id) do
+    employee_stats = employee_stats(company_id)
+    course_stats = course_stats(company_id)
+    enrollment_stats = enrollment_stats(company_id)
+    recent_enrollments = recent_enrollments(company_id)
+    recent_completions = recent_completions(company_id)
+
+    Map.merge(employee_stats, course_stats)
+    |> Map.merge(enrollment_stats)
+    |> Map.put(:recent_enrollments, recent_enrollments)
+    |> Map.put(:recent_completions, recent_completions)
+  end
+
+  defp employee_stats(company_id) do
+    total =
+      User
+      |> where([u], u.company_id == ^company_id)
+      |> select([u], count(u.id))
+      |> Repo.one()
+
+    active =
+      User
+      |> where([u], u.company_id == ^company_id and u.status == :active)
+      |> select([u], count(u.id))
+      |> Repo.one()
+
+    %{total_employees: total, active_employees: active}
+  end
+
+  defp course_stats(company_id) do
+    alias Lms.Training.Course
+
+    courses =
+      Course
+      |> where([c], c.company_id == ^company_id)
+      |> group_by([c], c.status)
+      |> select([c], {c.status, count(c.id)})
+      |> Repo.all()
+      |> Map.new()
+
+    total = Enum.reduce(courses, 0, fn {_status, count}, acc -> acc + count end)
+    published = Map.get(courses, :published, 0)
+    draft = Map.get(courses, :draft, 0)
+
+    %{total_courses: total, published_courses: published, draft_courses: draft}
+  end
+
+  defp enrollment_stats(company_id) do
+    alias Lms.Learning.Enrollment
+    alias Lms.Training.Course
+
+    base_query =
+      Enrollment
+      |> join(:inner, [e], c in Course, on: e.course_id == c.id and c.company_id == ^company_id)
+
+    total =
+      base_query
+      |> select([e], count(e.id))
+      |> Repo.one()
+
+    completed =
+      base_query
+      |> where([e], not is_nil(e.completed_at))
+      |> select([e], count(e.id))
+      |> Repo.one()
+
+    overdue =
+      base_query
+      |> where(
+        [e],
+        not is_nil(e.due_date) and is_nil(e.completed_at) and e.due_date < ^Date.utc_today()
+      )
+      |> select([e], count(e.id))
+      |> Repo.one()
+
+    completion_rate = if total > 0, do: completed / total * 100.0, else: 0.0
+
+    %{
+      total_enrollments: total,
+      completed_enrollments: completed,
+      overdue_enrollments: overdue,
+      completion_rate: completion_rate
+    }
+  end
+
+  defp recent_enrollments(company_id) do
+    alias Lms.Learning.Enrollment
+    alias Lms.Training.Course
+
+    Enrollment
+    |> join(:inner, [e], c in Course, on: e.course_id == c.id and c.company_id == ^company_id)
+    |> order_by([e], desc: e.enrolled_at)
+    |> limit(5)
+    |> preload([:user, :course])
+    |> Repo.all()
+  end
+
+  defp recent_completions(company_id) do
+    alias Lms.Learning.Enrollment
+    alias Lms.Training.Course
+
+    Enrollment
+    |> join(:inner, [e], c in Course, on: e.course_id == c.id and c.company_id == ^company_id)
+    |> where([e], not is_nil(e.completed_at))
+    |> order_by([e], desc: e.completed_at)
+    |> limit(5)
+    |> preload([:user, :course])
+    |> Repo.all()
+  end
+
+  @doc """
   Creates a company.
   """
   def create_company(attrs \\ %{}) do

@@ -327,6 +327,87 @@ defmodule Lms.CompaniesTest do
     end
   end
 
+  describe "company_dashboard_stats/1" do
+    test "returns zero stats for new company" do
+      company = company_fixture()
+      stats = Companies.company_dashboard_stats(company.id)
+
+      assert stats.total_employees == 0
+      assert stats.active_employees == 0
+      assert stats.total_courses == 0
+      assert stats.published_courses == 0
+      assert stats.draft_courses == 0
+      assert stats.total_enrollments == 0
+      assert stats.completed_enrollments == 0
+      assert stats.overdue_enrollments == 0
+      assert stats.completion_rate == 0.0
+      assert stats.recent_enrollments == []
+      assert stats.recent_completions == []
+    end
+
+    test "returns correct employee stats" do
+      company = company_fixture()
+      _employee = user_with_role_fixture(:employee, company.id)
+
+      stats = Companies.company_dashboard_stats(company.id)
+      assert stats.total_employees == 1
+      assert stats.active_employees == 1
+    end
+
+    test "returns correct course stats" do
+      company = company_fixture()
+      creator = user_with_role_fixture(:course_creator, company.id)
+      _published = course_fixture(%{company: company, creator: creator, status: :published})
+      _draft = course_fixture(%{company: company, creator: creator, status: :draft})
+
+      stats = Companies.company_dashboard_stats(company.id)
+      assert stats.total_courses == 2
+      assert stats.published_courses == 1
+      assert stats.draft_courses == 1
+    end
+
+    test "returns correct enrollment and completion stats" do
+      company = company_fixture()
+      creator = user_with_role_fixture(:course_creator, company.id)
+      employee = user_with_role_fixture(:employee, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      _enrollment = enrollment_fixture(%{user: employee, course: course})
+
+      stats = Companies.company_dashboard_stats(company.id)
+      assert stats.total_enrollments == 1
+      assert stats.completed_enrollments == 0
+      assert stats.completion_rate == 0.0
+    end
+
+    test "counts overdue enrollments" do
+      company = company_fixture()
+      creator = user_with_role_fixture(:course_creator, company.id)
+      employee = user_with_role_fixture(:employee, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+
+      _enrollment =
+        enrollment_fixture(%{
+          user: employee,
+          course: course,
+          due_date: Date.add(Date.utc_today(), -5)
+        })
+
+      stats = Companies.company_dashboard_stats(company.id)
+      assert stats.overdue_enrollments == 1
+    end
+
+    test "returns recent enrollments" do
+      company = company_fixture()
+      creator = user_with_role_fixture(:course_creator, company.id)
+      employee = user_with_role_fixture(:employee, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      _enrollment = enrollment_fixture(%{user: employee, course: course})
+
+      stats = Companies.company_dashboard_stats(company.id)
+      assert length(stats.recent_enrollments) == 1
+    end
+  end
+
   describe "change_registration/1 edge cases" do
     test "validates company_name max length" do
       long_name = String.duplicate("a", 256)
