@@ -246,6 +246,201 @@ defmodule LmsWeb.Admin.EnrollmentLive.IndexTest do
     end
   end
 
+  describe "Pagination" do
+    setup %{company: company} do
+      creator = user_with_role_fixture(:course_creator, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+
+      for _ <- 1..21 do
+        emp = user_with_role_fixture(:employee, company.id)
+        enrollment_fixture(%{user: emp, course: course})
+      end
+
+      %{course: course}
+    end
+
+    test "shows pagination controls when more than 20 enrollments", %{conn: conn} do
+      {:ok, view, html} = live(conn, ~p"/admin/enrollments")
+
+      assert html =~ "Showing page"
+      assert has_element?(view, "button", "Next")
+    end
+
+    test "navigates to next page", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/enrollments")
+
+      html = render_click(view, "page", %{"page" => "2"})
+
+      assert html =~ "Showing page 2"
+      assert has_element?(view, "button", "Previous")
+    end
+
+    test "navigates back to previous page", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/enrollments?page=2")
+
+      html = render_click(view, "page", %{"page" => "1"})
+
+      assert html =~ "Showing page 1"
+    end
+  end
+
+  describe "handle_info callbacks" do
+    test "closes modal and refreshes on enrollment completion", %{conn: conn, company: company} do
+      creator = user_with_role_fixture(:course_creator, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      employee = user_with_role_fixture(:employee, company.id)
+      enrollment_fixture(%{user: employee, course: course})
+
+      {:ok, view, _html} = live(conn, ~p"/admin/enrollments")
+
+      # Open modal first
+      render_click(view, "open_enroll_modal")
+
+      # Simulate the enrolled message from the component
+      send(
+        view.pid,
+        {LmsWeb.Admin.EnrollmentLive.EnrollFormComponent, {:enrolled, 1}}
+      )
+
+      html = render(view)
+      assert html =~ employee.email
+    end
+
+    test "handles email info message gracefully", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/enrollments")
+
+      send(view.pid, {:email, %{to: "test@example.com"}})
+
+      html = render(view)
+      assert html =~ "Enrollments"
+    end
+  end
+
+  describe "Status display" do
+    test "displays completed status badge", %{conn: conn, company: company} do
+      creator = user_with_role_fixture(:course_creator, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      employee = user_with_role_fixture(:employee, company.id)
+
+      enrollment_fixture(%{
+        user: employee,
+        course: course,
+        completed_at: DateTime.utc_now(:second)
+      })
+
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments")
+
+      assert html =~ "Completed"
+    end
+
+    test "displays overdue status badge", %{conn: conn, company: company} do
+      creator = user_with_role_fixture(:course_creator, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      employee = user_with_role_fixture(:employee, company.id)
+
+      enrollment_fixture(%{
+        user: employee,
+        course: course,
+        due_date: ~D[2020-01-01]
+      })
+
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments")
+
+      assert html =~ "Overdue"
+    end
+
+    test "displays formatted due date", %{conn: conn, company: company} do
+      creator = user_with_role_fixture(:course_creator, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      employee = user_with_role_fixture(:employee, company.id)
+
+      enrollment_fixture(%{
+        user: employee,
+        course: course,
+        due_date: ~D[2026-12-25]
+      })
+
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments")
+
+      assert html =~ "Dec 25, 2026"
+    end
+  end
+
+  describe "URL param parsing edge cases" do
+    test "defaults sort_by when atom exists but not in allowed fields", %{conn: conn} do
+      # "name" is an existing atom but not in @sort_fields (employee, course, due_date)
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?sort_by=name")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "defaults sort_by when atom does not exist", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?sort_by=zzz_no_such_atom_999")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "defaults sort_order when atom does not exist", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?sort_order=zzz_no_order_999")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "handles invalid sort_order gracefully", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?sort_order=invalid")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "handles negative page number gracefully", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?page=-5")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "handles non-numeric page gracefully", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?page=abc")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "handles zero page number gracefully", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?page=0")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "handles empty course_id param", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?course_id=")
+
+      assert html =~ "Enrollments"
+    end
+
+    test "handles invalid course_id param", %{conn: conn} do
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments?course_id=abc")
+
+      assert html =~ "Enrollments"
+    end
+  end
+
+  describe "Sort toggling" do
+    test "toggles from desc back to asc", %{conn: conn, company: company} do
+      creator = user_with_role_fixture(:course_creator, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      employee = user_with_role_fixture(:employee, company.id)
+      enrollment_fixture(%{user: employee, course: course})
+
+      {:ok, view, _html} = live(conn, ~p"/admin/enrollments")
+
+      # Click employee sort (already default asc) -> toggles to desc
+      render_click(view, "sort", %{"field" => "employee"})
+      # Click again -> toggles back to asc
+      html = render_click(view, "sort", %{"field" => "employee"})
+
+      assert html =~ "hero-chevron-up"
+    end
+  end
+
   describe "Authorization" do
     test "redirects unauthenticated user", %{} do
       conn = build_conn()
