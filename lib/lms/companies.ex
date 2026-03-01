@@ -17,11 +17,67 @@ defmodule Lms.Companies do
   end
 
   @doc """
+  Returns companies with aggregated stats (employee count, course count, enrollment count).
+
+  ## Options
+
+    * `:search` - Filter by company name (case-insensitive)
+
+  Returns a list of maps with `:company`, `:employee_count`, `:course_count`, `:enrollment_count`.
+  """
+  def list_companies_with_stats(opts \\ %{}) do
+    Company
+    |> maybe_search_company(opts[:search])
+    |> join(:left, [c], u in User, on: u.company_id == c.id)
+    |> join(:left, [c, _u], course in Lms.Training.Course, on: course.company_id == c.id)
+    |> join(:left, [c, _u, course], e in Lms.Learning.Enrollment, on: e.course_id == course.id)
+    |> group_by([c, _u, _course, _e], c.id)
+    |> select([c, u, course, e], %{
+      company: c,
+      employee_count: count(u.id, :distinct),
+      course_count: count(course.id, :distinct),
+      enrollment_count: count(e.id, :distinct)
+    })
+    |> order_by([c, _u, _course, _e], asc: c.name)
+    |> Repo.all()
+  end
+
+  defp maybe_search_company(query, nil), do: query
+  defp maybe_search_company(query, ""), do: query
+
+  defp maybe_search_company(query, search) do
+    search_term = "%#{search}%"
+    where(query, [c], ilike(c.name, ^search_term))
+  end
+
+  @doc """
   Gets a single company.
 
   Raises `Ecto.NoResultsError` if the Company does not exist.
   """
   def get_company!(id), do: Repo.get!(Company, id)
+
+  @doc """
+  Gets a single company with aggregated stats.
+
+  Returns a map with `:company`, `:employee_count`, `:course_count`, `:enrollment_count`.
+  Raises `Ecto.NoResultsError` if the Company does not exist.
+  """
+  def get_company_with_stats!(id) do
+    Company
+    |> where([c], c.id == ^id)
+    |> join(:left, [c], u in User, on: u.company_id == c.id)
+    |> join(:left, [c, _u], course in Lms.Training.Course, on: course.company_id == c.id)
+    |> join(:left, [c, _u, course], e in Lms.Learning.Enrollment, on: e.course_id == course.id)
+    |> group_by([c, _u, _course, _e], c.id)
+    |> select([c, u, course, e], %{
+      company: c,
+      employee_count: count(u.id, :distinct),
+      course_count: count(course.id, :distinct),
+      enrollment_count: count(e.id, :distinct)
+    })
+    |> Repo.one!()
+  end
 
   @doc """
   Gets a single company by slug.

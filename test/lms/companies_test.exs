@@ -3,6 +3,8 @@ defmodule Lms.CompaniesTest do
 
   import Lms.CompaniesFixtures
   import Lms.AccountsFixtures
+  import Lms.TrainingFixtures
+  import Lms.LearningFixtures
 
   alias Lms.Accounts.User
   alias Lms.Companies
@@ -234,6 +236,94 @@ defmodule Lms.CompaniesTest do
 
       assert {:error, changeset} = Companies.register_company(attrs)
       assert %{company_name: _} = errors_on(changeset)
+    end
+  end
+
+  describe "list_companies_with_stats/1" do
+    test "returns companies with zero counts when no data" do
+      company = company_fixture()
+      [result] = Companies.list_companies_with_stats()
+
+      assert result.company.id == company.id
+      assert result.employee_count == 0
+      assert result.course_count == 0
+      assert result.enrollment_count == 0
+    end
+
+    test "returns correct employee count" do
+      company = company_fixture()
+      _employee1 = user_with_role_fixture(:employee, company.id)
+      _employee2 = user_with_role_fixture(:employee, company.id)
+
+      [result] = Companies.list_companies_with_stats()
+      assert result.employee_count == 2
+    end
+
+    test "returns correct course count" do
+      company = company_fixture()
+      creator = user_with_role_fixture(:course_creator, company.id)
+      _course1 = course_fixture(%{company: company, creator: creator})
+      _course2 = course_fixture(%{company: company, creator: creator})
+
+      [result] = Companies.list_companies_with_stats()
+      # creator counts as employee too
+      assert result.course_count == 2
+    end
+
+    test "returns correct enrollment count" do
+      company = company_fixture()
+      creator = user_with_role_fixture(:course_creator, company.id)
+      employee = user_with_role_fixture(:employee, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      _enrollment = enrollment_fixture(%{user: employee, course: course})
+
+      [result] = Companies.list_companies_with_stats()
+      assert result.enrollment_count == 1
+    end
+
+    test "searches by company name" do
+      _company1 = company_fixture(%{name: "Acme Corp", slug: "acme-corp"})
+      _company2 = company_fixture(%{name: "Beta Inc", slug: "beta-inc"})
+
+      results = Companies.list_companies_with_stats(%{search: "Acme"})
+      assert length(results) == 1
+      assert hd(results).company.name == "Acme Corp"
+    end
+
+    test "returns empty list when search has no matches" do
+      _company = company_fixture()
+      assert Companies.list_companies_with_stats(%{search: "nonexistent"}) == []
+    end
+
+    test "orders by company name" do
+      _company_b = company_fixture(%{name: "Beta Corp", slug: "beta-corp"})
+      _company_a = company_fixture(%{name: "Alpha Corp", slug: "alpha-corp"})
+
+      results = Companies.list_companies_with_stats()
+      names = Enum.map(results, & &1.company.name)
+      assert names == ["Alpha Corp", "Beta Corp"]
+    end
+  end
+
+  describe "get_company_with_stats!/1" do
+    test "returns company with stats" do
+      company = company_fixture()
+      employee = user_with_role_fixture(:employee, company.id)
+      creator = user_with_role_fixture(:course_creator, company.id)
+      course = course_fixture(%{company: company, creator: creator, status: :published})
+      _enrollment = enrollment_fixture(%{user: employee, course: course})
+
+      result = Companies.get_company_with_stats!(company.id)
+      assert result.company.id == company.id
+      assert result.employee_count == 2
+      assert result.course_count == 1
+      assert result.enrollment_count == 1
+    end
+
+    test "raises when company does not exist" do
+      assert_raise Ecto.NoResultsError, fn ->
+        Companies.get_company_with_stats!(0)
+      end
     end
   end
 

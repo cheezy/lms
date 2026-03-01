@@ -83,7 +83,8 @@ defmodule LmsWeb.Router do
         {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:system_admin]}}
       ] do
-      live "/admin/companies", Admin.CompanyListLive
+      live "/admin/companies", Admin.CompanyListLive, :index
+      live "/admin/companies/:id", Admin.CompanyListLive, :show
     end
 
     live_session :company_admin,
