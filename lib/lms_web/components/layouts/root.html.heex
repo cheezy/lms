@@ -32,26 +32,41 @@
   </head>
   <body>
     <%= unless assigns[:hide_root_nav] do %>
-      <ul class="menu menu-horizontal w-full relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end">
-        <%= if @current_scope do %>
-          <li>
-            {@current_scope.user.email}
-          </li>
-          <li>
-            <.link href={~p"/users/settings"}>Settings</.link>
-          </li>
-          <li>
-            <.link href={~p"/users/log-out"} method="delete">Log out</.link>
-          </li>
-        <% else %>
-          <li>
-            <.link href={~p"/users/register"}>Register</.link>
-          </li>
-          <li>
-            <.link href={~p"/users/log-in"}>Log in</.link>
-          </li>
-        <% end %>
-      </ul>
+      <nav class="bg-base-100 border-b border-base-300">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-12 items-center justify-between">
+          <.link href={~p"/"} class="text-lg font-bold text-primary tracking-tight">
+            Uplift
+          </.link>
+          <div class="flex items-center gap-4">
+            <%= if @current_scope do %>
+              <span class="text-sm text-base-content/60">{@current_scope.user.email}</span>
+              <.link
+                href={~p"/users/settings"}
+                class="text-sm text-base-content/70 hover:text-primary transition-colors"
+              >
+                Settings
+              </.link>
+              <.link
+                href={~p"/users/log-out"}
+                method="delete"
+                class="text-sm text-base-content/70 hover:text-primary transition-colors"
+              >
+                Log out
+              </.link>
+            <% else %>
+              <.link
+                href={~p"/users/log-in"}
+                class="text-sm text-base-content/70 hover:text-primary transition-colors"
+              >
+                Log in
+              </.link>
+              <.link href={~p"/users/register"} class="btn btn-primary btn-sm">
+                Register
+              </.link>
+            <% end %>
+          </div>
+        </div>
+      </nav>
     <% end %>
     {@inner_content}
   </body>
