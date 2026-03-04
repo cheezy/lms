@@ -810,4 +810,29 @@ defmodule Lms.AccountsTest do
       {0, 0, []} = Accounts.bulk_invite_employees(scope, [], &"/invitations/#{&1}")
     end
   end
+
+  describe "update_user_locale/2" do
+    test "updates locale to a valid value" do
+      user = user_fixture()
+      assert {:ok, updated_user} = Accounts.update_user_locale(user, %{locale: "fr"})
+      assert updated_user.locale == "fr"
+    end
+
+    test "rejects invalid locale values" do
+      user = user_fixture()
+      assert {:error, changeset} = Accounts.update_user_locale(user, %{locale: "de"})
+      assert %{locale: ["is invalid"]} = errors_on(changeset)
+    end
+
+    test "preserves existing locale when given empty string" do
+      user = user_fixture()
+      assert {:ok, updated_user} = Accounts.update_user_locale(user, %{locale: ""})
+      assert updated_user.locale == "en"
+    end
+
+    test "defaults to en for new users" do
+      user = user_fixture()
+      assert user.locale == "en"
+    end
+  end
 end

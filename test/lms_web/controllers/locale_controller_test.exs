@@ -1,6 +1,31 @@
 defmodule LmsWeb.LocaleControllerTest do
   use LmsWeb.ConnCase, async: true
 
+  import Lms.AccountsFixtures
+
+  alias Lms.Accounts
+
+  describe "POST /locale (authenticated)" do
+    setup %{conn: conn} do
+      user = user_fixture()
+      conn = log_in_user(conn, user)
+      %{conn: conn, user: user}
+    end
+
+    test "persists locale to user record when authenticated", %{conn: conn, user: user} do
+      conn =
+        conn
+        |> put_req_header("referer", "http://localhost/dashboard")
+        |> post(~p"/locale", %{"locale" => "fr"})
+
+      assert redirected_to(conn) == "/dashboard"
+      assert get_session(conn, :locale) == "fr"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.locale == "fr"
+    end
+  end
+
   describe "POST /locale" do
     test "sets session locale to 'fr' and redirects to referer", %{conn: conn} do
       conn =

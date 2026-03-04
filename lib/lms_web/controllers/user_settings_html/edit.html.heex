@@ -10,6 +10,32 @@
     <div class="card bg-base-200 shadow-sm rounded-2xl">
       <div class="card-body">
         <h2 class="text-sm font-semibold uppercase tracking-wider text-base-content/50 mb-2">
+          {gettext("Language")}
+        </h2>
+        <.form
+          for={%{}}
+          as={:user}
+          action={~p"/users/settings"}
+          id="update_locale"
+        >
+          <input type="hidden" name="action" value="update_locale" />
+          <.input
+            name="user[locale]"
+            type="select"
+            label={gettext("Preferred language")}
+            value={@current_scope.user.locale}
+            options={[{"English", "en"}, {"Français", "fr"}]}
+          />
+          <.button class="btn btn-primary w-full" phx-disable-with={gettext("Saving...")}>
+            {gettext("Save Language")}
+          </.button>
+        </.form>
+      </div>
+    </div>
+
+    <div class="card bg-base-200 shadow-sm rounded-2xl">
+      <div class="card-body">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-base-content/50 mb-2">
           {gettext("Email")}
         </h2>
         <.form

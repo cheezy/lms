@@ -118,6 +118,7 @@ defmodule LmsWeb.UserAuth do
     conn
     |> renew_session(user)
     |> put_token_in_session(token)
+    |> put_session(:locale, user.locale || "en")
     |> maybe_write_remember_me_cookie(token, params, remember_me)
   end
 

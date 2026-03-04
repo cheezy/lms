@@ -146,4 +146,44 @@ defmodule LmsWeb.UserSettingsControllerTest do
       assert redirected_to(conn) == ~p"/users/log-in"
     end
   end
+
+  describe "PUT /users/settings (change locale form)" do
+    test "updates the user locale and sets session", %{conn: conn, user: user} do
+      conn =
+        put(conn, ~p"/users/settings", %{
+          "action" => "update_locale",
+          "user" => %{"locale" => "fr"}
+        })
+
+      assert redirected_to(conn) == ~p"/users/settings"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Language preference updated"
+      assert get_session(conn, :locale) == "fr"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.locale == "fr"
+    end
+
+    test "rejects invalid locale values", %{conn: conn, user: user} do
+      conn =
+        put(conn, ~p"/users/settings", %{
+          "action" => "update_locale",
+          "user" => %{"locale" => "de"}
+        })
+
+      assert redirected_to(conn) == ~p"/users/settings"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Could not update"
+
+      updated_user = Accounts.get_user!(user.id)
+      assert updated_user.locale == "en"
+    end
+
+    test "renders locale dropdown on settings page", %{conn: conn} do
+      conn = get(conn, ~p"/users/settings")
+      response = html_response(conn, 200)
+      assert response =~ "Preferred language"
+      assert response =~ "English"
+      assert response =~ "Français"
+      assert response =~ "Save Language"
+    end
+  end
 end

@@ -183,6 +183,24 @@ defmodule Lms.Accounts do
     |> update_user_and_delete_all_tokens()
   end
 
+  @doc """
+  Updates the user's locale preference.
+
+  ## Examples
+
+      iex> update_user_locale(user, %{locale: "fr"})
+      {:ok, %User{}}
+
+      iex> update_user_locale(user, %{locale: "invalid"})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_locale(%User{} = user, attrs) do
+    user
+    |> User.locale_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """

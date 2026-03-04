@@ -158,8 +158,8 @@ msgstr ""
 msgid "Archived — Read Only"
 msgstr ""
 
-#: lib/lms_web/components/layouts.ex:185
-#: lib/lms_web/components/layouts.ex:197
+#: lib/lms_web/components/layouts.ex:187
+#: lib/lms_web/components/layouts.ex:199
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr ""
@@ -503,11 +503,11 @@ msgstr ""
 msgid "Edit Course"
 msgstr ""
 
-#: lib/lms_web/controllers/user_registration_html/new.html.heex:23
+#: lib/lms_web/controllers/user_registration_html/new.html.heex:25
 #: lib/lms_web/controllers/user_session_html/new.html.heex:41
 #: lib/lms_web/controllers/user_session_html/new.html.heex:58
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:13
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:22
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:39
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:51
 #: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:211
 #: lib/lms_web/live/admin/employee_live/index.ex:309
 #: lib/lms_web/live/company_registration_live.ex:96
@@ -688,8 +688,8 @@ msgstr ""
 msgid "Lesson title..."
 msgstr ""
 
-#: lib/lms_web/controllers/user_registration_html/new.html.heex:11
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:38
+#: lib/lms_web/controllers/user_registration_html/new.html.heex:13
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:45
 #: lib/lms_web/live/company_registration_live.ex:129
 #, elixir-autogen, elixir-format
 msgid "Log in"
@@ -883,7 +883,7 @@ msgid "Parsing..."
 msgstr ""
 
 #: lib/lms_web/controllers/user_session_html/new.html.heex:65
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:33
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:65
 #: lib/lms_web/live/company_registration_live.ex:103
 #: lib/lms_web/live/invitation_live/accept.ex:103
 #, elixir-autogen, elixir-format
@@ -985,6 +985,7 @@ msgstr ""
 msgid "Save Course"
 msgstr ""
 
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:29
 #: lib/lms_web/live/courses/course_form_live.ex:204
 #, elixir-autogen, elixir-format
 msgid "Saving..."
@@ -1055,7 +1056,7 @@ msgstr ""
 msgid "Slug"
 msgstr ""
 
-#: lib/lms_web/components/layouts.ex:192
+#: lib/lms_web/components/layouts.ex:194
 #, elixir-autogen, elixir-format
 msgid "Something went wrong!"
 msgstr ""
@@ -1148,7 +1149,7 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-#: lib/lms_web/components/layouts.ex:180
+#: lib/lms_web/components/layouts.ex:182
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr ""
@@ -1213,38 +1214,38 @@ msgstr ""
 msgid "Actually Complete"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:280
+#: lib/lms_web/controllers/page_html/home.html.heex:294
 #, elixir-autogen, elixir-format
 msgid "Add your team via email or SSO integration. They're in instantly — no complicated onboarding."
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:344
+#: lib/lms_web/controllers/page_html/home.html.heex:362
 #, elixir-autogen, elixir-format
 msgid "All rights reserved."
 msgstr ""
 
-#: lib/lms_web/controllers/user_registration_html/new.html.heex:9
+#: lib/lms_web/controllers/user_registration_html/new.html.heex:11
 #, elixir-autogen, elixir-format
 msgid "Already registered?"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:269
+#: lib/lms_web/controllers/page_html/home.html.heex:281
 #, elixir-autogen, elixir-format
 msgid "Build courses with chapters and lessons. Add content, organize your curriculum, and publish when ready."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:24
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:56
 #, elixir-autogen, elixir-format
 msgid "Change Email"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:23
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:56
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:55
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:88
 #, elixir-autogen, elixir-format
 msgid "Changing..."
 msgstr ""
 
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:24
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:27
 #, elixir-autogen, elixir-format
 msgid "Confirm and log in only this time"
 msgstr ""
@@ -1254,23 +1255,23 @@ msgstr ""
 msgid "Confirm and stay logged in"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:52
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:84
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Confirm new password"
 msgstr ""
 
 #: lib/lms_web/controllers/user_session_html/confirm.html.heex:18
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:23
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:24
 #, elixir-autogen, elixir-format
 msgid "Confirming..."
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:267
+#: lib/lms_web/controllers/page_html/home.html.heex:279
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Create"
 msgstr ""
 
-#: lib/lms_web/controllers/user_registration_html/new.html.heex:30
+#: lib/lms_web/controllers/user_registration_html/new.html.heex:35
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Create an account"
 msgstr ""
@@ -1280,17 +1281,17 @@ msgstr ""
 msgid "Create beautiful courses in minutes, not weeks. Uplift makes it easy for small businesses to build engaging training content their employees love."
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:194
+#: lib/lms_web/controllers/page_html/home.html.heex:198
 #, elixir-autogen, elixir-format
 msgid "Create structured courses with chapters and lessons using a simple drag-and-drop editor. No technical skills required."
 msgstr ""
 
-#: lib/lms_web/controllers/user_registration_html/new.html.heex:7
+#: lib/lms_web/controllers/user_registration_html/new.html.heex:8
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Create your account"
 msgstr ""
 
-#: lib/lms_web/controllers/user_registration_html/new.html.heex:29
+#: lib/lms_web/controllers/user_registration_html/new.html.heex:32
 #, elixir-autogen, elixir-format
 msgid "Creating account..."
 msgstr ""
@@ -1300,7 +1301,7 @@ msgstr ""
 msgid "Don't have an account?"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:191
+#: lib/lms_web/controllers/page_html/home.html.heex:195
 #, elixir-autogen, elixir-format
 msgid "Easy Course Builder"
 msgstr ""
@@ -1310,19 +1311,19 @@ msgstr ""
 msgid "Empower Your Team"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:177
+#: lib/lms_web/controllers/page_html/home.html.heex:179
 #, elixir-autogen, elixir-format
 msgid "Everything you need to train your team"
 msgstr ""
 
 #: lib/lms_web/controllers/page_html/home.html.heex:20
 #: lib/lms_web/controllers/page_html/home.html.heex:60
-#: lib/lms_web/controllers/page_html/home.html.heex:328
+#: lib/lms_web/controllers/page_html/home.html.heex:346
 #, elixir-autogen, elixir-format
 msgid "Features"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:230
+#: lib/lms_web/controllers/page_html/home.html.heex:240
 #, elixir-autogen, elixir-format
 msgid "Flexible Deployment"
 msgstr ""
@@ -1333,42 +1334,42 @@ msgstr ""
 msgid "Get Started"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:116
-#: lib/lms_web/controllers/page_html/home.html.heex:312
+#: lib/lms_web/controllers/page_html/home.html.heex:118
+#: lib/lms_web/controllers/page_html/home.html.heex:330
 #, elixir-autogen, elixir-format
 msgid "Get Started Free"
 msgstr ""
 
 #: lib/lms_web/controllers/page_html/home.html.heex:26
 #: lib/lms_web/controllers/page_html/home.html.heex:66
-#: lib/lms_web/controllers/page_html/home.html.heex:334
+#: lib/lms_web/controllers/page_html/home.html.heex:352
 #, elixir-autogen, elixir-format
 msgid "How it Works"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:233
+#: lib/lms_web/controllers/page_html/home.html.heex:243
 #, elixir-autogen, elixir-format
 msgid "Integrate with your company's SSO/LDAP or use simple email-based access. Works with your existing infrastructure."
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:278
+#: lib/lms_web/controllers/page_html/home.html.heex:292
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Invite"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:220
+#: lib/lms_web/controllers/page_html/home.html.heex:228
 #, elixir-autogen, elixir-format
 msgid "Invite employees individually or in bulk via CSV. Manage enrollments and roles from one dashboard."
 msgstr ""
 
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:47
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:54
 #, elixir-autogen, elixir-format
 msgid "Keep me logged in on this device"
 msgstr ""
 
 #: lib/lms_web/controllers/page_html/home.html.heex:32
 #: lib/lms_web/controllers/page_html/home.html.heex:72
-#: lib/lms_web/controllers/page_html/home.html.heex:340
+#: lib/lms_web/controllers/page_html/home.html.heex:358
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Log In"
 msgstr ""
@@ -1388,7 +1389,7 @@ msgstr ""
 msgid "Log in with email"
 msgstr ""
 
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:50
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:60
 #, elixir-autogen, elixir-format
 msgid "Log me in only this time"
 msgstr ""
@@ -1398,9 +1399,9 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:37
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:44
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:49
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:42
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:51
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:57
 #, elixir-autogen, elixir-format
 msgid "Logging in..."
 msgstr ""
@@ -1410,47 +1411,47 @@ msgstr ""
 msgid "Manage your account email address and password settings"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:291
+#: lib/lms_web/controllers/page_html/home.html.heex:307
 #, elixir-autogen, elixir-format
 msgid "Monitor progress, see completions, and keep your team on track with real-time dashboards."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:45
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:77
 #, elixir-autogen, elixir-format
 msgid "New password"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:257
+#: lib/lms_web/controllers/page_html/home.html.heex:269
 #, elixir-autogen, elixir-format
 msgid "No complex setup. No IT department required. Just start building."
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:204
+#: lib/lms_web/controllers/page_html/home.html.heex:210
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Progress Tracking"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:302
+#: lib/lms_web/controllers/page_html/home.html.heex:320
 #, elixir-autogen, elixir-format
 msgid "Ready to Uplift Your Team?"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:57
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:89
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Save Password"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:122
+#: lib/lms_web/controllers/page_html/home.html.heex:124
 #, elixir-autogen, elixir-format
 msgid "See How it Works"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:207
+#: lib/lms_web/controllers/page_html/home.html.heex:213
 #, elixir-autogen, elixir-format
 msgid "See exactly where every employee is in their training. Track completions, identify who needs a nudge."
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:305
+#: lib/lms_web/controllers/page_html/home.html.heex:323
 #, elixir-autogen, elixir-format
 msgid "Set up in minutes. No credit card required."
 msgstr ""
@@ -1465,17 +1466,17 @@ msgstr ""
 msgid "Sign up"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:180
+#: lib/lms_web/controllers/page_html/home.html.heex:182
 #, elixir-autogen, elixir-format
 msgid "Simple, powerful tools designed for small businesses that want to invest in their people."
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:217
+#: lib/lms_web/controllers/page_html/home.html.heex:225
 #, elixir-autogen, elixir-format
 msgid "Team Management"
 msgstr ""
 
-#: lib/lms_web/controllers/user_session_html/confirm.html.heex:56
+#: lib/lms_web/controllers/user_session_html/confirm.html.heex:66
 #, elixir-autogen, elixir-format
 msgid "Tip: If you prefer passwords, you can enable them in the user settings."
 msgstr ""
@@ -1485,12 +1486,12 @@ msgstr ""
 msgid "To see sent emails, visit"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:289
+#: lib/lms_web/controllers/page_html/home.html.heex:305
 #, elixir-autogen, elixir-format
 msgid "Track"
 msgstr ""
 
-#: lib/lms_web/controllers/page_html/home.html.heex:254
+#: lib/lms_web/controllers/page_html/home.html.heex:266
 #, elixir-autogen, elixir-format
 msgid "Up and running in three steps"
 msgstr ""
@@ -1530,7 +1531,7 @@ msgstr ""
 msgid "the mailbox page"
 msgstr ""
 
-#: lib/lms_web/controllers/user_registration_html/new.html.heex:13
+#: lib/lms_web/controllers/user_registration_html/new.html.heex:15
 #, elixir-autogen, elixir-format
 msgid "to your account now."
 msgstr ""
@@ -1538,4 +1539,29 @@ msgstr ""
 #: lib/lms_web/controllers/page_html/home.html.heex:102
 #, elixir-autogen, elixir-format
 msgid "with Training They'll"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:54
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Could not update language preference."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:13
+#, elixir-autogen, elixir-format
+msgid "Language"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:49
+#, elixir-autogen, elixir-format
+msgid "Language preference updated successfully."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:25
+#, elixir-autogen, elixir-format
+msgid "Preferred language"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:30
+#, elixir-autogen, elixir-format
+msgid "Save Language"
 msgstr ""

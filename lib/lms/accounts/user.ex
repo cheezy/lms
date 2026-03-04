@@ -17,6 +17,7 @@ defmodule Lms.Accounts.User do
     field :invitation_token, :string
     field :invitation_sent_at, :utc_datetime
     field :invitation_accepted_at, :utc_datetime
+    field :locale, :string, default: "en"
 
     belongs_to :company, Lms.Companies.Company
 
@@ -147,6 +148,18 @@ defmodule Lms.Accounts.User do
     else
       changeset
     end
+  end
+
+  @allowed_locales ~w(en fr)
+
+  @doc """
+  A changeset for updating the user's locale preference.
+  """
+  def locale_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:locale])
+    |> validate_required([:locale])
+    |> validate_inclusion(:locale, @allowed_locales)
   end
 
   @doc """

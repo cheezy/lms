@@ -27,6 +27,17 @@ defmodule LmsWeb.UserAuthTest do
       assert Accounts.get_user_by_session_token(token)
     end
 
+    test "stores the user locale in the session", %{conn: conn, user: user} do
+      {:ok, user} = Accounts.update_user_locale(user, %{locale: "fr"})
+      conn = UserAuth.log_in_user(conn, user)
+      assert get_session(conn, :locale) == "fr"
+    end
+
+    test "stores default locale when user has no locale set", %{conn: conn, user: user} do
+      conn = UserAuth.log_in_user(conn, user)
+      assert get_session(conn, :locale) == "en"
+    end
+
     test "clears everything previously stored in the session", %{conn: conn, user: user} do
       conn = conn |> put_session(:to_be_removed, "value") |> UserAuth.log_in_user(user)
       refute get_session(conn, :to_be_removed)

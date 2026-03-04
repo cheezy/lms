@@ -38,6 +38,24 @@ defmodule LmsWeb.UserSettingsController do
     end
   end
 
+  def update(conn, %{"action" => "update_locale"} = params) do
+    %{"user" => %{"locale" => locale}} = params
+    user = conn.assigns.current_scope.user
+
+    case Accounts.update_user_locale(user, %{locale: locale}) do
+      {:ok, _user} ->
+        conn
+        |> put_session(:locale, locale)
+        |> put_flash(:info, gettext("Language preference updated successfully."))
+        |> redirect(to: ~p"/users/settings")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, gettext("Could not update language preference."))
+        |> redirect(to: ~p"/users/settings")
+    end
+  end
+
   def update(conn, %{"action" => "update_password"} = params) do
     %{"user" => user_params} = params
     user = conn.assigns.current_scope.user
