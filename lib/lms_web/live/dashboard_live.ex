@@ -106,7 +106,7 @@ defmodule LmsWeb.DashboardLive do
 
         <%!-- Activity Feed --%>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="bg-base-200 rounded-lg p-5">
+          <div class="bg-base-200 rounded-2xl p-5">
             <h3 class="text-base font-semibold text-base-content mb-4 flex items-center gap-2">
               <.icon name="hero-arrow-trending-up" class="size-5 text-primary" />
               {gettext("Recent Enrollments")}
@@ -114,10 +114,10 @@ defmodule LmsWeb.DashboardLive do
             <div :if={@stats.recent_enrollments == []} class="text-sm text-base-content/50 py-4">
               {gettext("No enrollments yet.")}
             </div>
-            <ul :if={@stats.recent_enrollments != []} class="space-y-3">
+            <ul :if={@stats.recent_enrollments != []} class="divide-y divide-base-300">
               <li
                 :for={enrollment <- @stats.recent_enrollments}
-                class="flex items-center justify-between"
+                class="flex items-center justify-between py-3 first:pt-0 last:pb-0"
               >
                 <div class="min-w-0">
                   <p class="text-sm font-medium text-base-content truncate">
@@ -132,7 +132,7 @@ defmodule LmsWeb.DashboardLive do
             </ul>
           </div>
 
-          <div class="bg-base-200 rounded-lg p-5">
+          <div class="bg-base-200 rounded-2xl p-5">
             <h3 class="text-base font-semibold text-base-content mb-4 flex items-center gap-2">
               <.icon name="hero-check-badge" class="size-5 text-success" />
               {gettext("Recent Completions")}
@@ -140,10 +140,10 @@ defmodule LmsWeb.DashboardLive do
             <div :if={@stats.recent_completions == []} class="text-sm text-base-content/50 py-4">
               {gettext("No completions yet.")}
             </div>
-            <ul :if={@stats.recent_completions != []} class="space-y-3">
+            <ul :if={@stats.recent_completions != []} class="divide-y divide-base-300">
               <li
                 :for={enrollment <- @stats.recent_completions}
-                class="flex items-center justify-between"
+                class="flex items-center justify-between py-3 first:pt-0 last:pb-0"
               >
                 <div class="min-w-0">
                   <p class="text-sm font-medium text-base-content truncate">
@@ -187,7 +187,7 @@ defmodule LmsWeb.DashboardLive do
 
   defp stat_card(assigns) do
     ~H"""
-    <div class="bg-base-200 rounded-lg p-4">
+    <div class="bg-base-200 rounded-2xl p-4 hover:-translate-y-0.5 hover:shadow-md transition-all">
       <div class="flex items-center gap-2 mb-2">
         <div class={"p-2 rounded-lg bg-#{@color}/10"}>
           <.icon name={@icon} class={"size-5 text-#{@color}"} />
@@ -204,7 +204,7 @@ defmodule LmsWeb.DashboardLive do
     ~H"""
     <.link
       navigate={@href}
-      class="bg-base-200 rounded-lg p-4 flex items-center gap-3 hover:bg-base-300 transition-colors group"
+      class="bg-base-200 rounded-2xl p-4 flex items-center gap-3 hover:bg-base-300 hover:-translate-y-0.5 hover:shadow-md transition-all group"
     >
       <.icon name={@icon} class="size-6 text-primary/60 group-hover:text-primary transition-colors" />
       <div>
