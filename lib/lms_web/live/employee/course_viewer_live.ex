@@ -260,7 +260,7 @@ defmodule LmsWeb.Employee.CourseViewerLive do
                   class={[
                     "w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors",
                     @current_lesson && @current_lesson.id == lesson.id &&
-                      "bg-primary/10 text-primary font-medium",
+                      "bg-primary/10 text-primary font-medium border-l-2 border-primary",
                     !(@current_lesson && @current_lesson.id == lesson.id) &&
                       "text-base-content/70 hover:bg-base-200"
                   ]}

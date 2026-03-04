@@ -87,7 +87,7 @@ defmodule LmsWeb.Employee.MyLearningLive do
             <h2 class="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
               <.icon name="hero-play-circle" class="size-5 text-info" />
               {gettext("In Progress")}
-              <span class="badge badge-sm badge-ghost">{length(@in_progress)}</span>
+              <span class="badge badge-sm badge-primary">{length(@in_progress)}</span>
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <.course_card
@@ -103,7 +103,7 @@ defmodule LmsWeb.Employee.MyLearningLive do
             <h2 class="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
               <.icon name="hero-clock" class="size-5 text-base-content/50" />
               {gettext("Not Started")}
-              <span class="badge badge-sm badge-ghost">{length(@not_started)}</span>
+              <span class="badge badge-sm badge-primary">{length(@not_started)}</span>
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <.course_card
@@ -119,7 +119,7 @@ defmodule LmsWeb.Employee.MyLearningLive do
             <h2 class="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
               <.icon name="hero-check-circle" class="size-5 text-success" />
               {gettext("Completed")}
-              <span class="badge badge-sm badge-ghost">{length(@completed)}</span>
+              <span class="badge badge-sm badge-primary">{length(@completed)}</span>
             </h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <.course_card
@@ -139,7 +139,7 @@ defmodule LmsWeb.Employee.MyLearningLive do
     ~H"""
     <.link
       navigate={~p"/my-learning/#{@enrollment.course_id}"}
-      class="group block rounded-lg border border-base-300 bg-base-100 overflow-hidden transition-all hover:shadow-md hover:border-primary/30"
+      class="group block rounded-2xl border border-base-300 bg-base-100 overflow-hidden hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30 transition-all"
     >
       <%!-- Cover image --%>
       <div class="aspect-video bg-base-200 relative overflow-hidden">
