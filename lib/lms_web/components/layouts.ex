@@ -35,35 +35,94 @@ defmodule LmsWeb.Layouts do
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
-      <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
-      </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
-          </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
-          </li>
-          <li>
+    <header class="bg-base-100 border-b border-base-300 sticky top-0 z-40">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex h-14 items-center justify-between">
+          <%!-- Left: Uplift wordmark --%>
+          <.link
+            navigate={if @current_scope, do: ~p"/dashboard", else: ~p"/"}
+            class="text-xl font-bold text-primary tracking-tight"
+          >
+            Uplift
+          </.link>
+
+          <%!-- Center: Role-based nav links (desktop) --%>
+          <nav :if={@current_scope} class="hidden md:flex items-center gap-1">
+            <.link
+              :if={@current_scope.user.role == :system_admin}
+              navigate={~p"/admin/companies"}
+              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+            >
+              Companies
+            </.link>
+
+            <.link
+              :if={@current_scope.user.role in [:company_admin, :system_admin]}
+              navigate={~p"/dashboard"}
+              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+            >
+              Dashboard
+            </.link>
+
+            <.link
+              :if={@current_scope.user.role in [:company_admin, :system_admin]}
+              navigate={~p"/admin/employees"}
+              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+            >
+              Employees
+            </.link>
+
+            <.link
+              :if={@current_scope.user.role in [:course_creator, :company_admin, :system_admin]}
+              navigate={~p"/courses"}
+              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+            >
+              Courses
+            </.link>
+
+            <.link
+              :if={@current_scope.user.role in [:company_admin, :system_admin]}
+              navigate={~p"/admin/enrollments"}
+              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+            >
+              Enrollments
+            </.link>
+
+            <.link
+              :if={@current_scope.user.role == :employee}
+              navigate={~p"/my-learning"}
+              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+            >
+              My Learning
+            </.link>
+          </nav>
+
+          <%!-- Right: Theme toggle + user info --%>
+          <div class="flex items-center gap-3">
             <.theme_toggle />
-          </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
-          </li>
-        </ul>
+            <div :if={@current_scope} class="hidden sm:flex items-center gap-3">
+              <span class="text-sm text-base-content/60">{@current_scope.user.email}</span>
+              <.link
+                href={~p"/users/settings"}
+                class="text-sm text-base-content/70 hover:text-primary transition-colors"
+              >
+                Settings
+              </.link>
+              <.link
+                href={~p"/users/log-out"}
+                method="delete"
+                class="text-sm text-base-content/70 hover:text-primary transition-colors"
+              >
+                Log out
+              </.link>
+            </div>
+          </div>
+        </div>
       </div>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
+    <main class="px-4 py-8 sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-7xl space-y-4">
         {render_slot(@inner_block)}
       </div>
     </main>
