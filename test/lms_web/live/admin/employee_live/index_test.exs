@@ -448,10 +448,10 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
       assert has_element?(view, ".badge-success", "active")
     end
 
-    test "shows warning badge for invited employees", %{conn: conn, scope: scope} do
+    test "shows info badge for invited employees", %{conn: conn, scope: scope} do
       {_invited, _token} = invited_user_fixture(scope)
       {:ok, view, _html} = live(conn, ~p"/admin/employees")
-      assert has_element?(view, ".badge-warning", "invited")
+      assert has_element?(view, ".badge-info", "invited")
     end
   end
 

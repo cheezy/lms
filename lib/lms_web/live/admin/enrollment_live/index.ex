@@ -340,7 +340,11 @@ defmodule LmsWeb.Admin.EnrollmentLive.Index do
               </tr>
             </thead>
             <tbody>
-              <tr :for={enrollment <- @enrollments} id={"enrollment-#{enrollment.id}"}>
+              <tr
+                :for={enrollment <- @enrollments}
+                id={"enrollment-#{enrollment.id}"}
+                class="hover:bg-base-200/50 transition-colors"
+              >
                 <td class="font-medium">
                   {enrollment.user.name || enrollment.user.email}
                 </td>

@@ -324,14 +324,18 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
               </tr>
             </thead>
             <tbody>
-              <tr :for={employee <- @employees} id={"employee-#{employee.id}"}>
+              <tr
+                :for={employee <- @employees}
+                id={"employee-#{employee.id}"}
+                class="hover:bg-base-200/50 transition-colors"
+              >
                 <td class="font-medium">{employee.name || "—"}</td>
                 <td>{employee.email}</td>
                 <td>
                   <span class={[
                     "badge badge-sm",
                     employee.status == :active && "badge-success",
-                    employee.status == :invited && "badge-warning"
+                    employee.status == :invited && "badge-info"
                   ]}>
                     {employee.status}
                   </span>
