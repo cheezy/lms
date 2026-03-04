@@ -1,12 +1,28 @@
-# Uplift Landing Page Implementation Plan
+# Uplift UI Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Replace the default Phoenix boilerplate landing page with a marketing-focused landing page for the Uplift LMS product.
+> **Design Reference:** See `docs/plans/2026-03-04-uplift-ui-design.md` for the full UI design system.
 
-**Architecture:** The landing page is a static Phoenix controller page (no LiveView). It uses Tailwind CSS v4 classes directly for styling. A small JS module handles the sticky nav scroll behavior and mobile hamburger toggle. The page has its own layout that bypasses the default `Layouts.app` wrapper.
+**Goal:** Rebrand the entire LMS application to the Uplift design system — landing page, app layout, all authenticated pages, and authentication pages.
 
-**Tech Stack:** Phoenix 1.8 controller, HEEx templates, Tailwind CSS v4, Heroicons via `<.icon>`, vanilla JS for scroll/menu interactions.
+**Architecture:** The landing page is a static Phoenix controller page with a custom layout. All other pages use LiveView with the shared `Layouts.app` wrapper. The Uplift brand is applied through CSS custom properties, updated daisyUI theme tokens, and consistent Tailwind classes across all templates.
+
+**Tech Stack:** Phoenix 1.8 controller + LiveView, HEEx templates, Tailwind CSS v4, daisyUI themes, Heroicons via `<.icon>`, vanilla JS for landing page interactions.
+
+**Page Groups:**
+- Tasks 1-10: Landing page (public marketing)
+- Task 11: DaisyUI theme rebrand (affects all authenticated pages)
+- Task 12: App layout (shared navigation chrome)
+- Task 13: Root layout updates
+- Task 14: Authentication pages (login, register, company register, invitation, settings)
+- Task 15: Dashboard
+- Task 16: Course management (list, form, editor)
+- Task 17: Employee management
+- Task 18: Enrollment management
+- Task 19: System admin (company list)
+- Task 20: Employee learning (my learning, course viewer)
+- Task 21: Final test suite and precommit
 
 ---
 
@@ -800,4 +816,519 @@ assert html_response(conn, 200) =~ "Empower Your Team"
 ```bash
 git add -A
 git commit -m "fix: update tests for new landing page content"
+```
+
+---
+
+## App-Wide Rebrand (Tasks 11-21)
+
+> **Design Reference:** See `docs/plans/2026-03-04-uplift-ui-design.md` — Page Groups 2-9.
+
+---
+
+### Task 11: Rebrand DaisyUI Themes to Uplift Palette
+
+Update the light and dark daisyUI theme tokens in `app.css` to use the Uplift color palette. This single change propagates the brand to every daisyUI component (buttons, badges, inputs, cards) across all authenticated pages.
+
+**Files:**
+- Modify: `assets/css/app.css`
+
+**Step 1: Update the dark theme tokens**
+
+In `assets/css/app.css`, find the `@plugin "../vendor/daisyui-theme"` block with `name: "dark"` and update these color values:
+
+```css
+@plugin "../vendor/daisyui-theme" {
+  name: "dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(22% 0.03 277);
+  --color-base-200: oklch(18% 0.025 277);
+  --color-base-300: oklch(14% 0.02 277);
+  --color-base-content: oklch(95% 0.015 277);
+  --color-primary: oklch(65% 0.25 285);
+  --color-primary-content: oklch(98% 0.01 285);
+  --color-secondary: oklch(55% 0.2 277);
+  --color-secondary-content: oklch(98% 0.01 277);
+  --color-accent: oklch(75% 0.15 195);
+  --color-accent-content: oklch(15% 0.03 195);
+  --color-neutral: oklch(30% 0.03 277);
+  --color-neutral-content: oklch(95% 0.01 277);
+  --color-info: oklch(65% 0.15 240);
+  --color-info-content: oklch(98% 0.01 240);
+  --color-success: oklch(65% 0.17 155);
+  --color-success-content: oklch(98% 0.01 155);
+  --color-warning: oklch(75% 0.15 75);
+  --color-warning-content: oklch(20% 0.02 75);
+  --color-error: oklch(60% 0.22 25);
+  --color-error-content: oklch(98% 0.01 25);
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+```
+
+**Step 2: Update the light theme tokens**
+
+Find the `@plugin "../vendor/daisyui-theme"` block with `name: "light"` and update:
+
+```css
+@plugin "../vendor/daisyui-theme" {
+  name: "light";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(99% 0.005 285);
+  --color-base-200: oklch(96% 0.005 285);
+  --color-base-300: oklch(92% 0.008 285);
+  --color-base-content: oklch(20% 0.02 285);
+  --color-primary: oklch(58% 0.24 285);
+  --color-primary-content: oklch(98% 0.01 285);
+  --color-secondary: oklch(48% 0.18 277);
+  --color-secondary-content: oklch(98% 0.01 277);
+  --color-accent: oklch(70% 0.15 195);
+  --color-accent-content: oklch(15% 0.03 195);
+  --color-neutral: oklch(40% 0.02 285);
+  --color-neutral-content: oklch(98% 0.005 285);
+  --color-info: oklch(60% 0.18 255);
+  --color-info-content: oklch(98% 0.01 255);
+  --color-success: oklch(62% 0.17 155);
+  --color-success-content: oklch(98% 0.01 155);
+  --color-warning: oklch(75% 0.15 75);
+  --color-warning-content: oklch(20% 0.02 75);
+  --color-error: oklch(58% 0.22 25);
+  --color-error-content: oklch(98% 0.01 25);
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.75rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+```
+
+**Step 3: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Visit any authenticated page — buttons, badges, and inputs should now use the violet/indigo/cyan palette.
+
+**Step 4: Commit**
+
+```bash
+git add assets/css/app.css
+git commit -m "feat: rebrand daisyUI themes to Uplift violet/indigo palette"
+```
+
+---
+
+### Task 12: Rebrand the App Layout (Layouts.app)
+
+Replace the generic Phoenix boilerplate navbar in `Layouts.app` with an Uplift-branded navigation bar that shows role-based links.
+
+**Files:**
+- Modify: `lib/lms_web/components/layouts.ex` (the `app` function)
+
+**Step 1: Update the `app` function component**
+
+Replace the existing `app` function's `~H` template in `lib/lms_web/components/layouts.ex`. The new nav should:
+
+- Show the "Uplift" wordmark on the left linking to `/` (or `/dashboard` if authenticated)
+- Show role-based navigation links in the center:
+  - System admin: Companies
+  - Company admin: Dashboard, Employees, Courses, Enrollments
+  - Course creator: Courses
+  - Employee: My Learning
+- Show the theme toggle and user dropdown on the right
+- Use `@current_scope` to determine the user's role and which links to show
+- Style with Uplift brand colors: `bg-base-100` background, `text-primary` for active links
+
+The nav links should use `<.link navigate={~p"/path"}>` for LiveView navigation. Use the existing `<.theme_toggle />` component.
+
+**Step 2: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Log in and verify the nav shows correct links for the user's role. Check that the Uplift wordmark appears.
+
+**Step 3: Commit**
+
+```bash
+git add lib/lms_web/components/layouts.ex
+git commit -m "feat: rebrand Layouts.app with Uplift nav and role-based links"
+```
+
+---
+
+### Task 13: Update Root Layout
+
+Update the root layout to use Uplift branding in the `<head>` and conditionally show the auth nav.
+
+**Files:**
+- Modify: `lib/lms_web/components/layouts/root.html.heex`
+
+**Step 1: Update the root layout**
+
+Changes to make:
+1. Update `<.live_title>` default from "Lms" to "Uplift" and suffix to " · LMS"
+2. Wrap the `<ul class="menu ...">` in `<%= unless assigns[:hide_root_nav] do %>` conditional
+3. Restyle the auth nav bar (Register/Log in links) to match Uplift branding: clean, minimal, with violet accent for primary action
+
+**Step 2: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Visit `/users/log-in` — should see the Uplift-styled auth nav. Visit `/` — root nav should be hidden (landing page has its own).
+
+**Step 3: Commit**
+
+```bash
+git add lib/lms_web/components/layouts/root.html.heex
+git commit -m "feat: rebrand root layout with Uplift title and styled auth nav"
+```
+
+---
+
+### Task 14: Rebrand Authentication Pages
+
+Update all auth page templates to use Uplift branding: centered card layouts, violet accent buttons, Uplift wordmark headers.
+
+**Files:**
+- Modify: `lib/lms_web/controllers/user_session_html/new.html.heex` (login)
+- Modify: `lib/lms_web/controllers/user_registration_html/new.html.heex` (register)
+- Modify: `lib/lms_web/live/company_registration_live.ex` (company register)
+- Modify: `lib/lms_web/live/invitation_live/accept.ex` (invitation accept)
+- Modify: `lib/lms_web/controllers/user_settings_html/edit.html.heex` (settings)
+
+**Step 1: Update login page**
+
+Restyle `new.html.heex` (user session):
+- Add Uplift wordmark text above the form ("Uplift" in text-2xl font-bold text-primary)
+- Add "Welcome back" heading below
+- Style the form card with `rounded-2xl bg-base-100 shadow-lg p-8` wrapper
+- Ensure buttons use `btn-primary` (which is now violet from theme update)
+- Keep both login methods (magic link + password) with divider
+
+**Step 2: Update registration page**
+
+Restyle `new.html.heex` (user registration):
+- Add Uplift wordmark + "Create your account" heading
+- Wrap form in styled card
+- Button uses `btn-primary`
+- Footer link "Already have an account? Log in"
+
+**Step 3: Update company registration**
+
+In `company_registration_live.ex`, update the render function:
+- Replace the generic icon header with "Uplift" wordmark text
+- Keep the card layout but ensure it uses `rounded-2xl` and consistent spacing
+- Ensure buttons use `btn-primary`
+
+**Step 4: Update invitation accept**
+
+In `accept.ex`, update the render function:
+- Replace header with "Welcome to Uplift" text
+- Keep envelope icon but style the card consistently
+- Button uses `btn-primary`
+
+**Step 5: Update settings page**
+
+Restyle `edit.html.heex`:
+- Add "Account Settings" page heading
+- Wrap each form section in a styled card (`rounded-2xl bg-base-100 shadow-sm p-6`)
+- Buttons use `btn-primary`
+
+**Step 6: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Visit each auth page and verify consistent Uplift branding.
+
+**Step 7: Commit**
+
+```bash
+git add lib/lms_web/controllers/user_session_html/new.html.heex lib/lms_web/controllers/user_registration_html/new.html.heex lib/lms_web/live/company_registration_live.ex lib/lms_web/live/invitation_live/accept.ex lib/lms_web/controllers/user_settings_html/edit.html.heex
+git commit -m "feat: rebrand all authentication pages with Uplift design"
+```
+
+---
+
+### Task 15: Rebrand Dashboard
+
+Update the company admin dashboard to use the Uplift design language.
+
+**Files:**
+- Modify: `lib/lms_web/live/dashboard_live.ex`
+
+**Step 1: Update the dashboard render function**
+
+Changes:
+- Stat card icons use `text-primary` (violet) and `text-accent` (cyan) instead of the old Phoenix colors
+- Icon backgrounds use `bg-primary/10` and `bg-accent/10`
+- Cards use `rounded-2xl` with hover lift effect (`hover:-translate-y-0.5 hover:shadow-md transition-all`)
+- Quick action buttons: primary action uses `btn-primary`, others use `btn-ghost` or `btn-outline`
+- Navigation cards use `rounded-2xl` with subtle hover effect
+- Activity feed items use clean divider styling
+- Page heading: "Dashboard" with company context
+
+**Step 2: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Log in as company admin, visit `/dashboard` — verify violet/cyan accent colors on stat cards and consistent card styling.
+
+**Step 3: Commit**
+
+```bash
+git add lib/lms_web/live/dashboard_live.ex
+git commit -m "feat: rebrand dashboard with Uplift design system"
+```
+
+---
+
+### Task 16: Rebrand Course Management Pages
+
+Update course list, form, and editor to use Uplift design.
+
+**Files:**
+- Modify: `lib/lms_web/live/courses/course_list_live.ex`
+- Modify: `lib/lms_web/live/courses/course_form_live.ex`
+- Modify: `lib/lms_web/live/courses/course_editor_live.ex`
+
+**Step 1: Update course list**
+
+In `course_list_live.ex`:
+- "New Course" button uses `btn-primary` (violet)
+- Filter buttons and dropdowns use consistent styling
+- Grid view cards use `rounded-2xl` with hover lift
+- Status badges: Draft (`badge-neutral`), Published (`badge-primary`), Archived (`badge-ghost`)
+- Cover image placeholders use gradient with Uplift colors
+- Empty state icon uses `text-primary`
+
+**Step 2: Update course form**
+
+In `course_form_live.ex`:
+- Form wrapper card uses `rounded-2xl bg-base-100 shadow-sm`
+- Upload zone uses dashed border with `border-primary/30` accent
+- Upload progress bar uses `bg-primary`
+- Save button uses `btn-primary`
+
+**Step 3: Update course editor**
+
+In `course_editor_live.ex`:
+- Sidebar background uses `bg-base-200`
+- Selected lesson highlight uses `bg-primary/10 border-l-2 border-primary`
+- Chapter headers use clean typography
+- Drag handles styled subtly
+- "Add Chapter" and "Add Lesson" buttons use `btn-ghost btn-sm text-primary`
+- Save button uses `btn-primary`
+- Previous/Next buttons use `btn-outline`
+
+**Step 4: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Visit `/courses`, create/edit a course, open the editor — verify consistent styling.
+
+**Step 5: Commit**
+
+```bash
+git add lib/lms_web/live/courses/course_list_live.ex lib/lms_web/live/courses/course_form_live.ex lib/lms_web/live/courses/course_editor_live.ex
+git commit -m "feat: rebrand course management pages with Uplift design"
+```
+
+---
+
+### Task 17: Rebrand Employee Management
+
+Update the employee list page with modals.
+
+**Files:**
+- Modify: `lib/lms_web/live/admin/employee_live/index.ex`
+
+**Step 1: Update employee management**
+
+Changes:
+- "Invite Employee" button uses `btn-primary`, "Bulk Upload" uses `btn-ghost`
+- Search input uses consistent styling
+- Table uses clean `divide-y` with `hover:bg-base-200/50` row highlight
+- Status badges: Active (`badge-success`), Invited (`badge-info`)
+- Action buttons use `btn-ghost btn-xs`
+- Pagination uses `join` button group with `btn-outline`
+- Invite modal card uses `rounded-2xl` with proper heading
+- Bulk upload modal uses styled drag-drop zone with `border-primary/30`
+
+**Step 2: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Visit `/admin/employees` — verify consistent table and button styling.
+
+**Step 3: Commit**
+
+```bash
+git add lib/lms_web/live/admin/employee_live/index.ex
+git commit -m "feat: rebrand employee management with Uplift design"
+```
+
+---
+
+### Task 18: Rebrand Enrollment Management
+
+Update the enrollment list page.
+
+**Files:**
+- Modify: `lib/lms_web/live/admin/enrollment_live/index.ex`
+
+**Step 1: Update enrollment management**
+
+Changes:
+- "Enroll Employees" button uses `btn-primary`
+- Progress bars use `bg-primary` fill on `bg-base-200` track, `rounded-full`
+- Status badges: Not Started (`badge-neutral`), In Progress (`badge-primary`), Completed (`badge-success`), Overdue (`badge-error`)
+- Table styling matches employee management (clean dividers, hover highlight)
+- Pagination matches employee management
+- Enroll modal uses consistent card styling
+
+**Step 2: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Visit `/admin/enrollments` — verify progress bars and badges use Uplift colors.
+
+**Step 3: Commit**
+
+```bash
+git add lib/lms_web/live/admin/enrollment_live/index.ex
+git commit -m "feat: rebrand enrollment management with Uplift design"
+```
+
+---
+
+### Task 19: Rebrand System Admin Pages
+
+Update the company list page.
+
+**Files:**
+- Modify: `lib/lms_web/live/admin/company_list_live.ex`
+
+**Step 1: Update company list**
+
+Changes:
+- Header count badge uses `badge-primary`
+- Table styling matches other admin pages
+- Count badges in columns use `badge-ghost badge-sm`
+- Detail sidebar card uses `rounded-2xl bg-base-100 shadow-lg`
+- Stat cards in detail sidebar use `text-primary` and `text-accent` icon colors
+- Close button and action links use consistent styling
+
+**Step 2: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Log in as system admin, visit `/admin/companies` — verify consistent styling.
+
+**Step 3: Commit**
+
+```bash
+git add lib/lms_web/live/admin/company_list_live.ex
+git commit -m "feat: rebrand system admin pages with Uplift design"
+```
+
+---
+
+### Task 20: Rebrand Employee Learning Pages
+
+Update My Learning and Course Viewer.
+
+**Files:**
+- Modify: `lib/lms_web/live/employee/my_learning_live.ex`
+- Modify: `lib/lms_web/live/employee/course_viewer_live.ex`
+
+**Step 1: Update My Learning**
+
+In `my_learning_live.ex`:
+- Section count badges use `badge-primary`
+- Course cards use `rounded-2xl` with hover lift effect
+- Progress bars use `bg-primary` fill, `rounded-full`
+- Cover image area has subtle hover zoom
+- Completion checkmarks use `text-success`
+- Due date warnings use `text-warning` or `text-error`
+
+**Step 2: Update Course Viewer**
+
+In `course_viewer_live.ex`:
+- Header progress bar uses `bg-primary` fill
+- Sidebar chapter/lesson navigation:
+  - Current lesson: `bg-primary/10` highlight with `border-l-2 border-primary`
+  - Completed lessons: `text-success` checkmark icon
+  - Pending lessons: `text-base-content/30` circle icon
+  - Chapter progress badges use `badge-ghost badge-xs`
+- "Mark as Complete" button uses `btn-primary`
+- "Completed" badge uses `badge-success`
+- Previous/Next buttons use `btn-outline`
+- Mobile sidebar overlay uses `bg-base-300/50 backdrop-blur-sm`
+
+**Step 3: Verify**
+
+Run: `mix compile --warnings-as-errors`
+Expected: Compiles without errors.
+
+Log in as employee, visit `/my-learning` and `/my-learning/:course_id` — verify progress bars, badges, and navigation use Uplift colors.
+
+**Step 4: Commit**
+
+```bash
+git add lib/lms_web/live/employee/my_learning_live.ex lib/lms_web/live/employee/course_viewer_live.ex
+git commit -m "feat: rebrand employee learning pages with Uplift design"
+```
+
+---
+
+### Task 21: Final Test Suite and Precommit
+
+Run all tests and precommit checks to ensure nothing is broken.
+
+**Files:**
+- Possibly modify: any file with test failures
+
+**Step 1: Run the full test suite**
+
+Run: `mix test`
+Expected: All tests pass. If any fail, investigate and fix.
+
+**Step 2: Run precommit checks**
+
+Run: `mix precommit`
+Expected: All checks pass.
+
+**Step 3: Fix any issues found**
+
+Common fixes needed:
+- Test assertions referencing old text content (Phoenix boilerplate)
+- Test assertions referencing old CSS classes
+- Any compilation warnings from template changes
+
+**Step 4: Commit fixes if any**
+
+```bash
+git add -A
+git commit -m "fix: update tests and resolve precommit issues after Uplift rebrand"
 ```

@@ -1,5 +1,7 @@
 # Uplift Landing Page Design
 
+> **Full Design System:** For the complete UI design covering all pages, see `docs/plans/2026-03-04-uplift-ui-design.md`.
+
 ## Product
 
 **Name:** Uplift
