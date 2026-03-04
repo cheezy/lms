@@ -115,6 +115,7 @@ defmodule LmsWeb.Layouts do
                 <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log out
               </.link>
             </div>
+            <.locale_selector />
             <.theme_toggle />
           </div>
         </div>
@@ -199,6 +200,70 @@ defmodule LmsWeb.Layouts do
     </div>
     """
   end
+
+  @doc """
+  Renders a locale selector toggle for switching between EN and FR.
+
+  The active locale is visually highlighted. Uses plain HTML forms so the
+  page fully reloads and all gettext strings re-render in the new locale.
+
+  ## Variants
+
+    * `:default` — theme-aware for use in the app layout header
+    * `:landing` — light text on dark background for the landing page
+
+  ## Examples
+
+      <.locale_selector />
+      <.locale_selector variant={:landing} />
+  """
+  attr :variant, :atom, default: :default, values: [:default, :landing]
+
+  def locale_selector(assigns) do
+    assigns = assign(assigns, :current_locale, Gettext.get_locale())
+
+    ~H"""
+    <div class="flex items-center gap-0.5">
+      <form action={~p"/locale"} method="post">
+        <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+        <input type="hidden" name="locale" value="en" />
+        <button
+          type="submit"
+          class={[
+            "px-2 py-1 text-xs font-bold rounded-md cursor-pointer transition-colors",
+            locale_button_class(@variant, @current_locale == "en")
+          ]}
+        >
+          EN
+        </button>
+      </form>
+      <span class={[
+        "text-xs select-none",
+        if(@variant == :landing, do: "text-white/30", else: "text-base-content/30")
+      ]}>
+        |
+      </span>
+      <form action={~p"/locale"} method="post">
+        <input type="hidden" name="_csrf_token" value={Plug.CSRFProtection.get_csrf_token()} />
+        <input type="hidden" name="locale" value="fr" />
+        <button
+          type="submit"
+          class={[
+            "px-2 py-1 text-xs font-bold rounded-md cursor-pointer transition-colors",
+            locale_button_class(@variant, @current_locale == "fr")
+          ]}
+        >
+          FR
+        </button>
+      </form>
+    </div>
+    """
+  end
+
+  defp locale_button_class(:default, true), do: "text-primary bg-primary/10"
+  defp locale_button_class(:default, false), do: "text-base-content/50 hover:text-primary"
+  defp locale_button_class(:landing, true), do: "text-white bg-white/15"
+  defp locale_button_class(:landing, false), do: "text-white/50 hover:text-white"
 
   @doc """
   Provides dark vs light theme toggle based on themes defined in app.css.

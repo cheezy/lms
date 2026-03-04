@@ -45,7 +45,7 @@ defmodule LmsWeb.Admin.CompanyListLiveTest do
 
       html =
         view
-        |> form("form", %{search: "Test"})
+        |> form("form[phx-change=search]", %{search: "Test"})
         |> render_change()
 
       assert html =~ company.name
@@ -57,7 +57,7 @@ defmodule LmsWeb.Admin.CompanyListLiveTest do
 
       html =
         view
-        |> form("form", %{search: "nonexistent"})
+        |> form("form[phx-change=search]", %{search: "nonexistent"})
         |> render_change()
 
       assert html =~ "No companies match your search"

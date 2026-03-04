@@ -65,7 +65,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       assert has_element?(view, "input[name='chapter[title]']")
 
       view
-      |> form("form", chapter: %{title: "My First Chapter"})
+      |> form("form[phx-submit=save_new_chapter]", chapter: %{title: "My First Chapter"})
       |> render_submit()
 
       html = render(view)
@@ -81,7 +81,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       |> render_click()
 
       view
-      |> form("form", chapter: %{title: "Updated Title"})
+      |> form("form[phx-submit=update_chapter]", chapter: %{title: "Updated Title"})
       |> render_submit()
 
       html = render(view)
@@ -129,7 +129,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       |> render_click()
 
       view
-      |> form("form", lesson: %{title: "Lesson Alpha"})
+      |> form("form[phx-submit=save_new_lesson]", lesson: %{title: "Lesson Alpha"})
       |> render_submit()
 
       html = render(view)
@@ -162,7 +162,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       |> render_click()
 
       view
-      |> form("form", lesson: %{title: "New Lesson"})
+      |> form("form[phx-submit=update_lesson_title]", lesson: %{title: "New Lesson"})
       |> render_submit()
 
       html = render(view)
@@ -448,7 +448,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       html =
         view
-        |> form("form", chapter: %{title: ""})
+        |> form("form[phx-submit=save_new_chapter]", chapter: %{title: ""})
         |> render_submit()
 
       assert html =~ "can&#39;t be blank" or html =~ "can't be blank"
@@ -464,7 +464,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       html =
         view
-        |> form("form", chapter: %{title: ""})
+        |> form("form[phx-submit=update_chapter]", chapter: %{title: ""})
         |> render_submit()
 
       assert html =~ "can&#39;t be blank" or html =~ "can't be blank"
@@ -490,7 +490,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       html =
         view
-        |> form("form", lesson: %{title: ""})
+        |> form("form[phx-submit=save_new_lesson]", lesson: %{title: ""})
         |> render_submit()
 
       assert html =~ "can&#39;t be blank" or html =~ "can't be blank"
@@ -510,7 +510,7 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       html =
         view
-        |> form("form", lesson: %{title: ""})
+        |> form("form[phx-submit=update_lesson_title]", lesson: %{title: ""})
         |> render_submit()
 
       assert html =~ "can&#39;t be blank" or html =~ "can't be blank"
