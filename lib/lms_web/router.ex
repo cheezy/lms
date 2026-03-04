@@ -60,7 +60,8 @@ defmodule LmsWeb.Router do
     get "/users/register", UserRegistrationController, :new
     post "/users/register", UserRegistrationController, :create
 
-    live_session :company_registration do
+    live_session :company_registration,
+      on_mount: [{LmsWeb.Plugs.LocaleHook, :default}] do
       live "/companies/register", CompanyRegistrationLive
     end
   end
@@ -82,6 +83,7 @@ defmodule LmsWeb.Router do
 
     live_session :admin,
       on_mount: [
+        {LmsWeb.Plugs.LocaleHook, :default},
         {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:system_admin]}}
       ] do
@@ -91,6 +93,7 @@ defmodule LmsWeb.Router do
 
     live_session :company_admin,
       on_mount: [
+        {LmsWeb.Plugs.LocaleHook, :default},
         {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks, {:require_role, [:company_admin, :system_admin]}}
       ] do
@@ -101,6 +104,7 @@ defmodule LmsWeb.Router do
 
     live_session :course_creator,
       on_mount: [
+        {LmsWeb.Plugs.LocaleHook, :default},
         {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks,
          {:require_role, [:course_creator, :company_admin, :system_admin]}}
@@ -113,6 +117,7 @@ defmodule LmsWeb.Router do
 
     live_session :employee,
       on_mount: [
+        {LmsWeb.Plugs.LocaleHook, :default},
         {LmsWeb.UserAuth, :ensure_authenticated},
         {LmsWeb.Plugs.AuthorizationHooks,
          {:require_role, [:employee, :course_creator, :company_admin, :system_admin]}}

@@ -4,19 +4,19 @@
       <.link navigate={~p"/"} class="text-2xl font-bold text-primary tracking-tight">
         Uplift
       </.link>
-      <h1 class="mt-4 text-xl font-semibold text-base-content">Welcome back</h1>
+      <h1 class="mt-4 text-xl font-semibold text-base-content">{gettext("Welcome back")}</h1>
       <p class="mt-1 text-sm text-base-content/60">
         <%= if @current_scope do %>
-          You need to reauthenticate to perform sensitive actions on your account.
+          {gettext("You need to reauthenticate to perform sensitive actions on your account.")}
         <% else %>
-          Don't have an account?
+          {gettext("Don't have an account?")}
           <.link
             navigate={~p"/users/register"}
             class="font-semibold text-primary hover:underline"
           >
-            Sign up
+            {gettext("Sign up")}
           </.link>
-          for an account now.
+          {gettext("for an account now.")}
         <% end %>
       </p>
     </div>
@@ -24,9 +24,9 @@
     <div :if={local_mail_adapter?()} class="alert alert-info">
       <.icon name="hero-information-circle" class="size-6 shrink-0" />
       <div>
-        <p>You are running the local mail adapter.</p>
+        <p>{gettext("You are running the local mail adapter.")}</p>
         <p>
-          To see sent emails, visit <.link href="/dev/mailbox" class="underline">the mailbox page</.link>.
+          {gettext("To see sent emails, visit")} <.link href="/dev/mailbox" class="underline">{gettext("the mailbox page")}</.link>.
         </p>
       </div>
     </div>
@@ -38,38 +38,38 @@
             readonly={!!@current_scope}
             field={f[:email]}
             type="email"
-            label="Email"
+            label={gettext("Email")}
             autocomplete="email"
             required
             phx-mounted={JS.focus()}
           />
           <.button class="btn btn-primary w-full">
-            Log in with email <span aria-hidden="true">&rarr;</span>
+            {gettext("Log in with email")} <span aria-hidden="true">&rarr;</span>
           </.button>
         </.form>
 
-        <div class="divider">or</div>
+        <div class="divider">{gettext("or")}</div>
 
         <.form :let={f} for={@form} as={:user} id="login_form_password" action={~p"/users/log-in"}>
           <.input
             readonly={!!@current_scope}
             field={f[:email]}
             type="email"
-            label="Email"
+            label={gettext("Email")}
             autocomplete="email"
             required
           />
           <.input
             field={f[:password]}
             type="password"
-            label="Password"
+            label={gettext("Password")}
             autocomplete="current-password"
           />
           <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-            Log in and stay logged in <span aria-hidden="true">&rarr;</span>
+            {gettext("Log in and stay logged in")} <span aria-hidden="true">&rarr;</span>
           </.button>
           <.button class="btn btn-primary btn-soft w-full mt-2">
-            Log in only this time
+            {gettext("Log in only this time")}
           </.button>
         </.form>
       </div>

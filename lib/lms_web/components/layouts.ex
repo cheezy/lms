@@ -53,7 +53,7 @@ defmodule LmsWeb.Layouts do
               navigate={~p"/admin/companies"}
               class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              <.icon name="hero-building-office-2" class="size-4" /> Companies
+              <.icon name="hero-building-office-2" class="size-4" /> {gettext("Companies")}
             </.link>
 
             <.link
@@ -61,7 +61,7 @@ defmodule LmsWeb.Layouts do
               navigate={~p"/dashboard"}
               class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              <.icon name="hero-squares-2x2" class="size-4" /> Dashboard
+              <.icon name="hero-squares-2x2" class="size-4" /> {gettext("Dashboard")}
             </.link>
 
             <.link
@@ -69,7 +69,7 @@ defmodule LmsWeb.Layouts do
               navigate={~p"/admin/employees"}
               class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              <.icon name="hero-users" class="size-4" /> Employees
+              <.icon name="hero-users" class="size-4" /> {gettext("Employees")}
             </.link>
 
             <.link
@@ -77,7 +77,7 @@ defmodule LmsWeb.Layouts do
               navigate={~p"/courses"}
               class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              <.icon name="hero-academic-cap" class="size-4" /> Courses
+              <.icon name="hero-academic-cap" class="size-4" /> {gettext("Courses")}
             </.link>
 
             <.link
@@ -85,7 +85,7 @@ defmodule LmsWeb.Layouts do
               navigate={~p"/admin/enrollments"}
               class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              <.icon name="hero-clipboard-document-check" class="size-4" /> Enrollments
+              <.icon name="hero-clipboard-document-check" class="size-4" /> {gettext("Enrollments")}
             </.link>
 
             <.link
@@ -93,7 +93,7 @@ defmodule LmsWeb.Layouts do
               navigate={~p"/my-learning"}
               class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              <.icon name="hero-book-open" class="size-4" /> My Learning
+              <.icon name="hero-book-open" class="size-4" /> {gettext("My Learning")}
             </.link>
           </nav>
 
@@ -105,14 +105,16 @@ defmodule LmsWeb.Layouts do
                 href={~p"/users/settings"}
                 class="inline-flex items-center gap-1.5 px-3 py-2 font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
               >
-                <.icon name="hero-cog-6-tooth" class="size-4" /> Settings
+                <.icon name="hero-cog-6-tooth" class="size-4" /> {gettext("Settings")}
               </.link>
               <.link
                 href={~p"/users/log-out"}
                 method="delete"
                 class="inline-flex items-center gap-1.5 px-3 py-2 font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
               >
-                <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log out
+                <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> {gettext(
+                  "Log out"
+                )}
               </.link>
             </div>
             <.locale_selector />
