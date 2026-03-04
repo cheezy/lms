@@ -131,7 +131,8 @@
       "WebFetch(domain:www.stridelikeaboss.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(TASK_IDENTIFIER=\"W26\" TASK_TITLE=\"Build landing page hero, features, how-it-works, and footer sections\" git commit:*)",
-      "Bash(TASK_IDENTIFIER=\"W27\" TASK_TITLE=\"Update root layout and page title for Uplift branding\")"
+      "Bash(TASK_IDENTIFIER=\"W27\" TASK_TITLE=\"Update root layout and page title for Uplift branding\")",
+      "mcp__postgres__query"
     ],
     "deny": [],
     "ask": []

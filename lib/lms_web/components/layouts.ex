@@ -51,71 +51,71 @@ defmodule LmsWeb.Layouts do
             <.link
               :if={@current_scope.user.role == :system_admin}
               navigate={~p"/admin/companies"}
-              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              Companies
+              <.icon name="hero-building-office-2" class="size-4" /> Companies
             </.link>
 
             <.link
               :if={@current_scope.user.role in [:company_admin, :system_admin]}
               navigate={~p"/dashboard"}
-              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              Dashboard
+              <.icon name="hero-squares-2x2" class="size-4" /> Dashboard
             </.link>
 
             <.link
               :if={@current_scope.user.role in [:company_admin, :system_admin]}
               navigate={~p"/admin/employees"}
-              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              Employees
+              <.icon name="hero-users" class="size-4" /> Employees
             </.link>
 
             <.link
               :if={@current_scope.user.role in [:course_creator, :company_admin, :system_admin]}
               navigate={~p"/courses"}
-              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              Courses
+              <.icon name="hero-academic-cap" class="size-4" /> Courses
             </.link>
 
             <.link
               :if={@current_scope.user.role in [:company_admin, :system_admin]}
               navigate={~p"/admin/enrollments"}
-              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              Enrollments
+              <.icon name="hero-clipboard-document-check" class="size-4" /> Enrollments
             </.link>
 
             <.link
               :if={@current_scope.user.role == :employee}
               navigate={~p"/my-learning"}
-              class="px-3 py-2 text-sm font-medium text-base-content/70 hover:text-primary rounded-lg hover:bg-base-200 transition-colors"
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
-              My Learning
+              <.icon name="hero-book-open" class="size-4" /> My Learning
             </.link>
           </nav>
 
-          <%!-- Right: Theme toggle + user info --%>
+          <%!-- Right: User info + theme toggle --%>
           <div class="flex items-center gap-3">
-            <.theme_toggle />
-            <div :if={@current_scope} class="hidden sm:flex items-center gap-3">
-              <span class="text-sm text-base-content/60">{@current_scope.user.email}</span>
+            <div :if={@current_scope} class="hidden sm:flex items-center gap-1 text-sm">
+              <span class="px-2 font-medium text-base-content">{@current_scope.user.email}</span>
               <.link
                 href={~p"/users/settings"}
-                class="text-sm text-base-content/70 hover:text-primary transition-colors"
+                class="inline-flex items-center gap-1.5 px-3 py-2 font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
               >
-                Settings
+                <.icon name="hero-cog-6-tooth" class="size-4" /> Settings
               </.link>
               <.link
                 href={~p"/users/log-out"}
                 method="delete"
-                class="text-sm text-base-content/70 hover:text-primary transition-colors"
+                class="inline-flex items-center gap-1.5 px-3 py-2 font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
               >
-                Log out
+                <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" /> Log out
               </.link>
             </div>
+            <.theme_toggle />
           </div>
         </div>
       </div>

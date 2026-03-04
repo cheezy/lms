@@ -70,6 +70,11 @@ config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Configure Gettext locales
+config :gettext, default_locale: "en"
+
+config :lms, LmsWeb.Gettext, locales: ~w(en fr)
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 

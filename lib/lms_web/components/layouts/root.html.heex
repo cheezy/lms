@@ -31,7 +31,7 @@
     </script>
   </head>
   <body>
-    <%= unless assigns[:hide_root_nav] do %>
+    <%= unless assigns[:hide_root_nav] || assigns[:current_scope] do %>
       <nav class="bg-base-100 border-b border-base-300">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-12 items-center justify-between">
           <.link href={~p"/"} class="text-lg font-bold text-primary tracking-tight">

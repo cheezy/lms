@@ -67,11 +67,16 @@ defmodule LmsWeb.Employee.MyLearningLive do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-5xl">
-        <div class="mb-8">
-          <h1 class="text-2xl font-bold text-base-content">{gettext("My Learning")}</h1>
-          <p class="mt-1 text-sm text-base-content/60">
-            {gettext("Track your course progress and continue learning.")}
-          </p>
+        <div class="mb-8 flex items-center gap-4">
+          <div class="rounded-2xl bg-primary/10 p-3">
+            <.icon name="hero-book-open" class="size-8 text-primary" />
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-base-content">{gettext("My Learning")}</h1>
+            <p class="mt-0.5 text-sm text-base-content/60">
+              {gettext("Pick up where you left off and keep building your skills.")}
+            </p>
+          </div>
         </div>
 
         <div :if={!@has_enrollments} class="text-center py-12">
