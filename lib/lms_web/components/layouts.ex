@@ -86,12 +86,13 @@ defmodule LmsWeb.Layouts do
 
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
-  slot :inner_block, required: true
+  attr :current_scope, :map, default: nil, doc: "the current scope (unused on landing page)"
+  slot :inner_block
 
   def landing(assigns) do
     ~H"""
     <main>
-      {render_slot(@inner_block)}
+      {render_slot(@inner_block) || @inner_content}
     </main>
     <.flash_group flash={@flash} />
     """

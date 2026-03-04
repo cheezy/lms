@@ -29,6 +29,13 @@ import {SortableChapters, SortableLessons} from "./hooks/sortable"
 
 const Hooks = {...colocatedHooks, TipTapEditor, SortableChapters, SortableLessons}
 
+import { initLanding } from "./landing"
+
+// Initialize landing page behavior if on the landing page
+if (document.getElementById("landing-nav")) {
+  initLanding()
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
