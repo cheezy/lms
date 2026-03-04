@@ -434,7 +434,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
         <div class="flex gap-6">
           <%!-- Sidebar --%>
           <div class="w-80 shrink-0">
-            <div class="bg-base-200 rounded-lg p-4">
+            <div class="bg-base-200 rounded-2xl p-4">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-base-content">{gettext("Contents")}</h2>
                 <button
@@ -585,7 +585,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
                           class={[
                             "flex-1 text-left text-sm px-2 py-1 rounded truncate transition-colors",
                             if(@selected_lesson && @selected_lesson.id == lesson.id,
-                              do: "bg-primary/10 text-primary font-medium",
+                              do: "bg-primary/10 text-primary font-medium border-l-2 border-primary",
                               else: "text-base-content/70 hover:bg-base-300"
                             )
                           ]}
@@ -684,7 +684,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
           <%!-- Main content area --%>
           <div class="flex-1 min-w-0">
             <%= if @selected_lesson do %>
-              <div class="bg-base-200 rounded-lg p-6">
+              <div class="bg-base-200 rounded-2xl p-6">
                 <div class="flex items-center justify-between mb-4">
                   <h2 class="text-lg font-semibold text-base-content">{@selected_lesson.title}</h2>
                   <%!-- Move to chapter dropdown --%>
@@ -780,7 +780,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
               </div>
             <% else %>
               <%!-- Empty state --%>
-              <div class="bg-base-200 rounded-lg p-12 text-center">
+              <div class="bg-base-200 rounded-2xl p-12 text-center">
                 <.icon name="hero-document-text" class="size-16 text-base-content/20 mx-auto mb-4" />
                 <p class="text-base-content/50 text-lg">
                   {gettext("Select a lesson to edit its content")}

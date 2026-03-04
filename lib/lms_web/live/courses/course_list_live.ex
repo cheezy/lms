@@ -232,7 +232,7 @@ defmodule LmsWeb.Courses.CourseListLive do
           <div
             :for={course <- @courses}
             id={"course-#{course.id}"}
-            class="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow"
+            class="card bg-base-100 border border-base-300 shadow-sm rounded-2xl hover:-translate-y-0.5 hover:shadow-md transition-all"
           >
             <figure class="h-40 bg-base-200 overflow-hidden">
               <img

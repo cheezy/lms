@@ -124,7 +124,7 @@ defmodule LmsWeb.Courses.CourseFormLive do
           <h1 class="text-2xl font-bold text-base-content mt-2">{@page_title}</h1>
         </div>
 
-        <div class="card bg-base-100 border border-base-300 p-6">
+        <div class="card bg-base-200 rounded-2xl shadow-sm p-6">
           <.form
             for={@form}
             id="course-form"
