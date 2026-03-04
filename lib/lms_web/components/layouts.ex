@@ -73,6 +73,31 @@ defmodule LmsWeb.Layouts do
   end
 
   @doc """
+  Renders a minimal landing page layout without app chrome.
+
+  This layout is used for the public landing page which has its own
+  navigation and full-page sections.
+
+  ## Examples
+
+      <Layouts.landing flash={@flash}>
+        <h1>Welcome</h1>
+      </Layouts.landing>
+
+  """
+  attr :flash, :map, required: true, doc: "the map of flash messages"
+  slot :inner_block, required: true
+
+  def landing(assigns) do
+    ~H"""
+    <main>
+      {render_slot(@inner_block)}
+    </main>
+    <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
   Shows the flash group with standard titles and content.
 
   ## Examples
