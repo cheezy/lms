@@ -60,12 +60,9 @@ defmodule LmsWeb.Admin.CompanyListLive do
               {gettext("Manage all companies on the platform")}
             </p>
           </div>
-          <div class="flex items-center gap-2">
-            <.icon name="hero-building-office-2" class="size-8 text-primary/60" />
-            <span class="text-2xl font-bold text-base-content">
-              {length(@companies)}
-            </span>
-          </div>
+          <span class="badge badge-primary badge-lg text-lg font-bold">
+            {length(@companies)}
+          </span>
         </div>
 
         <div class="mb-6">
@@ -102,13 +99,13 @@ defmodule LmsWeb.Admin.CompanyListLive do
               </.link>
             </:col>
             <:col :let={row} label={gettext("Employees")}>
-              <span class="badge badge-ghost">{row.employee_count}</span>
+              <span class="badge badge-ghost badge-sm">{row.employee_count}</span>
             </:col>
             <:col :let={row} label={gettext("Courses")}>
-              <span class="badge badge-ghost">{row.course_count}</span>
+              <span class="badge badge-ghost badge-sm">{row.course_count}</span>
             </:col>
             <:col :let={row} label={gettext("Enrollments")}>
-              <span class="badge badge-ghost">{row.enrollment_count}</span>
+              <span class="badge badge-ghost badge-sm">{row.enrollment_count}</span>
             </:col>
             <:col :let={row} label={gettext("Created")}>
               <span class="text-sm text-base-content/60">
@@ -135,7 +132,7 @@ defmodule LmsWeb.Admin.CompanyListLive do
   defp company_detail(assigns) do
     ~H"""
     <div class="fixed inset-0 bg-base-200/80 z-40" phx-click="close_detail"></div>
-    <div class="fixed inset-y-0 right-0 w-full max-w-lg bg-base-100 shadow-xl z-50 overflow-y-auto">
+    <div class="fixed inset-y-0 right-0 w-full max-w-lg bg-base-100 shadow-lg rounded-l-2xl z-50 overflow-y-auto">
       <div class="p-6">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-xl font-bold text-base-content">
@@ -197,9 +194,9 @@ defmodule LmsWeb.Admin.CompanyListLive do
 
   defp stat_card(assigns) do
     ~H"""
-    <div class="bg-base-200 rounded-lg p-4">
+    <div class="bg-base-200 rounded-2xl p-4">
       <div class="flex items-center gap-2 mb-1">
-        <.icon name={@icon} class="size-4 text-primary/60" />
+        <.icon name={@icon} class="size-4 text-primary" />
         <span class="text-xs text-base-content/50 uppercase tracking-wider">{@label}</span>
       </div>
       <span class="text-2xl font-bold text-base-content">{@value}</span>
