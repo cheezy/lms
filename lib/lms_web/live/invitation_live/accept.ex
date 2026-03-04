@@ -66,11 +66,11 @@ defmodule LmsWeb.InvitationLive.Accept do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-md">
         <div class="text-center mb-8">
-          <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4">
-            <.icon name="hero-envelope-open" class="size-7 text-primary" />
-          </div>
-          <h1 class="text-2xl font-bold text-base-content">
-            {gettext("Set Your Password")}
+          <.link navigate={~p"/"} class="text-2xl font-bold text-primary tracking-tight">
+            Uplift
+          </.link>
+          <h1 class="mt-4 text-xl font-semibold text-base-content">
+            {gettext("Welcome to Uplift")}
           </h1>
           <p class="mt-2 text-sm text-base-content/60">
             {gettext("Welcome, %{name}! Set a password to activate your account.",
@@ -79,7 +79,7 @@ defmodule LmsWeb.InvitationLive.Accept do
           </p>
         </div>
 
-        <div class="card bg-base-200 shadow-sm">
+        <div class="card bg-base-200 shadow-sm rounded-2xl">
           <div class="card-body">
             <div class="mb-4">
               <label class="label text-base-content font-medium text-sm">
