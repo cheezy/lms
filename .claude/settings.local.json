@@ -129,7 +129,8 @@
       "mcp__Tidewave__get_source_location",
       "Bash(mix deps.unlock:*)",
       "WebFetch(domain:www.stridelikeaboss.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(TASK_IDENTIFIER=\"W26\" TASK_TITLE=\"Build landing page hero, features, how-it-works, and footer sections\" git commit:*)"
     ],
     "deny": [],
     "ask": []
