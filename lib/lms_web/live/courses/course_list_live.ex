@@ -267,6 +267,10 @@ defmodule LmsWeb.Courses.CourseListLive do
                 {gettext("0 enrolled")}
               </div>
               <div class="card-actions mt-3 pt-3 border-t border-base-300">
+                <.link navigate={~p"/courses/#{course.id}/editor"} class="btn btn-ghost btn-xs">
+                  <.icon name="hero-book-open" class="size-3.5" />
+                  {gettext("Content")}
+                </.link>
                 <.link navigate={~p"/courses/#{course.id}/edit"} class="btn btn-ghost btn-xs">
                   <.icon name="hero-pencil" class="size-3.5" />
                   {gettext("Edit")}
@@ -358,6 +362,13 @@ defmodule LmsWeb.Courses.CourseListLive do
                 <td class="text-base-content/60">0</td>
                 <td>
                   <div class="flex gap-1">
+                    <.link
+                      navigate={~p"/courses/#{course.id}/editor"}
+                      class="btn btn-ghost btn-xs"
+                    >
+                      <.icon name="hero-book-open" class="size-3.5" />
+                      {gettext("Content")}
+                    </.link>
                     <.link
                       navigate={~p"/courses/#{course.id}/edit"}
                       class="btn btn-ghost btn-xs"

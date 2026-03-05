@@ -358,6 +358,9 @@ msgstr "Cours mis à jour avec succès."
 #: lib/lms_web/live/dashboard_live.ex:64
 #: lib/lms_web/live/dashboard_live.ex:171
 #, elixir-autogen, elixir-format
+msgid "Content"
+msgstr "Contenu"
+
 msgid "Courses"
 msgstr "Cours"
 
