@@ -37,6 +37,7 @@ defmodule LmsWeb.UserAuth do
 
     conn
     |> create_or_extend_session(user, params)
+    |> delete_session(:user_return_to)
     |> redirect(to: user_return_to || signed_in_path(conn))
   end
 

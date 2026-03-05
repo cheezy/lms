@@ -40,7 +40,7 @@ defmodule LmsWeb.Layouts do
         <div class="flex h-14 items-center justify-between">
           <%!-- Left: Uplift wordmark --%>
           <.link
-            navigate={if @current_scope, do: ~p"/dashboard", else: ~p"/"}
+            href={~p"/"}
             class="text-xl font-bold text-primary tracking-tight"
           >
             Uplift

@@ -73,6 +73,25 @@ defmodule LmsWeb.UserAuthTest do
       assert redirected_to(conn) == "/hello"
     end
 
+    test "consumes user_return_to from session after redirect", %{conn: conn, user: user} do
+      conn = conn |> put_session(:user_return_to, "/hello") |> UserAuth.log_in_user(user)
+      refute get_session(conn, :user_return_to)
+    end
+
+    test "consumes user_return_to even when re-authenticating same user", %{
+      conn: conn,
+      user: user
+    } do
+      conn =
+        conn
+        |> assign(:current_scope, Scope.for_user(user))
+        |> put_session(:user_return_to, "/users/settings")
+        |> UserAuth.log_in_user(user)
+
+      assert redirected_to(conn) == "/users/settings"
+      refute get_session(conn, :user_return_to)
+    end
+
     test "writes a cookie if remember_me is configured", %{conn: conn, user: user} do
       conn = conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
       assert get_session(conn, :user_token) == conn.cookies[@remember_me_cookie]
