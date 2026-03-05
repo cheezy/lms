@@ -20,10 +20,13 @@ defmodule LmsWeb.UserAuthTest do
   end
 
   describe "log_in_user/3" do
-    test "stores the user token in the session", %{conn: conn, user: user} do
+    test "stores the user token in the session and redirects to role-based path", %{
+      conn: conn,
+      user: user
+    } do
       conn = UserAuth.log_in_user(conn, user)
       assert token = get_session(conn, :user_token)
-      assert redirected_to(conn) == ~p"/"
+      assert redirected_to(conn) == ~p"/my-learning"
       assert Accounts.get_user_by_session_token(token)
     end
 
@@ -244,6 +247,20 @@ defmodule LmsWeb.UserAuthTest do
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
                "You must re-authenticate to access this page."
+    end
+
+    test "does not store user_return_to in session when redirecting", %{conn: conn, user: user} do
+      eleven_minutes_ago = DateTime.utc_now(:second) |> DateTime.add(-11, :minute)
+      user = %{user | authenticated_at: eleven_minutes_ago}
+
+      conn =
+        %{conn | path_info: ["users", "settings"], query_string: ""}
+        |> fetch_flash()
+        |> assign(:current_scope, Scope.for_user(user))
+        |> UserAuth.require_sudo_mode([])
+
+      assert conn.halted
+      refute get_session(conn, :user_return_to)
     end
   end
 

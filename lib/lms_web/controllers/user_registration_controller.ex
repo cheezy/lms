@@ -4,6 +4,8 @@ defmodule LmsWeb.UserRegistrationController do
   alias Lms.Accounts
   alias Lms.Accounts.User
 
+  plug :assign_hide_root_nav
+
   def new(conn, _params) do
     changeset = Accounts.change_user_email(%User{})
     render(conn, :new, changeset: changeset)
@@ -28,5 +30,9 @@ defmodule LmsWeb.UserRegistrationController do
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset)
     end
+  end
+
+  defp assign_hide_root_nav(conn, _opts) do
+    assign(conn, :hide_root_nav, true)
   end
 end

@@ -4,6 +4,8 @@ defmodule LmsWeb.UserSessionController do
   alias Lms.Accounts
   alias LmsWeb.UserAuth
 
+  plug :assign_hide_root_nav
+
   def new(conn, _params) do
     email = get_in(conn.assigns, [:current_scope, Access.key(:user), Access.key(:email)])
     form = Phoenix.Component.to_form(%{"email" => email}, as: "user")
@@ -118,5 +120,9 @@ defmodule LmsWeb.UserSessionController do
     conn
     |> put_flash(:info, "Logged out successfully.")
     |> UserAuth.log_out_user()
+  end
+
+  defp assign_hide_root_nav(conn, _opts) do
+    assign(conn, :hide_root_nav, true)
   end
 end

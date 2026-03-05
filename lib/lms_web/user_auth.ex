@@ -38,7 +38,7 @@ defmodule LmsWeb.UserAuth do
     conn
     |> create_or_extend_session(user, params)
     |> delete_session(:user_return_to)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect(to: user_return_to || signed_in_path(Scope.for_user(user)))
   end
 
   @doc """
@@ -218,7 +218,6 @@ defmodule LmsWeb.UserAuth do
     else
       conn
       |> put_flash(:error, "You must re-authenticate to access this page.")
-      |> maybe_store_return_to()
       |> redirect(to: ~p"/users/log-in")
       |> halt()
     end
@@ -239,16 +238,18 @@ defmodule LmsWeb.UserAuth do
 
   @doc """
   Returns the role-appropriate path for the signed-in user.
+
+  Accepts a `%Plug.Conn{}` or a `%Scope{}`.
   """
-  def signed_in_path(conn) do
-    case get_in(conn.assigns, [:current_scope, Access.key(:user), Access.key(:role)]) do
-      :system_admin -> ~p"/admin/companies"
-      :company_admin -> ~p"/dashboard"
-      :course_creator -> ~p"/courses"
-      :employee -> ~p"/my-learning"
-      _ -> ~p"/"
-    end
+  def signed_in_path(%Plug.Conn{} = conn) do
+    signed_in_path(conn.assigns[:current_scope])
   end
+
+  def signed_in_path(%Scope{user: %{role: :system_admin}}), do: ~p"/admin/companies"
+  def signed_in_path(%Scope{user: %{role: :company_admin}}), do: ~p"/dashboard"
+  def signed_in_path(%Scope{user: %{role: :course_creator}}), do: ~p"/courses"
+  def signed_in_path(%Scope{user: %{role: :employee}}), do: ~p"/my-learning"
+  def signed_in_path(_), do: ~p"/"
 
   @doc """
   Plug for routes that require the user to be authenticated.
