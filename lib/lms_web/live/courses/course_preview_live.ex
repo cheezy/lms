@@ -8,7 +8,7 @@ defmodule LmsWeb.Courses.CoursePreviewLive do
     course = Training.get_course_with_contents!(id)
     user = socket.assigns.current_scope.user
 
-    if course.company_id != user.company_id do
+    if user.role != :system_admin && course.company_id != user.company_id do
       {:ok,
        socket
        |> put_flash(:error, gettext("You don't have access to this course."))
