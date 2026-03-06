@@ -135,7 +135,8 @@
       "mcp__postgres__query",
       "mcp__Tidewave__get_ecto_schemas",
       "mcp__Tidewave__get_logs",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "mcp__filesystem__search_files"
     ],
     "deny": [],
     "ask": []
