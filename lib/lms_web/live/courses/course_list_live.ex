@@ -275,6 +275,10 @@ defmodule LmsWeb.Courses.CourseListLive do
                   <.icon name="hero-pencil" class="size-3.5" />
                   {gettext("Edit")}
                 </.link>
+                <.link navigate={~p"/courses/#{course.id}/preview"} class="btn btn-ghost btn-xs">
+                  <.icon name="hero-eye" class="size-3.5" />
+                  {gettext("Preview")}
+                </.link>
                 <button
                   :if={course.status == :draft}
                   phx-click="publish"
@@ -375,6 +379,13 @@ defmodule LmsWeb.Courses.CourseListLive do
                     >
                       <.icon name="hero-pencil" class="size-3.5" />
                       {gettext("Edit")}
+                    </.link>
+                    <.link
+                      navigate={~p"/courses/#{course.id}/preview"}
+                      class="btn btn-ghost btn-xs"
+                    >
+                      <.icon name="hero-eye" class="size-3.5" />
+                      {gettext("Preview")}
                     </.link>
                     <button
                       :if={course.status == :draft}
