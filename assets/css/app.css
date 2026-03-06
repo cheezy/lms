@@ -91,6 +91,9 @@
   --noise: 0;
 }
 
+/* Tailwind Typography plugin for prose styling (lists, blockquotes, etc.) */
+@plugin "@tailwindcss/typography";
+
 /* Add variants based on LiveView classes */
 @custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
 @custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);

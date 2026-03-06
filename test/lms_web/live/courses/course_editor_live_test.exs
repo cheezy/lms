@@ -1242,6 +1242,14 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
   describe "Image upload" do
     setup %{course: course} do
+      existing_files = Path.wildcard("priv/static/uploads/*") |> MapSet.new()
+
+      on_exit(fn ->
+        Path.wildcard("priv/static/uploads/*")
+        |> Enum.reject(&MapSet.member?(existing_files, &1))
+        |> Enum.each(&File.rm/1)
+      end)
+
       chapter = chapter_fixture(%{course: course})
       lesson = lesson_fixture(%{chapter: chapter, title: "Upload Lesson"})
       %{chapter: chapter, lesson: lesson}
@@ -1292,10 +1300,6 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       # Verify the image was created in the database
       assert [_ | _] = Training.list_lesson_images(lesson.id)
-    after
-      # Clean up uploaded files
-      Path.wildcard("priv/static/uploads/*")
-      |> Enum.each(&File.rm/1)
     end
   end
 
