@@ -15,6 +15,7 @@ alias Lms.Accounts
 alias Lms.Accounts.User
 alias Lms.Companies.Company
 alias Lms.Training.Course
+alias Lms.Learning.Enrollment
 
 now = DateTime.utc_now(:second)
 
@@ -112,20 +113,39 @@ end
 
 # ── 5. Course ────────────────────────────────────────────────────────
 
-case Repo.get_by(Course, title: "Using Claude Code Remote Control") do
+course =
+  case Repo.get_by(Course, title: "Using Claude Code Remote Control") do
+    nil ->
+      {:ok, course} =
+        Lms.Training.create_course(%{
+          title: "Using Claude Code Remote Control",
+          description:
+            "This course will demonstrate how you can use the new Remote Control feature of Claude Code.",
+          status: :draft,
+          company_id: company.id,
+          creator_id: cheezy.id
+        })
+
+      IO.puts("Created course: Using Claude Code Remote Control")
+      course
+
+    course ->
+      IO.puts("Course already exists: Using Claude Code Remote Control")
+      course
+  end
+
+# ── 6. Enroll cheezy in the course ────────────────────────────────
+
+case Repo.get_by(Enrollment, user_id: cheezy.id, course_id: course.id) do
   nil ->
-    {:ok, _course} =
-      Lms.Training.create_course(%{
-        title: "Using Claude Code Remote Control",
-        description:
-          "This course will demonstrate how you can use the new Remote Control feature of Claude Code.",
-        status: :draft,
-        company_id: company.id,
-        creator_id: cheezy.id
+    {:ok, _enrollment} =
+      Lms.Learning.enroll_employee(%{
+        user_id: cheezy.id,
+        course_id: course.id
       })
 
-    IO.puts("Created course: Using Claude Code Remote Control")
+    IO.puts("Enrolled cheezy@letstango.ca in: Using Claude Code Remote Control")
 
-  _course ->
-    IO.puts("Course already exists: Using Claude Code Remote Control")
+  _enrollment ->
+    IO.puts("Enrollment already exists for cheezy@letstango.ca")
 end

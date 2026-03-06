@@ -89,7 +89,14 @@ defmodule LmsWeb.Layouts do
             </.link>
 
             <.link
-              :if={@current_scope.user.role == :employee}
+              :if={
+                @current_scope.user.role in [
+                  :employee,
+                  :course_creator,
+                  :company_admin,
+                  :system_admin
+                ]
+              }
               navigate={~p"/my-learning"}
               class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
             >
