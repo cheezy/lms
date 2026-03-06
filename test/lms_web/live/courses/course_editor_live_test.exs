@@ -275,6 +275,369 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       assert html =~ "Lesson saved"
     end
+
+    test "renders TipTap editor with toolbar when lesson is selected", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert has_element?(view, "[phx-hook='TipTapEditor']")
+      assert has_element?(view, "[data-toolbar]")
+      assert has_element?(view, "[data-editor]")
+      assert html =~ "phx-update=\"ignore\""
+    end
+
+    test "editor element includes lesson content as data attribute", %{
+      conn: conn,
+      course: course,
+      chapter: chapter
+    } do
+      content = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "paragraph",
+            "content" => [%{"type" => "text", "text" => "Existing content"}]
+          }
+        ]
+      }
+
+      lesson = lesson_fixture(%{chapter: chapter, title: "With Content", content: content})
+
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "data-content="
+      assert html =~ "Existing content"
+    end
+
+    test "editor element gets unique id per lesson", %{
+      conn: conn,
+      course: course,
+      chapter: chapter
+    } do
+      lesson1 = lesson_fixture(%{chapter: chapter, title: "Lesson One"})
+      lesson2 = lesson_fixture(%{chapter: chapter, title: "Lesson Two"})
+
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson1.id}']")
+      |> render_click()
+
+      assert has_element?(view, "#editor-#{lesson1.id}")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson2.id}']")
+      |> render_click()
+
+      assert has_element?(view, "#editor-#{lesson2.id}")
+      refute has_element?(view, "#editor-#{lesson1.id}")
+    end
+
+    test "editor_updated stores content for later save", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      content = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "heading",
+            "attrs" => %{"level" => 1},
+            "content" => [%{"type" => "text", "text" => "My Heading"}]
+          }
+        ]
+      }
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => Jason.encode!(content)})
+
+      # Save and verify the content was persisted
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      saved_lesson = Training.get_lesson!(lesson.id)
+      assert saved_lesson.content["content"] |> hd() |> Map.get("type") == "heading"
+    end
+
+    test "saves content with multiple content types", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      content = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "heading",
+            "attrs" => %{"level" => 1},
+            "content" => [%{"type" => "text", "text" => "Title"}]
+          },
+          %{
+            "type" => "paragraph",
+            "content" => [
+              %{"type" => "text", "text" => "Some "},
+              %{"type" => "text", "marks" => [%{"type" => "bold"}], "text" => "bold"},
+              %{"type" => "text", "text" => " text"}
+            ]
+          },
+          %{
+            "type" => "bulletList",
+            "content" => [
+              %{
+                "type" => "listItem",
+                "content" => [
+                  %{
+                    "type" => "paragraph",
+                    "content" => [%{"type" => "text", "text" => "Item 1"}]
+                  }
+                ]
+              }
+            ]
+          },
+          %{"type" => "horizontalRule"},
+          %{
+            "type" => "blockquote",
+            "content" => [
+              %{
+                "type" => "paragraph",
+                "content" => [%{"type" => "text", "text" => "A quote"}]
+              }
+            ]
+          }
+        ]
+      }
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => Jason.encode!(content)})
+
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      saved = Training.get_lesson!(lesson.id)
+      types = Enum.map(saved.content["content"], & &1["type"])
+      assert "heading" in types
+      assert "paragraph" in types
+      assert "bulletList" in types
+      assert "horizontalRule" in types
+      assert "blockquote" in types
+    end
+
+    test "multiple editor_updated events only keeps the latest content", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      first_content =
+        Jason.encode!(%{
+          "type" => "doc",
+          "content" => [
+            %{"type" => "paragraph", "content" => [%{"type" => "text", "text" => "First"}]}
+          ]
+        })
+
+      second_content =
+        Jason.encode!(%{
+          "type" => "doc",
+          "content" => [
+            %{"type" => "paragraph", "content" => [%{"type" => "text", "text" => "Second"}]}
+          ]
+        })
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => first_content})
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => second_content})
+
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      saved = Training.get_lesson!(lesson.id)
+      text = get_in(saved.content, ["content", Access.at(0), "content", Access.at(0), "text"])
+      assert text == "Second"
+    end
+
+    test "selecting a lesson clears editing and adding state", %{
+      conn: conn,
+      course: course,
+      chapter: chapter
+    } do
+      lesson = lesson_fixture(%{chapter: chapter, title: "Clear State Lesson"})
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      # Start adding a chapter (sets adding state)
+      view |> element("button", "Chapter") |> render_click()
+      assert has_element?(view, "input[name='chapter[title]']")
+
+      # Select a lesson — should clear the adding form
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      refute has_element?(view, "input[name='chapter[title]']")
+      assert has_element?(view, "[phx-hook='TipTapEditor']")
+    end
+
+    test "selecting a lesson initializes editor_content from lesson", %{
+      conn: conn,
+      course: course,
+      chapter: chapter
+    } do
+      content = %{
+        "type" => "doc",
+        "content" => [
+          %{"type" => "paragraph", "content" => [%{"type" => "text", "text" => "Pre-existing"}]}
+        ]
+      }
+
+      lesson =
+        lesson_fixture(%{chapter: chapter, title: "Pre-existing Content", content: content})
+
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      # Save without any editor_updated — should save the original content
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      saved = Training.get_lesson!(lesson.id)
+      text = get_in(saved.content, ["content", Access.at(0), "content", Access.at(0), "text"])
+      assert text == "Pre-existing"
+    end
+
+    test "editor passes readonly=false for draft course", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "data-readonly=\"false\""
+    end
+
+    test "saves content with nil content (empty lesson)", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      # Save without any editor updates — content should be nil initially
+      html =
+        view
+        |> element("button[phx-click='save_content']")
+        |> render_click()
+
+      assert html =~ "Lesson saved"
+    end
+
+    test "switching lessons updates the editor element", %{
+      conn: conn,
+      course: course,
+      chapter: chapter
+    } do
+      lesson1 =
+        lesson_fixture(%{
+          chapter: chapter,
+          title: "First Lesson",
+          content: %{
+            "type" => "doc",
+            "content" => [
+              %{
+                "type" => "paragraph",
+                "content" => [%{"type" => "text", "text" => "Content A"}]
+              }
+            ]
+          }
+        })
+
+      lesson2 =
+        lesson_fixture(%{
+          chapter: chapter,
+          title: "Second Lesson",
+          content: %{
+            "type" => "doc",
+            "content" => [
+              %{
+                "type" => "paragraph",
+                "content" => [%{"type" => "text", "text" => "Content B"}]
+              }
+            ]
+          }
+        })
+
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      # Select first lesson
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson1.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Content A"
+      assert has_element?(view, "#editor-#{lesson1.id}")
+
+      # Switch to second lesson
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson2.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Content B"
+      assert has_element?(view, "#editor-#{lesson2.id}")
+    end
   end
 
   describe "Chapter reordering" do
@@ -543,6 +906,216 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
       # Should not crash - page still renders
       html = render(view)
       assert html =~ "Content Lesson"
+    end
+
+    test "invalid JSON does not overwrite previously valid content", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      valid_content =
+        Jason.encode!(%{
+          "type" => "doc",
+          "content" => [
+            %{"type" => "paragraph", "content" => [%{"type" => "text", "text" => "Valid"}]}
+          ]
+        })
+
+      # Send valid content first
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => valid_content})
+
+      # Send invalid JSON — should be ignored
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => "{broken"})
+
+      # Save — should persist the valid content, not the invalid one
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      saved = Training.get_lesson!(lesson.id)
+      text = get_in(saved.content, ["content", Access.at(0), "content", Access.at(0), "text"])
+      assert text == "Valid"
+    end
+
+    test "empty document content is valid", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      empty_doc = Jason.encode!(%{"type" => "doc", "content" => []})
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => empty_doc})
+
+      html =
+        view
+        |> element("button[phx-click='save_content']")
+        |> render_click()
+
+      assert html =~ "Lesson saved"
+
+      saved = Training.get_lesson!(lesson.id)
+      assert saved.content == %{"type" => "doc", "content" => []}
+    end
+
+    test "content with code blocks saves correctly", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      content = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "codeBlock",
+            "attrs" => %{"language" => nil},
+            "content" => [
+              %{"type" => "text", "text" => "defmodule Foo do\n  def bar, do: :ok\nend"}
+            ]
+          }
+        ]
+      }
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => Jason.encode!(content)})
+
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      saved = Training.get_lesson!(lesson.id)
+
+      code_text =
+        get_in(saved.content, ["content", Access.at(0), "content", Access.at(0), "text"])
+
+      assert code_text =~ "defmodule Foo"
+    end
+
+    test "content with links saves correctly", %{
+      conn: conn,
+      course: course,
+      lesson: lesson
+    } do
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      content = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "paragraph",
+            "content" => [
+              %{
+                "type" => "text",
+                "marks" => [%{"type" => "link", "attrs" => %{"href" => "https://example.com"}}],
+                "text" => "Click here"
+              }
+            ]
+          }
+        ]
+      }
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => Jason.encode!(content)})
+
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      saved = Training.get_lesson!(lesson.id)
+      marks = get_in(saved.content, ["content", Access.at(0), "content", Access.at(0), "marks"])
+      assert [%{"type" => "link", "attrs" => %{"href" => "https://example.com"}}] = marks
+    end
+
+    test "content persists across lesson reselection", %{
+      conn: conn,
+      course: course,
+      chapter: chapter,
+      lesson: lesson
+    } do
+      other = lesson_fixture(%{chapter: chapter, title: "Other Lesson"})
+
+      {:ok, view, _html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      # Select lesson and add content
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      content =
+        Jason.encode!(%{
+          "type" => "doc",
+          "content" => [
+            %{"type" => "paragraph", "content" => [%{"type" => "text", "text" => "Saved text"}]}
+          ]
+        })
+
+      view
+      |> element("[phx-hook='TipTapEditor']")
+      |> render_hook("editor_updated", %{"content" => content})
+
+      view
+      |> element("button[phx-click='save_content']")
+      |> render_click()
+
+      # Select a different lesson
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{other.id}']")
+      |> render_click()
+
+      # Reselect original lesson — content should be preserved from database
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      html = render(view)
+      assert html =~ "Saved text"
+    end
+
+    test "save_content on archived course is blocked", %{conn: conn, company: company} do
+      course = course_fixture(%{company: company, status: :draft})
+      chapter = chapter_fixture(%{course: course})
+      lesson = lesson_fixture(%{chapter: chapter, title: "Archived Lesson"})
+      {:ok, published} = Training.publish_course(course)
+      {:ok, archived} = Training.archive_course(published)
+
+      {:ok, view, _html} = live(conn, ~p"/courses/#{archived.id}/editor")
+
+      view
+      |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+      |> render_click()
+
+      # Toolbar and save button should not be rendered for archived courses
+      refute has_element?(view, "[data-toolbar]")
+      refute has_element?(view, "button[phx-click='save_content']")
     end
   end
 

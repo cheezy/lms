@@ -119,6 +119,7 @@ const TipTapEditor = {
   _updateToolbarState(toolbar, buttons) {
     let btnIndex = 0
     toolbar.childNodes.forEach(node => {
+      if (node.nodeType !== 1) return
       if (node.className && node.className.includes("w-px")) return
       const btn = buttons[btnIndex]
       if (btn && !btn.type) {
