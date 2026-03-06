@@ -84,7 +84,7 @@ msgstr "Acme Corporation"
 
 #: lib/lms_web/components/core_components.ex:342
 #: lib/lms_web/live/admin/employee_live/index.ex:322
-#: lib/lms_web/live/courses/course_list_live.ex:318
+#: lib/lms_web/live/courses/course_list_live.ex:326
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr "Actions"
@@ -136,14 +136,14 @@ msgstr "Tous les statuts"
 msgid "Already have an account?"
 msgstr "Vous avez déjà un compte ?"
 
-#: lib/lms_web/live/courses/course_list_live.ex:292
-#: lib/lms_web/live/courses/course_list_live.ex:384
+#: lib/lms_web/live/courses/course_list_live.ex:300
+#: lib/lms_web/live/courses/course_list_live.ex:406
 #, elixir-autogen, elixir-format
 msgid "Archive"
 msgstr "Archiver"
 
-#: lib/lms_web/live/courses/course_list_live.ex:288
-#: lib/lms_web/live/courses/course_list_live.ex:381
+#: lib/lms_web/live/courses/course_list_live.ex:296
+#: lib/lms_web/live/courses/course_list_live.ex:403
 #, elixir-autogen, elixir-format
 msgid "Archive this course?"
 msgstr "Archiver ce cours ?"
@@ -158,8 +158,8 @@ msgstr "Archivé"
 msgid "Archived — Read Only"
 msgstr "Archivé — Lecture seule"
 
-#: lib/lms_web/components/layouts.ex:187
-#: lib/lms_web/components/layouts.ex:199
+#: lib/lms_web/components/layouts.ex:194
+#: lib/lms_web/components/layouts.ex:206
 #, elixir-autogen, elixir-format
 msgid "Attempting to reconnect"
 msgstr "Tentative de reconnexion"
@@ -310,7 +310,7 @@ msgstr "Impossible de modifier le rôle."
 
 #: lib/lms_web/live/admin/enrollment_live/enroll_form_component.ex:116
 #: lib/lms_web/live/admin/enrollment_live/index.ex:327
-#: lib/lms_web/live/courses/course_list_live.ex:314
+#: lib/lms_web/live/courses/course_list_live.ex:322
 #, elixir-autogen, elixir-format
 msgid "Course"
 msgstr "Cours"
@@ -358,9 +358,6 @@ msgstr "Cours mis à jour avec succès."
 #: lib/lms_web/live/dashboard_live.ex:64
 #: lib/lms_web/live/dashboard_live.ex:171
 #, elixir-autogen, elixir-format
-msgid "Content"
-msgstr "Contenu"
-
 msgid "Courses"
 msgstr "Cours"
 
@@ -419,8 +416,8 @@ msgstr "Tableau de bord"
 
 #: lib/lms_web/live/courses/course_editor_live.ex:529
 #: lib/lms_web/live/courses/course_editor_live.ex:613
-#: lib/lms_web/live/courses/course_list_live.ex:302
-#: lib/lms_web/live/courses/course_list_live.ex:393
+#: lib/lms_web/live/courses/course_list_live.ex:310
+#: lib/lms_web/live/courses/course_list_live.ex:415
 #, elixir-autogen, elixir-format
 msgid "Delete"
 msgstr "Supprimer"
@@ -430,8 +427,8 @@ msgstr "Supprimer"
 msgid "Delete this chapter and all its lessons?"
 msgstr "Supprimer ce chapitre et toutes ses leçons ?"
 
-#: lib/lms_web/live/courses/course_list_live.ex:298
-#: lib/lms_web/live/courses/course_list_live.ex:390
+#: lib/lms_web/live/courses/course_list_live.ex:306
+#: lib/lms_web/live/courses/course_list_live.ex:412
 #, elixir-autogen, elixir-format
 msgid "Delete this course? This cannot be undone."
 msgstr "Supprimer ce cours ? Cette action est irréversible."
@@ -495,8 +492,8 @@ msgstr "Échéance : %{date}"
 
 #: lib/lms_web/live/courses/course_editor_live.ex:520
 #: lib/lms_web/live/courses/course_editor_live.ex:604
-#: lib/lms_web/live/courses/course_list_live.ex:272
-#: lib/lms_web/live/courses/course_list_live.ex:366
+#: lib/lms_web/live/courses/course_list_live.ex:276
+#: lib/lms_web/live/courses/course_list_live.ex:381
 #, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr "Modifier"
@@ -555,7 +552,7 @@ msgstr "Inscrire"
 msgid "Enroll Employees"
 msgstr "Inscrire des employés"
 
-#: lib/lms_web/live/courses/course_list_live.ex:316
+#: lib/lms_web/live/courses/course_list_live.ex:324
 #, elixir-autogen, elixir-format
 msgid "Enrolled"
 msgstr "Inscrits"
@@ -744,7 +741,7 @@ msgstr "12 caractères minimum"
 msgid "Move"
 msgstr "Déplacer"
 
-#: lib/lms_web/components/layouts.ex:96
+#: lib/lms_web/components/layouts.ex:103
 #: lib/lms_web/live/employee/my_learning_live.ex:14
 #: lib/lms_web/live/employee/my_learning_live.ex:75
 #, elixir-autogen, elixir-format
@@ -757,6 +754,7 @@ msgstr "Mon apprentissage"
 msgid "Name"
 msgstr "Nom"
 
+#: lib/lms_web/live/courses/course_preview_live.ex:162
 #: lib/lms_web/live/employee/course_viewer_live.ex:240
 #, elixir-autogen, elixir-format
 msgid "Navigation"
@@ -771,6 +769,7 @@ msgstr "Nouveau cours"
 
 #: lib/lms_web/live/admin/employee_live/index.ex:422
 #: lib/lms_web/live/admin/enrollment_live/index.ex:407
+#: lib/lms_web/live/courses/course_preview_live.ex:233
 #: lib/lms_web/live/employee/course_viewer_live.ex:335
 #, elixir-autogen, elixir-format
 msgid "Next"
@@ -905,6 +904,7 @@ msgstr "Veuillez sélectionner des employés et un cours."
 
 #: lib/lms_web/live/admin/employee_live/index.ex:406
 #: lib/lms_web/live/admin/enrollment_live/index.ex:391
+#: lib/lms_web/live/courses/course_preview_live.ex:224
 #: lib/lms_web/live/employee/course_viewer_live.ex:326
 #, elixir-autogen, elixir-format
 msgid "Previous"
@@ -925,14 +925,14 @@ msgstr "Promouvoir"
 msgid "Promote %{name} to Course Creator?"
 msgstr "Promouvoir %{name} au rôle de créateur de cours ?"
 
-#: lib/lms_web/live/courses/course_list_live.ex:282
-#: lib/lms_web/live/courses/course_list_live.ex:375
+#: lib/lms_web/live/courses/course_list_live.ex:290
+#: lib/lms_web/live/courses/course_list_live.ex:397
 #, elixir-autogen, elixir-format
 msgid "Publish"
 msgstr "Publier"
 
-#: lib/lms_web/live/courses/course_list_live.ex:278
-#: lib/lms_web/live/courses/course_list_live.ex:372
+#: lib/lms_web/live/courses/course_list_live.ex:286
+#: lib/lms_web/live/courses/course_list_live.ex:394
 #, elixir-autogen, elixir-format
 msgid "Publish this course?"
 msgstr "Publier ce cours ?"
@@ -1059,7 +1059,7 @@ msgstr "Ignoré"
 msgid "Slug"
 msgstr "Identifiant"
 
-#: lib/lms_web/components/layouts.ex:194
+#: lib/lms_web/components/layouts.ex:201
 #, elixir-autogen, elixir-format
 msgid "Something went wrong!"
 msgstr "Une erreur est survenue !"
@@ -1072,7 +1072,7 @@ msgstr "Commencez par ajouter un chapitre dans le panneau latéral"
 #: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:212
 #: lib/lms_web/live/admin/employee_live/index.ex:310
 #: lib/lms_web/live/admin/enrollment_live/index.ex:339
-#: lib/lms_web/live/courses/course_list_live.ex:315
+#: lib/lms_web/live/courses/course_list_live.ex:323
 #, elixir-autogen, elixir-format
 msgid "Status"
 msgstr "Statut"
@@ -1087,6 +1087,7 @@ msgstr "Administration système"
 msgid "The CSV file is empty or contains only headers."
 msgstr "Le fichier CSV est vide ou ne contient que des en-têtes."
 
+#: lib/lms_web/live/courses/course_preview_live.ex:202
 #: lib/lms_web/live/employee/course_viewer_live.ex:290
 #, elixir-autogen, elixir-format
 msgid "This course has no lessons yet."
@@ -1107,6 +1108,7 @@ msgstr "Titre"
 msgid "Today"
 msgstr "Aujourd'hui"
 
+#: lib/lms_web/live/courses/course_preview_live.ex:133
 #: lib/lms_web/live/employee/course_viewer_live.ex:198
 #, elixir-autogen, elixir-format
 msgid "Toggle navigation"
@@ -1152,7 +1154,7 @@ msgstr "Valide"
 msgid "View"
 msgstr "Voir"
 
-#: lib/lms_web/components/layouts.ex:182
+#: lib/lms_web/components/layouts.ex:189
 #, elixir-autogen, elixir-format
 msgid "We can't find the internet"
 msgstr "Connexion internet introuvable"
@@ -1397,7 +1399,7 @@ msgstr "Se connecter par courriel"
 msgid "Log me in only this time"
 msgstr "Me connecter cette fois seulement"
 
-#: lib/lms_web/components/layouts.ex:115
+#: lib/lms_web/components/layouts.ex:122
 #, elixir-autogen, elixir-format
 msgid "Log out"
 msgstr "Se déconnecter"
@@ -1459,7 +1461,7 @@ msgstr "Voyez exactement où en est chaque employé dans sa formation. Suivez le
 msgid "Set up in minutes. No credit card required."
 msgstr "Configuration en quelques minutes. Aucune carte de crédit requise."
 
-#: lib/lms_web/components/layouts.ex:108
+#: lib/lms_web/components/layouts.ex:115
 #, elixir-autogen, elixir-format
 msgid "Settings"
 msgstr "Paramètres"
@@ -1568,3 +1570,30 @@ msgstr "Langue préférée"
 #, elixir-autogen, elixir-format
 msgid "Save Language"
 msgstr "Enregistrer la langue"
+
+#: lib/lms_web/live/courses/course_preview_live.ex:123
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Back to Courses"
+msgstr "Retour aux cours"
+
+#: lib/lms_web/live/courses/course_list_live.ex:272
+#: lib/lms_web/live/courses/course_list_live.ex:374
+#, elixir-autogen, elixir-format
+msgid "Content"
+msgstr "Contenu"
+
+#: lib/lms_web/live/courses/course_list_live.ex:280
+#: lib/lms_web/live/courses/course_list_live.ex:388
+#, elixir-autogen, elixir-format
+msgid "Preview"
+msgstr "Aperçu"
+
+#: lib/lms_web/live/courses/course_preview_live.ex:128
+#, elixir-autogen, elixir-format
+msgid "Preview Mode"
+msgstr "Mode aperçu"
+
+#: lib/lms_web/live/courses/course_preview_live.ex:14
+#, elixir-autogen, elixir-format
+msgid "You don't have access to this course."
+msgstr "Vous n'avez pas accès à ce cours."
