@@ -10,6 +10,7 @@ defmodule LmsWeb.CompanyRegistrationLive do
     socket =
       socket
       |> assign(:current_scope, nil)
+      |> assign(:hide_root_nav, true)
       |> assign(:page_title, gettext("Register Your Company"))
       |> assign(:form, to_form(changeset, as: "registration"))
 
