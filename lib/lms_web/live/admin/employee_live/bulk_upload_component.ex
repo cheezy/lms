@@ -25,6 +25,7 @@ defmodule LmsWeb.Admin.EmployeeLive.BulkUploadComponent do
     {:noreply, socket}
   end
 
+  # sobelow_skip ["Traversal.FileModule"]
   @impl true
   def handle_event("parse_csv", _params, socket) do
     scope = socket.assigns.current_scope

@@ -100,10 +100,12 @@ defmodule LmsWeb.Courses.CourseFormLive do
     end
   end
 
+  # sobelow_skip ["Traversal.FileModule"]
   defp consume_cover_image(socket) do
     uploaded_entries =
       consume_uploaded_entries(socket, :cover_image, fn %{path: path}, entry ->
-        dest = Path.join(["priv/static/uploads", "#{entry.uuid}-#{entry.client_name}"])
+        safe_name = Path.basename(entry.client_name)
+        dest = Path.join(["priv/static/uploads", "#{entry.uuid}-#{safe_name}"])
         File.cp!(path, dest)
         {:ok, ~p"/uploads/#{Path.basename(dest)}"}
       end)

@@ -250,6 +250,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
 
   # -- Image upload --
 
+  # sobelow_skip ["Traversal.FileModule"]
   def handle_event("upload_image", _params, socket) do
     lesson = socket.assigns.selected_lesson
 

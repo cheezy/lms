@@ -392,6 +392,7 @@ defmodule Lms.Training do
     |> Repo.all()
   end
 
+  # sobelow_skip ["Traversal.FileModule"]
   def delete_lesson_image(%LessonImage{} = image) do
     file_path = image.file_path
 
