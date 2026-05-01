@@ -17,7 +17,9 @@ defmodule LmsWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts images uploads favicon.ico robots.txt)
+  def static_paths,
+    do:
+      ~w(assets fonts images uploads apple-touch-icon.png apple-touch-icon-precomposed.png favicon.ico manifest.webmanifest robots.txt)
 
   def router do
     quote do
