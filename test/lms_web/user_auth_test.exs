@@ -8,7 +8,6 @@ defmodule LmsWeb.UserAuthTest do
   alias LmsWeb.UserAuth
 
   @remember_me_cookie "_lms_web_user_remember_me"
-  @remember_me_cookie_max_age 60 * 60 * 24 * 14
 
   setup %{conn: conn} do
     conn =
@@ -95,53 +94,28 @@ defmodule LmsWeb.UserAuthTest do
       refute get_session(conn, :user_return_to)
     end
 
-    test "writes a cookie if remember_me is configured", %{conn: conn, user: user} do
+    test "does not write a remember-me cookie even when remember_me param is true", %{
+      conn: conn,
+      user: user
+    } do
       conn = conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
-      assert get_session(conn, :user_token) == conn.cookies[@remember_me_cookie]
-      assert get_session(conn, :user_remember_me) == true
 
-      assert %{value: signed_token, max_age: max_age} = conn.resp_cookies[@remember_me_cookie]
-      assert signed_token != get_session(conn, :user_token)
-      assert max_age == @remember_me_cookie_max_age
-    end
-
-    test "writes a cookie if remember_me was set in previous session", %{conn: conn, user: user} do
-      conn = conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
-      assert get_session(conn, :user_token) == conn.cookies[@remember_me_cookie]
-      assert get_session(conn, :user_remember_me) == true
-
-      conn =
-        conn
-        |> recycle()
-        |> Map.replace!(:secret_key_base, LmsWeb.Endpoint.config(:secret_key_base))
-        |> fetch_cookies()
-        |> init_test_session(%{user_remember_me: true})
-
-      # the conn is already logged in and has the remember_me cookie set,
-      # now we log in again and even without explicitly setting remember_me,
-      # the cookie should be set again
-      conn = conn |> UserAuth.log_in_user(user, %{})
-      assert %{value: signed_token, max_age: max_age} = conn.resp_cookies[@remember_me_cookie]
-      assert signed_token != get_session(conn, :user_token)
-      assert max_age == @remember_me_cookie_max_age
-      assert get_session(conn, :user_remember_me) == true
+      refute conn.resp_cookies[@remember_me_cookie]
+      refute get_session(conn, :user_remember_me)
     end
   end
 
   describe "logout_user/1" do
-    test "erases session and cookies", %{conn: conn, user: user} do
+    test "erases session", %{conn: conn, user: user} do
       user_token = Accounts.generate_user_session_token(user)
 
       conn =
         conn
         |> put_session(:user_token, user_token)
-        |> put_req_cookie(@remember_me_cookie, user_token)
         |> fetch_cookies()
         |> UserAuth.log_out_user()
 
       refute get_session(conn, :user_token)
-      refute conn.cookies[@remember_me_cookie]
-      assert %{max_age: 0} = conn.resp_cookies[@remember_me_cookie]
       assert redirected_to(conn) == ~p"/"
       refute Accounts.get_user_by_session_token(user_token)
     end
@@ -149,8 +123,12 @@ defmodule LmsWeb.UserAuthTest do
     test "works even if user is already logged out", %{conn: conn} do
       conn = conn |> fetch_cookies() |> UserAuth.log_out_user()
       refute get_session(conn, :user_token)
-      assert %{max_age: 0} = conn.resp_cookies[@remember_me_cookie]
       assert redirected_to(conn) == ~p"/"
+    end
+
+    test "does not attempt to clear a remember-me cookie", %{conn: conn} do
+      conn = conn |> fetch_cookies() |> UserAuth.log_out_user()
+      refute Map.has_key?(conn.resp_cookies, @remember_me_cookie)
     end
   end
 
@@ -166,22 +144,18 @@ defmodule LmsWeb.UserAuthTest do
       assert get_session(conn, :user_token) == user_token
     end
 
-    test "authenticates user from cookies", %{conn: conn, user: user} do
-      logged_in_conn =
-        conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
-
-      user_token = logged_in_conn.cookies[@remember_me_cookie]
-      %{value: signed_token} = logged_in_conn.resp_cookies[@remember_me_cookie]
+    test "ignores a remember-me cookie when no session is set", %{conn: conn, user: user} do
+      user_token = Accounts.generate_user_session_token(user)
 
       conn =
         conn
-        |> put_req_cookie(@remember_me_cookie, signed_token)
+        |> put_req_cookie(@remember_me_cookie, user_token)
         |> UserAuth.fetch_current_scope_for_user([])
 
-      assert conn.assigns.current_scope.user.id == user.id
-      assert conn.assigns.current_scope.user.authenticated_at == user.authenticated_at
-      assert get_session(conn, :user_token) == user_token
-      assert get_session(conn, :user_remember_me)
+      # Without a session token, the user is not authenticated even if a stale
+      # remember-me cookie is present in the request.
+      refute get_session(conn, :user_token)
+      refute conn.assigns.current_scope
     end
 
     test "does not authenticate if data is missing", %{conn: conn, user: user} do
@@ -191,30 +165,20 @@ defmodule LmsWeb.UserAuthTest do
       refute conn.assigns.current_scope
     end
 
-    test "reissues a new token after a few days and refreshes cookie", %{conn: conn, user: user} do
-      logged_in_conn =
-        conn |> fetch_cookies() |> UserAuth.log_in_user(user, %{"remember_me" => "true"})
-
-      token = logged_in_conn.cookies[@remember_me_cookie]
-      %{value: signed_token} = logged_in_conn.resp_cookies[@remember_me_cookie]
-
+    test "reissues a new session token after a few days", %{conn: conn, user: user} do
+      token = Accounts.generate_user_session_token(user)
       offset_user_token(token, -10, :day)
       {user, _} = Accounts.get_user_by_session_token(token)
 
       conn =
         conn
         |> put_session(:user_token, token)
-        |> put_session(:user_remember_me, true)
-        |> put_req_cookie(@remember_me_cookie, signed_token)
         |> UserAuth.fetch_current_scope_for_user([])
 
       assert conn.assigns.current_scope.user.id == user.id
       assert conn.assigns.current_scope.user.authenticated_at == user.authenticated_at
       assert new_token = get_session(conn, :user_token)
       assert new_token != token
-      assert %{value: new_signed_token, max_age: max_age} = conn.resp_cookies[@remember_me_cookie]
-      assert new_signed_token != signed_token
-      assert max_age == @remember_me_cookie_max_age
     end
   end
 

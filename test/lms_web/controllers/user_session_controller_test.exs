@@ -70,7 +70,10 @@ defmodule LmsWeb.UserSessionControllerTest do
       assert response =~ ~p"/users/log-out"
     end
 
-    test "logs the user in with remember me", %{conn: conn, user: user} do
+    test "ignores a stale remember_me param and does not write a cookie", %{
+      conn: conn,
+      user: user
+    } do
       conn =
         post(conn, ~p"/users/log-in", %{
           "user" => %{
@@ -80,7 +83,7 @@ defmodule LmsWeb.UserSessionControllerTest do
           }
         })
 
-      assert conn.resp_cookies["_lms_web_user_remember_me"]
+      refute conn.resp_cookies["_lms_web_user_remember_me"]
       assert redirected_to(conn) == ~p"/my-learning"
     end
 
