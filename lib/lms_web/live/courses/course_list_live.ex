@@ -128,7 +128,7 @@ defmodule LmsWeb.Courses.CourseListLive do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-6xl">
         <%!-- Header --%>
-        <div class="flex items-center justify-between mb-8">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-8">
           <div>
             <h1 class="text-2xl font-bold text-base-content">{gettext("Courses")}</h1>
             <p class="mt-1 text-sm text-base-content/60">
@@ -264,7 +264,7 @@ defmodule LmsWeb.Courses.CourseListLive do
               <div class="text-xs text-base-content/40 mt-2">
                 {gettext("0 enrolled")}
               </div>
-              <div class="card-actions mt-3 pt-3 border-t border-base-300">
+              <div class="card-actions mt-3 pt-3 border-t border-base-300 gap-y-1">
                 <.link navigate={~p"/courses/#{course.id}/editor"} class="btn btn-ghost btn-xs">
                   <.icon name="hero-book-open" class="size-3.5" />
                   {gettext("Content")}

@@ -147,9 +147,11 @@ defmodule LmsWeb.Admin.EmployeeLive.BulkUploadComponent do
           </div>
 
           <div :for={entry <- @uploads.csv.entries} class="flex items-center gap-3">
-            <.icon name="hero-document-text" class="size-6 text-primary" />
-            <span class="text-base-content font-medium">{entry.client_name}</span>
-            <span class="text-sm text-base-content/60">
+            <.icon name="hero-document-text" class="size-6 text-primary shrink-0" />
+            <span class="text-base-content font-medium truncate min-w-0 flex-1">
+              {entry.client_name}
+            </span>
+            <span class="text-sm text-base-content/60 shrink-0">
               {format_file_size(entry.client_size)}
             </span>
             <button
@@ -157,7 +159,7 @@ defmodule LmsWeb.Admin.EmployeeLive.BulkUploadComponent do
               phx-click="cancel-upload"
               phx-value-ref={entry.ref}
               phx-target={@myself}
-              class="btn btn-ghost btn-xs text-error"
+              class="btn btn-ghost btn-xs text-error shrink-0"
             >
               <.icon name="hero-x-mark" class="size-4" />
             </button>
