@@ -88,7 +88,7 @@ defmodule LmsWeb.Admin.EmployeeLive.BulkUploadComponent do
   def render(assigns) do
     ~H"""
     <div class="modal modal-open">
-      <div class="modal-box bg-base-100 max-w-2xl">
+      <div class="modal-box bg-base-100 w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto">
         <button
           type="button"
           class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
