@@ -3,6 +3,8 @@ defmodule Lms.Accounts do
   The Accounts context.
   """
 
+  use Gettext, backend: LmsWeb.Gettext
+
   import Ecto.Query, warn: false
   alias Lms.Repo
 
@@ -561,35 +563,26 @@ defmodule Lms.Accounts do
 
     {validated, _seen} =
       Enum.reduce(rows, {[], MapSet.new()}, fn row, {acc, seen} ->
-        errors = []
         lower_email = String.downcase(row.email)
-
-        errors =
-          if String.trim(row.name) == "",
-            do: ["Name is required" | errors],
-            else: errors
-
-        errors =
-          if Regex.match?(@email_regex, row.email),
-            do: errors,
-            else: ["Invalid email format" | errors]
-
-        errors =
-          if lower_email in seen,
-            do: ["Duplicate email in CSV" | errors],
-            else: errors
-
-        errors =
-          if lower_email in existing_emails,
-            do: ["Employee already exists" | errors],
-            else: errors
-
-        validated_row = Map.merge(row, %{valid?: errors == [], errors: Enum.reverse(errors)})
+        errors = row_errors(row, lower_email, seen, existing_emails)
+        validated_row = Map.merge(row, %{valid?: errors == [], errors: errors})
         {acc ++ [validated_row], MapSet.put(seen, lower_email)}
       end)
 
     validated
   end
+
+  defp row_errors(row, lower_email, seen, existing_emails) do
+    []
+    |> add_if(String.trim(row.name) == "", gettext("Name is required"))
+    |> add_if(!Regex.match?(@email_regex, row.email), gettext("Invalid email format"))
+    |> add_if(lower_email in seen, gettext("Duplicate email in CSV"))
+    |> add_if(lower_email in existing_emails, gettext("Employee already exists"))
+    |> Enum.reverse()
+  end
+
+  defp add_if(errors, true, message), do: [message | errors]
+  defp add_if(errors, false, _message), do: errors
 
   @doc """
   Bulk invites employees from a list of validated rows.

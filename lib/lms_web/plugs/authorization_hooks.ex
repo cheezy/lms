@@ -15,6 +15,7 @@ defmodule LmsWeb.Plugs.AuthorizationHooks do
   """
 
   use LmsWeb, :verified_routes
+  use Gettext, backend: LmsWeb.Gettext
 
   import Phoenix.Component
   import Phoenix.LiveView
@@ -35,7 +36,7 @@ defmodule LmsWeb.Plugs.AuthorizationHooks do
     else
       socket =
         socket
-        |> put_flash(:error, "You are not authorized to access this page.")
+        |> put_flash(:error, gettext("You are not authorized to access this page."))
         |> redirect(to: ~p"/")
 
       {:halt, socket}

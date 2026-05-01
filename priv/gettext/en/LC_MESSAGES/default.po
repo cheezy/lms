@@ -72,6 +72,7 @@ msgstr ""
 msgid "0 enrolled"
 msgstr ""
 
+#: lib/lms_web/controllers/user_session_controller.ex:56
 #: lib/lms_web/live/invitation_live/accept.ex:55
 #, elixir-autogen, elixir-format
 msgid "Account activated successfully!"
@@ -1659,6 +1660,7 @@ msgid "We'll send a confirmation link to the new address."
 msgstr ""
 
 #: lib/lms_web/controllers/user_settings_controller.ex:119
+#: lib/lms_web/user_auth.ex:186
 #, elixir-autogen, elixir-format
 msgid "You must re-authenticate to access this page."
 msgstr ""
@@ -1681,4 +1683,71 @@ msgstr ""
 #: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:6
 #, elixir-autogen, elixir-format
 msgid "Use a strong password that you don't reuse on other sites."
+msgstr ""
+
+#: lib/lms_web/controllers/user_session_controller.ex:39
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Company registered successfully!"
+msgstr ""
+
+#: lib/lms/accounts.ex:581
+#, elixir-autogen, elixir-format
+msgid "Duplicate email in CSV"
+msgstr ""
+
+#: lib/lms/accounts.ex:586
+#, elixir-autogen, elixir-format
+msgid "Employee already exists"
+msgstr ""
+
+#: lib/lms/accounts.ex:577
+#, elixir-autogen, elixir-format
+msgid "Invalid email format"
+msgstr ""
+
+#: lib/lms_web/controllers/user_session_controller.ex:27
+#, elixir-autogen, elixir-format
+msgid "Invalid email or password"
+msgstr ""
+
+#: lib/lms_web/controllers/user_session_controller.ex:68
+#, elixir-autogen, elixir-format
+msgid "Logged out successfully."
+msgstr ""
+
+#: lib/lms_web/controllers/user_session_controller.ex:61
+#, elixir-autogen, elixir-format
+msgid "Login link is invalid or has expired."
+msgstr ""
+
+#: lib/lms/accounts.ex:571
+#, elixir-autogen, elixir-format
+msgid "Name is required"
+msgstr ""
+
+#: lib/lms_web/controllers/user_session_controller.ex:44
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Registration link is invalid or has expired."
+msgstr ""
+
+#: lib/lms_web/controllers/user_session_controller.ex:20
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Welcome back!"
+msgstr ""
+
+#: lib/lms_web/plugs/authorization.ex:33
+#: lib/lms_web/plugs/authorization_hooks.ex:39
+#, elixir-autogen, elixir-format
+msgid "You are not authorized to access this page."
+msgstr ""
+
+#: lib/lms_web/plugs/authorization.ex:80
+#, elixir-autogen, elixir-format
+msgid "You are not authorized to access this resource."
+msgstr ""
+
+#: lib/lms_web/user_auth.ex:160
+#: lib/lms_web/user_auth.ex:228
+#, elixir-autogen, elixir-format
+msgid "You must log in to access this page."
 msgstr ""

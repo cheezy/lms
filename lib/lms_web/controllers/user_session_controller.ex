@@ -17,14 +17,14 @@ defmodule LmsWeb.UserSessionController do
   def create(conn, %{"user" => %{"email" => email, "password" => password} = user_params}) do
     if user = Accounts.get_user_by_email_and_password(email, password) do
       conn
-      |> put_flash(:info, "Welcome back!")
+      |> put_flash(:info, gettext("Welcome back!"))
       |> UserAuth.log_in_user(user, user_params)
     else
       form = Phoenix.Component.to_form(user_params, as: "user")
 
       # In order to prevent user enumeration attacks, don't disclose whether the email is registered.
       conn
-      |> put_flash(:error, "Invalid email or password")
+      |> put_flash(:error, gettext("Invalid email or password"))
       |> render(:new, form: form)
     end
   end
@@ -36,12 +36,12 @@ defmodule LmsWeb.UserSessionController do
 
         conn
         |> assign(:current_scope, Lms.Accounts.Scope.for_user(user))
-        |> put_flash(:info, "Company registered successfully!")
+        |> put_flash(:info, gettext("Company registered successfully!"))
         |> UserAuth.log_in_user(user)
 
       {:error, _reason} ->
         conn
-        |> put_flash(:error, "Registration link is invalid or has expired.")
+        |> put_flash(:error, gettext("Registration link is invalid or has expired."))
         |> redirect(to: ~p"/users/log-in")
     end
   end
@@ -53,19 +53,19 @@ defmodule LmsWeb.UserSessionController do
 
         conn
         |> assign(:current_scope, Lms.Accounts.Scope.for_user(user))
-        |> put_flash(:info, "Account activated successfully!")
+        |> put_flash(:info, gettext("Account activated successfully!"))
         |> UserAuth.log_in_user(user)
 
       {:error, _reason} ->
         conn
-        |> put_flash(:error, "Login link is invalid or has expired.")
+        |> put_flash(:error, gettext("Login link is invalid or has expired."))
         |> redirect(to: ~p"/users/log-in")
     end
   end
 
   def delete(conn, _params) do
     conn
-    |> put_flash(:info, "Logged out successfully.")
+    |> put_flash(:info, gettext("Logged out successfully."))
     |> UserAuth.log_out_user()
   end
 

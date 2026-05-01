@@ -7,6 +7,7 @@ defmodule LmsWeb.Plugs.Authorization do
   """
 
   use LmsWeb, :verified_routes
+  use Gettext, backend: LmsWeb.Gettext
 
   import Plug.Conn
   import Phoenix.Controller
@@ -29,7 +30,7 @@ defmodule LmsWeb.Plugs.Authorization do
       conn
     else
       conn
-      |> put_flash(:error, "You are not authorized to access this page.")
+      |> put_flash(:error, gettext("You are not authorized to access this page."))
       |> redirect(to: ~p"/")
       |> halt()
     end
@@ -76,7 +77,7 @@ defmodule LmsWeb.Plugs.Authorization do
         conn
       else
         conn
-        |> put_flash(:error, "You are not authorized to access this resource.")
+        |> put_flash(:error, gettext("You are not authorized to access this resource."))
         |> redirect(to: ~p"/")
         |> halt()
       end

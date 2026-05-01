@@ -72,6 +72,7 @@ msgstr "%{name} a été %{action}."
 msgid "0 enrolled"
 msgstr "0 inscrit"
 
+#: lib/lms_web/controllers/user_session_controller.ex:56
 #: lib/lms_web/live/invitation_live/accept.ex:55
 #, elixir-autogen, elixir-format
 msgid "Account activated successfully!"
@@ -1659,6 +1660,7 @@ msgid "We'll send a confirmation link to the new address."
 msgstr "Nous enverrons un lien de confirmation à la nouvelle adresse."
 
 #: lib/lms_web/controllers/user_settings_controller.ex:119
+#: lib/lms_web/user_auth.ex:186
 #, elixir-autogen, elixir-format
 msgid "You must re-authenticate to access this page."
 msgstr "Vous devez vous réauthentifier pour accéder à cette page."
@@ -1682,3 +1684,70 @@ msgstr "Mis à jour lorsque vous définissez ou modifiez votre mot de passe."
 #, elixir-autogen, elixir-format
 msgid "Use a strong password that you don't reuse on other sites."
 msgstr "Utilisez un mot de passe fort que vous ne réutilisez pas sur d'autres sites."
+
+#: lib/lms_web/controllers/user_session_controller.ex:39
+#, elixir-autogen, elixir-format
+msgid "Company registered successfully!"
+msgstr "Entreprise enregistrée avec succès !"
+
+#: lib/lms/accounts.ex:581
+#, elixir-autogen, elixir-format
+msgid "Duplicate email in CSV"
+msgstr "Courriel dupliqué dans le CSV"
+
+#: lib/lms/accounts.ex:586
+#, elixir-autogen, elixir-format
+msgid "Employee already exists"
+msgstr "L'employé existe déjà"
+
+#: lib/lms/accounts.ex:577
+#, elixir-autogen, elixir-format
+msgid "Invalid email format"
+msgstr "Format de courriel invalide"
+
+#: lib/lms_web/controllers/user_session_controller.ex:27
+#, elixir-autogen, elixir-format
+msgid "Invalid email or password"
+msgstr "Courriel ou mot de passe invalide"
+
+#: lib/lms_web/controllers/user_session_controller.ex:68
+#, elixir-autogen, elixir-format
+msgid "Logged out successfully."
+msgstr "Déconnexion réussie."
+
+#: lib/lms_web/controllers/user_session_controller.ex:61
+#, elixir-autogen, elixir-format
+msgid "Login link is invalid or has expired."
+msgstr "Le lien de connexion est invalide ou a expiré."
+
+#: lib/lms/accounts.ex:571
+#, elixir-autogen, elixir-format
+msgid "Name is required"
+msgstr "Le nom est requis"
+
+#: lib/lms_web/controllers/user_session_controller.ex:44
+#, elixir-autogen, elixir-format
+msgid "Registration link is invalid or has expired."
+msgstr "Le lien d'inscription est invalide ou a expiré."
+
+#: lib/lms_web/controllers/user_session_controller.ex:20
+#, elixir-autogen, elixir-format
+msgid "Welcome back!"
+msgstr "Bon retour !"
+
+#: lib/lms_web/plugs/authorization.ex:33
+#: lib/lms_web/plugs/authorization_hooks.ex:39
+#, elixir-autogen, elixir-format
+msgid "You are not authorized to access this page."
+msgstr "Vous n'êtes pas autorisé à accéder à cette page."
+
+#: lib/lms_web/plugs/authorization.ex:80
+#, elixir-autogen, elixir-format
+msgid "You are not authorized to access this resource."
+msgstr "Vous n'êtes pas autorisé à accéder à cette ressource."
+
+#: lib/lms_web/user_auth.ex:160
+#: lib/lms_web/user_auth.ex:228
+#, elixir-autogen, elixir-format
+msgid "You must log in to access this page."
+msgstr "Vous devez vous connecter pour accéder à cette page."
