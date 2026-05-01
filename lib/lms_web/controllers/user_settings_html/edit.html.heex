@@ -85,29 +85,28 @@
       </div>
     </div>
 
+    <%!-- Account Security: links to credential-change pages --%>
     <div class="card bg-base-200 shadow-sm rounded-2xl">
       <div class="card-body">
         <h2 class="text-sm font-semibold uppercase tracking-wider text-base-content/50 mb-2">
-          {gettext("Email")}
+          {gettext("Account Security")}
         </h2>
-        <.form
-          :let={f}
-          for={@email_changeset}
-          action={~p"/users/settings"}
-          id="update_email"
-        >
-          <input type="hidden" name="action" value="update_email" />
-          <.input
-            field={f[:email]}
-            type="email"
-            label={gettext("Email")}
-            autocomplete="email"
-            required
-          />
-          <.button class="btn btn-primary w-full" phx-disable-with={gettext("Changing...")}>
-            {gettext("Change Email")}
-          </.button>
-        </.form>
+        <ul class="space-y-2">
+          <li class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-medium text-base-content">{gettext("Email")}</p>
+              <p class="text-sm text-base-content/60 truncate">
+                {@current_scope.user.email}
+              </p>
+            </div>
+            <.link
+              navigate={~p"/users/settings/email"}
+              class="btn btn-ghost btn-sm text-primary shrink-0"
+            >
+              {gettext("Change email")}
+            </.link>
+          </li>
+        </ul>
       </div>
     </div>
 

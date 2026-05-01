@@ -28,13 +28,41 @@ defmodule LmsWeb.UserSettingsController do
     end
   end
 
-  def update(conn, %{"action" => "update_email"} = params) do
+  def update(conn, %{"action" => "update_password"} = params) do
     case require_sudo(conn) do
       {:error, conn} ->
         conn
 
       {:ok, conn} ->
         %{"user" => user_params} = params
+        user = conn.assigns.current_scope.user
+
+        case Accounts.update_user_password(user, user_params) do
+          {:ok, {user, _}} ->
+            conn
+            |> put_flash(:info, gettext("Password updated successfully."))
+            |> put_session(:user_return_to, ~p"/users/settings")
+            |> UserAuth.log_in_user(user)
+
+          {:error, changeset} ->
+            render(conn, :edit, password_changeset: changeset)
+        end
+    end
+  end
+
+  def edit_email(conn, _params) do
+    case require_sudo(conn) do
+      {:error, conn} -> conn
+      {:ok, conn} -> render(conn, :edit_email)
+    end
+  end
+
+  def update_email(conn, %{"user" => user_params}) do
+    case require_sudo(conn) do
+      {:error, conn} ->
+        conn
+
+      {:ok, conn} ->
         user = conn.assigns.current_scope.user
 
         case Accounts.change_user_email(user, user_params) do
@@ -54,29 +82,7 @@ defmodule LmsWeb.UserSettingsController do
             |> redirect(to: ~p"/users/settings")
 
           changeset ->
-            render(conn, :edit, email_changeset: %{changeset | action: :insert})
-        end
-    end
-  end
-
-  def update(conn, %{"action" => "update_password"} = params) do
-    case require_sudo(conn) do
-      {:error, conn} ->
-        conn
-
-      {:ok, conn} ->
-        %{"user" => user_params} = params
-        user = conn.assigns.current_scope.user
-
-        case Accounts.update_user_password(user, user_params) do
-          {:ok, {user, _}} ->
-            conn
-            |> put_flash(:info, gettext("Password updated successfully."))
-            |> put_session(:user_return_to, ~p"/users/settings")
-            |> UserAuth.log_in_user(user)
-
-          {:error, changeset} ->
-            render(conn, :edit, password_changeset: changeset)
+            render(conn, :edit_email, email_changeset: %{changeset | action: :insert})
         end
     end
   end

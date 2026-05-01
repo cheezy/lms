@@ -44,10 +44,16 @@ defmodule LmsWeb.UserSettingsControllerTest do
     end
 
     @tag token_authenticated_at: :second |> DateTime.utc_now() |> DateTime.add(-11, :minute)
-    test "PUT update_email redirects to log-in when not in sudo mode", %{conn: conn} do
+    test "GET email change page redirects to log-in when not in sudo mode", %{conn: conn} do
+      conn = get(conn, ~p"/users/settings/email")
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "re-authenticate"
+    end
+
+    @tag token_authenticated_at: :second |> DateTime.utc_now() |> DateTime.add(-11, :minute)
+    test "PUT email change redirects to log-in when not in sudo mode", %{conn: conn} do
       conn =
-        put(conn, ~p"/users/settings", %{
-          "action" => "update_email",
+        put(conn, ~p"/users/settings/email", %{
           "user" => %{"email" => "newaddress@example.com"}
         })
 
@@ -96,12 +102,22 @@ defmodule LmsWeb.UserSettingsControllerTest do
     end
   end
 
-  describe "PUT /users/settings (change email form)" do
+  describe "GET /users/settings/email" do
+    test "renders the dedicated email change page", %{conn: conn} do
+      conn = get(conn, ~p"/users/settings/email")
+      response = html_response(conn, 200)
+      assert response =~ "Change Email"
+      assert response =~ "New email"
+      assert response =~ "Send confirmation link"
+      assert response =~ ~p"/users/settings"
+    end
+  end
+
+  describe "PUT /users/settings/email" do
     @tag :capture_log
-    test "updates the user email", %{conn: conn, user: user} do
+    test "sends confirmation link for valid new email", %{conn: conn, user: user} do
       conn =
-        put(conn, ~p"/users/settings", %{
-          "action" => "update_email",
+        put(conn, ~p"/users/settings/email", %{
           "user" => %{"email" => unique_user_email()}
         })
 
@@ -110,18 +126,18 @@ defmodule LmsWeb.UserSettingsControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "A link to confirm your email"
 
+      # Email is unchanged until the user clicks the confirmation link
       assert Accounts.get_user_by_email(user.email)
     end
 
-    test "does not update email on invalid data", %{conn: conn} do
+    test "renders email page with errors on invalid data", %{conn: conn} do
       conn =
-        put(conn, ~p"/users/settings", %{
-          "action" => "update_email",
+        put(conn, ~p"/users/settings/email", %{
           "user" => %{"email" => "with spaces"}
         })
 
       response = html_response(conn, 200)
-      assert response =~ "Settings"
+      assert response =~ "Change Email"
       assert response =~ "must have the @ sign and no spaces"
     end
   end

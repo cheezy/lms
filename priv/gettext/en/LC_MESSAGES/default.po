@@ -32,7 +32,7 @@ msgstr ""
 msgid "%{count} employee(s) enrolled successfully."
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:203
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:205
 #, elixir-autogen, elixir-format
 msgid "%{count} invalid"
 msgstr ""
@@ -47,7 +47,7 @@ msgstr ""
 msgid "%{count} published"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:199
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:201
 #, elixir-autogen, elixir-format
 msgid "%{count} valid"
 msgstr ""
@@ -83,8 +83,8 @@ msgid "Acme Corporation"
 msgstr ""
 
 #: lib/lms_web/components/core_components.ex:342
-#: lib/lms_web/live/admin/employee_live/index.ex:301
-#: lib/lms_web/live/courses/course_list_live.ex:324
+#: lib/lms_web/live/admin/employee_live/index.ex:368
+#: lib/lms_web/live/courses/course_list_live.ex:408
 #, elixir-autogen, elixir-format
 msgid "Actions"
 msgstr ""
@@ -109,7 +109,7 @@ msgstr ""
 msgid "Add Employee"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:715
+#: lib/lms_web/live/courses/course_editor_live.ex:744
 #, elixir-autogen, elixir-format
 msgid "Add lesson"
 msgstr ""
@@ -137,13 +137,15 @@ msgid "Already have an account?"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_list_live.ex:298
-#: lib/lms_web/live/courses/course_list_live.ex:404
+#: lib/lms_web/live/courses/course_list_live.ex:381
+#: lib/lms_web/live/courses/course_list_live.ex:488
 #, elixir-autogen, elixir-format
 msgid "Archive"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_list_live.ex:294
-#: lib/lms_web/live/courses/course_list_live.ex:401
+#: lib/lms_web/live/courses/course_list_live.ex:378
+#: lib/lms_web/live/courses/course_list_live.ex:485
 #, elixir-autogen, elixir-format
 msgid "Archive this course?"
 msgstr ""
@@ -153,7 +155,7 @@ msgstr ""
 msgid "Archived"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:427
+#: lib/lms_web/live/courses/course_editor_live.ex:435
 #, elixir-autogen, elixir-format
 msgid "Archived — Read Only"
 msgstr ""
@@ -164,8 +166,8 @@ msgstr ""
 msgid "Attempting to reconnect"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:239
-#: lib/lms_web/live/courses/course_editor_live.ex:420
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:241
+#: lib/lms_web/live/courses/course_editor_live.ex:428
 #, elixir-autogen, elixir-format
 msgid "Back"
 msgstr ""
@@ -190,7 +192,7 @@ msgstr ""
 msgid "Bulk Upload"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:173
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:175
 #: lib/lms_web/live/admin/employee_live/invite_form_component.ex:82
 #: lib/lms_web/live/admin/enrollment_live/enroll_form_component.ex:186
 #: lib/lms_web/live/courses/course_form_live.ex:204
@@ -203,17 +205,17 @@ msgstr ""
 msgid "Cannot publish: course needs at least one chapter with a lesson."
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:447
+#: lib/lms_web/live/courses/course_editor_live.ex:476
 #, elixir-autogen, elixir-format
 msgid "Chapter"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:120
+#: lib/lms_web/live/courses/course_editor_live.ex:121
 #, elixir-autogen, elixir-format
 msgid "Chapter deleted."
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:476
+#: lib/lms_web/live/courses/course_editor_live.ex:505
 #, elixir-autogen, elixir-format
 msgid "Chapter title..."
 msgstr ""
@@ -240,7 +242,8 @@ msgstr ""
 msgid "Companies"
 msgstr ""
 
-#: lib/lms_web/live/admin/company_list_live.ex:93
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:56
+#: lib/lms_web/live/admin/company_list_live.ex:132
 #: lib/lms_web/live/company_registration_live.ex:70
 #, elixir-autogen, elixir-format
 msgid "Company"
@@ -274,7 +277,7 @@ msgstr ""
 msgid "Confirm password"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:440
+#: lib/lms_web/live/courses/course_editor_live.ex:469
 #, elixir-autogen, elixir-format
 msgid "Contents"
 msgstr ""
@@ -299,7 +302,7 @@ msgstr ""
 msgid "Could not resend invitation."
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:247
+#: lib/lms_web/live/courses/course_editor_live.ex:249
 #, elixir-autogen, elixir-format
 msgid "Could not save lesson."
 msgstr ""
@@ -310,13 +313,13 @@ msgid "Could not update role."
 msgstr ""
 
 #: lib/lms_web/live/admin/enrollment_live/enroll_form_component.ex:116
-#: lib/lms_web/live/admin/enrollment_live/index.ex:298
-#: lib/lms_web/live/courses/course_list_live.ex:320
+#: lib/lms_web/live/admin/enrollment_live/index.ex:333
+#: lib/lms_web/live/courses/course_list_live.ex:404
 #, elixir-autogen, elixir-format
 msgid "Course"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:425
+#: lib/lms_web/live/courses/course_editor_live.ex:433
 #, elixir-autogen, elixir-format
 msgid "Course Editor"
 msgstr ""
@@ -353,8 +356,9 @@ msgstr ""
 
 #: lib/lms_web/components/layouts.ex:80
 #: lib/lms_web/components/layouts.ex:224
-#: lib/lms_web/live/admin/company_list_live.ex:104
-#: lib/lms_web/live/admin/company_list_live.ex:154
+#: lib/lms_web/live/admin/company_list_live.ex:113
+#: lib/lms_web/live/admin/company_list_live.ex:143
+#: lib/lms_web/live/admin/company_list_live.ex:193
 #: lib/lms_web/live/courses/course_list_live.ex:12
 #: lib/lms_web/live/courses/course_list_live.ex:133
 #: lib/lms_web/live/dashboard_live.ex:64
@@ -393,13 +397,14 @@ msgstr ""
 msgid "Create your organization and admin account to get started."
 msgstr ""
 
-#: lib/lms_web/live/admin/company_list_live.ex:110
-#: lib/lms_web/live/admin/company_list_live.ex:164
+#: lib/lms_web/live/admin/company_list_live.ex:125
+#: lib/lms_web/live/admin/company_list_live.ex:149
+#: lib/lms_web/live/admin/company_list_live.ex:203
 #, elixir-autogen, elixir-format
 msgid "Created"
 msgstr ""
 
-#: lib/lms_web/live/admin/company_list_live.ex:182
+#: lib/lms_web/live/admin/company_list_live.ex:221
 #, elixir-autogen, elixir-format
 msgid "Created At"
 msgstr ""
@@ -417,36 +422,40 @@ msgstr ""
 msgid "Dashboard"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:675
-#: lib/lms_web/live/courses/course_editor_live.ex:779
+#: lib/lms_web/live/courses/course_editor_live.ex:704
+#: lib/lms_web/live/courses/course_editor_live.ex:808
 #: lib/lms_web/live/courses/course_list_live.ex:308
-#: lib/lms_web/live/courses/course_list_live.ex:413
+#: lib/lms_web/live/courses/course_list_live.ex:390
+#: lib/lms_web/live/courses/course_list_live.ex:497
 #, elixir-autogen, elixir-format
 msgid "Delete"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:673
+#: lib/lms_web/live/courses/course_editor_live.ex:702
 #, elixir-autogen, elixir-format
 msgid "Delete this chapter and all its lessons?"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_list_live.ex:304
-#: lib/lms_web/live/courses/course_list_live.ex:410
+#: lib/lms_web/live/courses/course_list_live.ex:387
+#: lib/lms_web/live/courses/course_list_live.ex:494
 #, elixir-autogen, elixir-format
 msgid "Delete this course? This cannot be undone."
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:777
+#: lib/lms_web/live/courses/course_editor_live.ex:806
 #, elixir-autogen, elixir-format
 msgid "Delete this lesson?"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:360
+#: lib/lms_web/live/admin/employee_live/index.ex:341
+#: lib/lms_web/live/admin/employee_live/index.ex:427
 #, elixir-autogen, elixir-format
 msgid "Demote"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:353
+#: lib/lms_web/live/admin/employee_live/index.ex:334
+#: lib/lms_web/live/admin/employee_live/index.ex:420
 #, elixir-autogen, elixir-format
 msgid "Demote %{name} to Employee?"
 msgstr ""
@@ -456,12 +465,12 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: lib/lms_web/live/admin/company_list_live.ex:174
+#: lib/lms_web/live/admin/company_list_live.ex:213
 #, elixir-autogen, elixir-format
 msgid "Details"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:281
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:283
 #, elixir-autogen, elixir-format
 msgid "Done"
 msgstr ""
@@ -471,13 +480,14 @@ msgstr ""
 msgid "Draft"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:632
-#: lib/lms_web/live/courses/course_editor_live.ex:747
+#: lib/lms_web/live/courses/course_editor_live.ex:661
+#: lib/lms_web/live/courses/course_editor_live.ex:776
 #, elixir-autogen, elixir-format
 msgid "Drag to reorder"
 msgstr ""
 
-#: lib/lms_web/live/admin/enrollment_live/index.ex:299
+#: lib/lms_web/live/admin/enrollment_live/index.ex:306
+#: lib/lms_web/live/admin/enrollment_live/index.ex:334
 #, elixir-autogen, elixir-format
 msgid "Due Date"
 msgstr ""
@@ -493,10 +503,11 @@ msgstr ""
 msgid "Due: %{date}"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:666
-#: lib/lms_web/live/courses/course_editor_live.ex:770
+#: lib/lms_web/live/courses/course_editor_live.ex:695
+#: lib/lms_web/live/courses/course_editor_live.ex:799
 #: lib/lms_web/live/courses/course_list_live.ex:274
-#: lib/lms_web/live/courses/course_list_live.ex:379
+#: lib/lms_web/live/courses/course_list_live.ex:360
+#: lib/lms_web/live/courses/course_list_live.ex:463
 #, elixir-autogen, elixir-format
 msgid "Edit"
 msgstr ""
@@ -508,10 +519,9 @@ msgstr ""
 
 #: lib/lms_web/controllers/user_registration_html/new.html.heex:25
 #: lib/lms_web/controllers/user_session_html/new.html.heex:41
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:39
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:51
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:212
-#: lib/lms_web/live/admin/employee_live/index.ex:288
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:97
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:214
+#: lib/lms_web/live/admin/employee_live/index.ex:355
 #: lib/lms_web/live/company_registration_live.ex:97
 #: lib/lms_web/live/invitation_live/accept.ex:86
 #, elixir-autogen, elixir-format
@@ -523,15 +533,16 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
-#: lib/lms_web/live/admin/enrollment_live/index.ex:297
+#: lib/lms_web/live/admin/enrollment_live/index.ex:332
 #, elixir-autogen, elixir-format
 msgid "Employee"
 msgstr ""
 
 #: lib/lms_web/components/layouts.ex:72
 #: lib/lms_web/components/layouts.ex:215
-#: lib/lms_web/live/admin/company_list_live.ex:101
-#: lib/lms_web/live/admin/company_list_live.ex:149
+#: lib/lms_web/live/admin/company_list_live.ex:107
+#: lib/lms_web/live/admin/company_list_live.ex:140
+#: lib/lms_web/live/admin/company_list_live.ex:188
 #: lib/lms_web/live/admin/employee_live/index.ex:16
 #: lib/lms_web/live/admin/employee_live/index.ex:214
 #: lib/lms_web/live/dashboard_live.ex:165
@@ -555,7 +566,7 @@ msgstr ""
 msgid "Enroll Employees"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_list_live.ex:322
+#: lib/lms_web/live/courses/course_list_live.ex:406
 #, elixir-autogen, elixir-format
 msgid "Enrolled"
 msgstr ""
@@ -567,8 +578,9 @@ msgstr ""
 
 #: lib/lms_web/components/layouts.ex:88
 #: lib/lms_web/components/layouts.ex:233
-#: lib/lms_web/live/admin/company_list_live.ex:107
-#: lib/lms_web/live/admin/company_list_live.ex:159
+#: lib/lms_web/live/admin/company_list_live.ex:119
+#: lib/lms_web/live/admin/company_list_live.ex:146
+#: lib/lms_web/live/admin/company_list_live.ex:198
 #: lib/lms_web/live/admin/enrollment_live/index.ex:21
 #: lib/lms_web/live/admin/enrollment_live/index.ex:207
 #: lib/lms_web/live/dashboard_live.ex:71
@@ -577,12 +589,12 @@ msgstr ""
 msgid "Enrollments"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:848
+#: lib/lms_web/live/courses/course_editor_live.ex:877
 #, elixir-autogen, elixir-format
 msgid "Error uploading %{name}: file must be an image under 5MB"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:291
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:293
 #, elixir-autogen, elixir-format
 msgid "File is too large (max 1 MB)"
 msgstr ""
@@ -592,13 +604,14 @@ msgstr ""
 msgid "File is too large (max 5MB)"
 msgstr ""
 
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:26
 #: lib/lms_web/live/admin/employee_live/invite_form_component.ex:69
 #: lib/lms_web/live/company_registration_live.ex:90
 #, elixir-autogen, elixir-format
 msgid "Full name"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:586
+#: lib/lms_web/live/courses/course_editor_live.ex:615
 #, elixir-autogen, elixir-format
 msgid "Image"
 msgstr ""
@@ -625,12 +638,12 @@ msgstr ""
 msgid "Invitation sent to %{email}."
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:265
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:267
 #, elixir-autogen, elixir-format
 msgid "Invitations Sent!"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:250
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:252
 #, elixir-autogen, elixir-format
 msgid "Invite %{count} Employees"
 msgstr ""
@@ -645,7 +658,7 @@ msgstr ""
 msgid "Invite a New Employee"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:271
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:273
 #: lib/lms_web/live/admin/employee_live/index.ex:254
 #, elixir-autogen, elixir-format
 msgid "Invited"
@@ -677,17 +690,17 @@ msgstr ""
 msgid "Lesson completed!"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:205
+#: lib/lms_web/live/courses/course_editor_live.ex:206
 #, elixir-autogen, elixir-format
 msgid "Lesson deleted."
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:243
+#: lib/lms_web/live/courses/course_editor_live.ex:245
 #, elixir-autogen, elixir-format
 msgid "Lesson saved."
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:704
+#: lib/lms_web/live/courses/course_editor_live.ex:733
 #, elixir-autogen, elixir-format
 msgid "Lesson title..."
 msgstr ""
@@ -740,7 +753,7 @@ msgstr ""
 msgid "Minimum 12 characters"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:797
+#: lib/lms_web/live/courses/course_editor_live.ex:826
 #, elixir-autogen, elixir-format
 msgid "Move"
 msgstr ""
@@ -753,8 +766,8 @@ msgstr ""
 msgid "My Learning"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:211
-#: lib/lms_web/live/admin/employee_live/index.ex:287
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:213
+#: lib/lms_web/live/admin/employee_live/index.ex:354
 #, elixir-autogen, elixir-format
 msgid "Name"
 msgstr ""
@@ -772,15 +785,15 @@ msgstr ""
 msgid "New Course"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:401
-#: lib/lms_web/live/admin/enrollment_live/index.ex:378
+#: lib/lms_web/live/admin/employee_live/index.ex:468
+#: lib/lms_web/live/admin/enrollment_live/index.ex:413
 #: lib/lms_web/live/courses/course_preview_live.ex:233
 #: lib/lms_web/live/employee/course_viewer_live.ex:333
 #, elixir-autogen, elixir-format
 msgid "Next"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:454
+#: lib/lms_web/live/courses/course_editor_live.ex:483
 #, elixir-autogen, elixir-format
 msgid "No chapters yet."
 msgstr ""
@@ -857,7 +870,7 @@ msgstr ""
 msgid "Not Started"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:292
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:294
 #, elixir-autogen, elixir-format
 msgid "Only CSV files are accepted"
 msgstr ""
@@ -867,7 +880,7 @@ msgstr ""
 msgid "Only one file allowed"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:293
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:295
 #, elixir-autogen, elixir-format
 msgid "Only one file can be uploaded"
 msgstr ""
@@ -884,14 +897,14 @@ msgstr ""
 msgid "Overview of your company's learning platform"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:177
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:179
 #, elixir-autogen, elixir-format
 msgid "Parsing..."
 msgstr ""
 
 #: lib/lms_web/controllers/user_registration_html/new.html.heex:33
 #: lib/lms_web/controllers/user_session_html/new.html.heex:49
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:65
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:116
 #: lib/lms_web/live/company_registration_live.ex:104
 #: lib/lms_web/live/invitation_live/accept.ex:103
 #, elixir-autogen, elixir-format
@@ -908,37 +921,41 @@ msgstr ""
 msgid "Please select employees and a course."
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:385
-#: lib/lms_web/live/admin/enrollment_live/index.ex:362
+#: lib/lms_web/live/admin/employee_live/index.ex:452
+#: lib/lms_web/live/admin/enrollment_live/index.ex:397
 #: lib/lms_web/live/courses/course_preview_live.ex:224
 #: lib/lms_web/live/employee/course_viewer_live.ex:324
 #, elixir-autogen, elixir-format
 msgid "Previous"
 msgstr ""
 
-#: lib/lms_web/live/admin/enrollment_live/index.ex:309
+#: lib/lms_web/live/admin/enrollment_live/index.ex:344
 #, elixir-autogen, elixir-format
 msgid "Progress"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:346
+#: lib/lms_web/live/admin/employee_live/index.ex:327
+#: lib/lms_web/live/admin/employee_live/index.ex:413
 #, elixir-autogen, elixir-format
 msgid "Promote"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:339
+#: lib/lms_web/live/admin/employee_live/index.ex:320
+#: lib/lms_web/live/admin/employee_live/index.ex:406
 #, elixir-autogen, elixir-format
 msgid "Promote %{name} to Course Creator?"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_list_live.ex:288
-#: lib/lms_web/live/courses/course_list_live.ex:395
+#: lib/lms_web/live/courses/course_list_live.ex:372
+#: lib/lms_web/live/courses/course_list_live.ex:479
 #, elixir-autogen, elixir-format
 msgid "Publish"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_list_live.ex:284
-#: lib/lms_web/live/courses/course_list_live.ex:392
+#: lib/lms_web/live/courses/course_list_live.ex:369
+#: lib/lms_web/live/courses/course_list_live.ex:476
 #, elixir-autogen, elixir-format
 msgid "Publish this course?"
 msgstr ""
@@ -974,17 +991,20 @@ msgstr ""
 msgid "Registering..."
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:332
+#: lib/lms_web/live/admin/employee_live/index.ex:313
+#: lib/lms_web/live/admin/employee_live/index.ex:399
 #, elixir-autogen, elixir-format
 msgid "Resend"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:290
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:50
+#: lib/lms_web/live/admin/employee_live/index.ex:303
+#: lib/lms_web/live/admin/employee_live/index.ex:357
 #, elixir-autogen, elixir-format
 msgid "Role"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:590
+#: lib/lms_web/live/courses/course_editor_live.ex:619
 #, elixir-autogen, elixir-format
 msgid "Save"
 msgstr ""
@@ -994,7 +1014,7 @@ msgstr ""
 msgid "Save Course"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:29
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:35
 #: lib/lms_web/live/courses/course_form_live.ex:206
 #, elixir-autogen, elixir-format
 msgid "Saving..."
@@ -1020,7 +1040,7 @@ msgstr ""
 msgid "Select a course..."
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:604
+#: lib/lms_web/live/courses/course_editor_live.ex:633
 #, elixir-autogen, elixir-format
 msgid "Select a lesson to edit its content"
 msgstr ""
@@ -1030,11 +1050,12 @@ msgstr ""
 msgid "Send Invitation"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:247
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:249
 #, elixir-autogen, elixir-format
 msgid "Sending invitations..."
 msgstr ""
 
+#: lib/lms_web/controllers/user_settings_html/edit_email.html.heex:27
 #: lib/lms_web/live/admin/employee_live/invite_form_component.ex:84
 #, elixir-autogen, elixir-format
 msgid "Sending..."
@@ -1045,22 +1066,22 @@ msgstr ""
 msgid "Set Your Password"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/index.ex:372
+#: lib/lms_web/live/admin/employee_live/index.ex:439
 #, elixir-autogen, elixir-format
 msgid "Showing page %{page} of %{total} (%{count} employees)"
 msgstr ""
 
-#: lib/lms_web/live/admin/enrollment_live/index.ex:349
+#: lib/lms_web/live/admin/enrollment_live/index.ex:384
 #, elixir-autogen, elixir-format
 msgid "Showing page %{page} of %{total} (%{count} enrollments)"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:275
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:277
 #, elixir-autogen, elixir-format
 msgid "Skipped"
 msgstr ""
 
-#: lib/lms_web/live/admin/company_list_live.ex:178
+#: lib/lms_web/live/admin/company_list_live.ex:217
 #, elixir-autogen, elixir-format
 msgid "Slug"
 msgstr ""
@@ -1070,15 +1091,15 @@ msgstr ""
 msgid "Something went wrong!"
 msgstr ""
 
-#: lib/lms_web/live/courses/course_editor_live.ex:607
+#: lib/lms_web/live/courses/course_editor_live.ex:636
 #, elixir-autogen, elixir-format
 msgid "Start by adding a chapter in the sidebar"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:213
-#: lib/lms_web/live/admin/employee_live/index.ex:289
-#: lib/lms_web/live/admin/enrollment_live/index.ex:310
-#: lib/lms_web/live/courses/course_list_live.ex:321
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:215
+#: lib/lms_web/live/admin/employee_live/index.ex:356
+#: lib/lms_web/live/admin/enrollment_live/index.ex:345
+#: lib/lms_web/live/courses/course_list_live.ex:405
 #, elixir-autogen, elixir-format
 msgid "Status"
 msgstr ""
@@ -1114,6 +1135,7 @@ msgstr ""
 msgid "Today"
 msgstr ""
 
+#: lib/lms_web/live/courses/course_editor_live.ex:443
 #: lib/lms_web/live/courses/course_preview_live.ex:133
 #: lib/lms_web/live/employee/course_viewer_live.ex:196
 #, elixir-autogen, elixir-format
@@ -1135,7 +1157,7 @@ msgstr ""
 msgid "Unsupported file type"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:181
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:183
 #, elixir-autogen, elixir-format
 msgid "Upload & Preview"
 msgstr ""
@@ -1150,12 +1172,12 @@ msgstr ""
 msgid "Upload error"
 msgstr ""
 
-#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:222
+#: lib/lms_web/live/admin/employee_live/bulk_upload_component.ex:224
 #, elixir-autogen, elixir-format
 msgid "Valid"
 msgstr ""
 
-#: lib/lms_web/live/admin/company_list_live.ex:120
+#: lib/lms_web/live/admin/company_list_live.ex:159
 #, elixir-autogen, elixir-format
 msgid "View"
 msgstr ""
@@ -1245,18 +1267,17 @@ msgstr ""
 msgid "Build courses with chapters and lessons. Add content, organize your curriculum, and publish when ready."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:56
+#: lib/lms_web/controllers/user_settings_html/edit_email.html.heex:4
 #, elixir-autogen, elixir-format
 msgid "Change Email"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:55
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:88
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:139
 #, elixir-autogen, elixir-format
 msgid "Changing..."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:84
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:135
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Confirm new password"
 msgstr ""
@@ -1380,7 +1401,7 @@ msgstr ""
 msgid "Monitor progress, see completions, and keep your team on track with real-time dashboards."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:77
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:128
 #, elixir-autogen, elixir-format
 msgid "New password"
 msgstr ""
@@ -1400,7 +1421,7 @@ msgstr ""
 msgid "Ready to Uplift Your Team?"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:89
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:140
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Save Password"
 msgstr ""
@@ -1491,29 +1512,9 @@ msgstr ""
 msgid "with Training They'll"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_controller.ex:54
-#, elixir-autogen, elixir-format, fuzzy
-msgid "Could not update language preference."
-msgstr ""
-
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:13
-#, elixir-autogen, elixir-format
-msgid "Language"
-msgstr ""
-
-#: lib/lms_web/controllers/user_settings_controller.ex:49
-#, elixir-autogen, elixir-format
-msgid "Language preference updated successfully."
-msgstr ""
-
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:25
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:32
 #, elixir-autogen, elixir-format
 msgid "Preferred language"
-msgstr ""
-
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:30
-#, elixir-autogen, elixir-format
-msgid "Save Language"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_preview_live.ex:123
@@ -1522,13 +1523,15 @@ msgid "Back to Courses"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_list_live.ex:270
-#: lib/lms_web/live/courses/course_list_live.ex:372
+#: lib/lms_web/live/courses/course_list_live.ex:357
+#: lib/lms_web/live/courses/course_list_live.ex:456
 #, elixir-autogen, elixir-format, fuzzy
 msgid "Content"
 msgstr ""
 
 #: lib/lms_web/live/courses/course_list_live.ex:278
-#: lib/lms_web/live/courses/course_list_live.ex:386
+#: lib/lms_web/live/courses/course_list_live.ex:363
+#: lib/lms_web/live/courses/course_list_live.ex:470
 #, elixir-autogen, elixir-format
 msgid "Preview"
 msgstr ""
@@ -1566,4 +1569,99 @@ msgstr ""
 #: lib/lms_web/components/layouts.ex:134
 #, elixir-autogen, elixir-format
 msgid "Open menu"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:80
+#, elixir-autogen, elixir-format
+msgid "A link to confirm your email change has been sent to the new address."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:46
+#, elixir-autogen, elixir-format
+msgid "Account Info"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:92
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Account Security"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit_email.html.heex:37
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Back to settings"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:106
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Change email"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:74
+#, elixir-autogen, elixir-format
+msgid "Confirmed"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:99
+#, elixir-autogen, elixir-format
+msgid "Email change link is invalid or it has expired."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:94
+#, elixir-autogen, elixir-format
+msgid "Email changed successfully."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:68
+#, elixir-autogen, elixir-format, fuzzy
+msgid "Email status"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:62
+#, elixir-autogen, elixir-format
+msgid "Member since"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit_email.html.heex:22
+#, elixir-autogen, elixir-format
+msgid "New email"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:80
+#, elixir-autogen, elixir-format
+msgid "Not confirmed"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:43
+#, elixir-autogen, elixir-format
+msgid "Password updated successfully."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:14
+#, elixir-autogen, elixir-format
+msgid "Profile"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:23
+#, elixir-autogen, elixir-format
+msgid "Profile updated successfully."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:36
+#, elixir-autogen, elixir-format
+msgid "Save Profile"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit_email.html.heex:28
+#, elixir-autogen, elixir-format
+msgid "Send confirmation link"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit_email.html.heex:6
+#, elixir-autogen, elixir-format
+msgid "We'll send a confirmation link to the new address."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_controller.ex:113
+#, elixir-autogen, elixir-format
+msgid "You must re-authenticate to access this page."
 msgstr ""
