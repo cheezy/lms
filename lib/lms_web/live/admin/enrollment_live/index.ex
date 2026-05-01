@@ -1,6 +1,11 @@
 defmodule LmsWeb.Admin.EnrollmentLive.Index do
   use LmsWeb, :live_view
 
+  import LmsWeb.LiveHelpers,
+    only: [format_progress: 1, maybe_put: 3, maybe_put: 4, pagination_range: 2]
+
+  import LmsWeb.SharedComponents, only: [sort_indicator: 1]
+
   alias Lms.Learning
 
   @sort_fields ~w(employee course due_date)a
@@ -166,30 +171,6 @@ defmodule LmsWeb.Admin.EnrollmentLive.Index do
     ~p"/admin/enrollments?#{params}"
   end
 
-  defp maybe_put(params, _key, nil), do: params
-  defp maybe_put(params, _key, ""), do: params
-  defp maybe_put(params, key, value), do: Map.put(params, key, value)
-
-  defp maybe_put(params, _key, default, default), do: params
-  defp maybe_put(params, key, value, _default), do: Map.put(params, key, value)
-
-  defp sort_indicator(assigns) do
-    ~H"""
-    <span :if={@sort_by == @field} class="ml-1">
-      <.icon
-        :if={@sort_order == :asc}
-        name="hero-chevron-up"
-        class="size-3 inline"
-      />
-      <.icon
-        :if={@sort_order == :desc}
-        name="hero-chevron-down"
-        class="size-3 inline"
-      />
-    </span>
-    """
-  end
-
   defp status_badge(assigns) do
     ~H"""
     <span class={[
@@ -209,18 +190,8 @@ defmodule LmsWeb.Admin.EnrollmentLive.Index do
   defp format_status(:completed), do: gettext("Completed")
   defp format_status(:overdue), do: gettext("Overdue")
 
-  defp format_progress(progress) do
-    :erlang.float_to_binary(progress, decimals: 0) <> "%"
-  end
-
   defp format_due_date(nil), do: "—"
   defp format_due_date(date), do: Calendar.strftime(date, "%b %d, %Y")
-
-  defp pagination_range(current_page, total_pages) do
-    start_page = max(1, current_page - 2)
-    end_page = min(total_pages, current_page + 2)
-    Enum.to_list(start_page..end_page)
-  end
 
   defp has_filters?(assigns) do
     assigns.search != "" || assigns.course_filter != nil || assigns.status_filter != ""

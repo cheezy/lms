@@ -456,345 +456,361 @@ defmodule LmsWeb.Courses.CourseEditorLive do
 
               <%!-- Chapter list --%>
               <div id="chapter-list" phx-hook={if(!@archived, do: "SortableChapters")}>
-                <div
+                <.chapter_item
                   :for={chapter <- @course.chapters}
-                  class="mb-2"
-                  id={"chapter-#{chapter.id}"}
-                  data-chapter-id={chapter.id}
-                >
-                  <%!-- Chapter header --%>
-                  <div class="flex items-center gap-1 group">
-                    <span
-                      :if={!@archived}
-                      data-drag-handle
-                      class="cursor-grab active:cursor-grabbing text-base-content/30 hover:text-base-content/60 px-0.5"
-                      title={gettext("Drag to reorder")}
-                    >
-                      <.icon name="hero-bars-3" class="size-3.5" />
-                    </span>
-                    <button
-                      phx-click="toggle_chapter"
-                      phx-value-id={chapter.id}
-                      class="btn btn-ghost btn-xs px-1"
-                    >
-                      <.icon
-                        name={
-                          if MapSet.member?(@expanded_chapters, chapter.id),
-                            do: "hero-chevron-down",
-                            else: "hero-chevron-right"
-                        }
-                        class="size-3.5"
-                      />
-                    </button>
-
-                    <%= if @editing == {:chapter, chapter.id} do %>
-                      <.form
-                        for={@form}
-                        phx-submit="update_chapter"
-                        class="flex-1 flex gap-1"
-                      >
-                        <.input
-                          field={@form[:title]}
-                          class="input input-xs input-bordered flex-1 bg-base-100"
-                          phx-mounted={JS.focus()}
-                        />
-                        <button type="submit" class="btn btn-ghost btn-xs text-success">
-                          <.icon name="hero-check" class="size-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          phx-click="cancel_edit"
-                          class="btn btn-ghost btn-xs text-error"
-                        >
-                          <.icon name="hero-x-mark" class="size-3.5" />
-                        </button>
-                      </.form>
-                    <% else %>
-                      <span class="flex-1 text-sm font-medium text-base-content truncate">
-                        {chapter.title}
-                      </span>
-                      <div :if={!@archived} class="hidden group-hover:flex items-center gap-0.5">
-                        <button
-                          phx-click="edit_chapter"
-                          phx-value-id={chapter.id}
-                          class="btn btn-ghost btn-xs px-1"
-                          title={gettext("Edit")}
-                        >
-                          <.icon name="hero-pencil" class="size-3" />
-                        </button>
-                        <button
-                          phx-click="delete_chapter"
-                          phx-value-id={chapter.id}
-                          data-confirm={gettext("Delete this chapter and all its lessons?")}
-                          class="btn btn-ghost btn-xs px-1 text-error"
-                          title={gettext("Delete")}
-                        >
-                          <.icon name="hero-trash" class="size-3" />
-                        </button>
-                      </div>
-                    <% end %>
-                  </div>
-
-                  <%!-- Lessons list (when expanded) --%>
-                  <div
-                    :if={MapSet.member?(@expanded_chapters, chapter.id)}
-                    id={"lessons-#{chapter.id}"}
-                    data-chapter-id={chapter.id}
-                    phx-hook={if(!@archived, do: "SortableLessons")}
-                    class="ml-6 mt-1 space-y-0.5"
-                  >
-                    <div
-                      :for={lesson <- chapter.lessons}
-                      class="flex items-center gap-1 group/lesson"
-                      id={"lesson-#{lesson.id}"}
-                      data-lesson-id={lesson.id}
-                    >
-                      <%= if @editing == {:lesson, lesson.id} do %>
-                        <.form
-                          for={@form}
-                          phx-submit="update_lesson_title"
-                          class="flex-1 flex gap-1"
-                        >
-                          <.input
-                            field={@form[:title]}
-                            class="input input-xs input-bordered flex-1 bg-base-100"
-                            phx-mounted={JS.focus()}
-                          />
-                          <button type="submit" class="btn btn-ghost btn-xs text-success">
-                            <.icon name="hero-check" class="size-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            phx-click="cancel_edit"
-                            class="btn btn-ghost btn-xs text-error"
-                          >
-                            <.icon name="hero-x-mark" class="size-3.5" />
-                          </button>
-                        </.form>
-                      <% else %>
-                        <span
-                          :if={!@archived}
-                          data-drag-handle
-                          class="cursor-grab active:cursor-grabbing text-base-content/30 hover:text-base-content/60 px-0.5"
-                          title={gettext("Drag to reorder")}
-                        >
-                          <.icon name="hero-bars-3" class="size-3" />
-                        </span>
-                        <button
-                          phx-click="select_lesson"
-                          phx-value-id={lesson.id}
-                          class={[
-                            "flex-1 text-left text-sm px-2 py-1 rounded truncate transition-colors",
-                            if(@selected_lesson && @selected_lesson.id == lesson.id,
-                              do: "bg-primary/10 text-primary font-medium border-l-2 border-primary",
-                              else: "text-base-content/70 hover:bg-base-300"
-                            )
-                          ]}
-                        >
-                          <.icon name="hero-document-text" class="size-3.5 inline mr-1" />
-                          {lesson.title}
-                        </button>
-                        <div
-                          :if={!@archived}
-                          class="hidden group-hover/lesson:flex items-center gap-0.5"
-                        >
-                          <button
-                            phx-click="edit_lesson_title"
-                            phx-value-id={lesson.id}
-                            class="btn btn-ghost btn-xs px-1"
-                            title={gettext("Edit")}
-                          >
-                            <.icon name="hero-pencil" class="size-3" />
-                          </button>
-                          <button
-                            phx-click="delete_lesson"
-                            phx-value-id={lesson.id}
-                            data-confirm={gettext("Delete this lesson?")}
-                            class="btn btn-ghost btn-xs px-1 text-error"
-                            title={gettext("Delete")}
-                          >
-                            <.icon name="hero-trash" class="size-3" />
-                          </button>
-                        </div>
-                      <% end %>
-                    </div>
-
-                    <%!-- Add lesson button --%>
-                    <%= if @adding == {:lesson, chapter.id} do %>
-                      <.form
-                        for={@form}
-                        phx-submit="save_new_lesson"
-                        class="flex gap-1 mt-1"
-                      >
-                        <.input
-                          field={@form[:title]}
-                          placeholder={gettext("Lesson title...")}
-                          class="input input-xs input-bordered flex-1 bg-base-100"
-                          phx-mounted={JS.focus()}
-                        />
-                        <button type="submit" class="btn btn-ghost btn-xs text-success">
-                          <.icon name="hero-check" class="size-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          phx-click="cancel_edit"
-                          class="btn btn-ghost btn-xs text-error"
-                        >
-                          <.icon name="hero-x-mark" class="size-3.5" />
-                        </button>
-                      </.form>
-                    <% else %>
-                      <button
-                        :if={!@archived}
-                        phx-click="add_lesson"
-                        phx-value-chapter-id={chapter.id}
-                        class="btn btn-ghost btn-xs text-primary/60 w-full justify-start mt-1"
-                      >
-                        <.icon name="hero-plus" class="size-3" />
-                        {gettext("Add lesson")}
-                      </button>
-                    <% end %>
-                  </div>
-                </div>
+                  chapter={chapter}
+                  archived={@archived}
+                  editing={@editing}
+                  adding={@adding}
+                  expanded_chapters={@expanded_chapters}
+                  selected_lesson={@selected_lesson}
+                  form={@form}
+                />
               </div>
 
               <%!-- Add chapter form (at bottom of sidebar) --%>
               <div :if={@adding == :chapter} class="mt-3 pt-3 border-t border-base-300">
-                <.form for={@form} phx-submit="save_new_chapter" class="flex gap-1">
-                  <.input
-                    field={@form[:title]}
-                    placeholder={gettext("Chapter title...")}
-                    class="input input-xs input-bordered flex-1 bg-base-100"
-                    phx-mounted={JS.focus()}
-                  />
-                  <button type="submit" class="btn btn-ghost btn-xs text-success">
-                    <.icon name="hero-check" class="size-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    phx-click="cancel_edit"
-                    class="btn btn-ghost btn-xs text-error"
-                  >
-                    <.icon name="hero-x-mark" class="size-3.5" />
-                  </button>
-                </.form>
+                <.inline_title_form
+                  form={@form}
+                  submit_event="save_new_chapter"
+                  placeholder={gettext("Chapter title...")}
+                />
               </div>
             </div>
           </div>
 
-          <%!-- Main content area --%>
-          <div class="flex-1 min-w-0">
-            <%= if @selected_lesson do %>
-              <div class="bg-base-200 rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-4">
-                  <h2 class="text-lg font-semibold text-base-content">{@selected_lesson.title}</h2>
-                  <%!-- Move to chapter dropdown --%>
-                  <div :if={!@archived && length(@course.chapters) > 1} class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-                      <.icon name="hero-arrows-right-left" class="size-4 mr-1" />
-                      {gettext("Move")}
-                    </div>
-                    <ul
-                      tabindex="0"
-                      class="dropdown-content menu bg-base-100 rounded-box z-10 w-56 p-2 shadow-lg border border-base-300"
-                    >
-                      <li
-                        :for={chapter <- @course.chapters}
-                        :if={chapter.id != @selected_lesson.chapter_id}
-                      >
-                        <button
-                          phx-click="move_lesson_to_chapter"
-                          phx-value-lesson-id={@selected_lesson.id}
-                          phx-value-chapter-id={chapter.id}
-                        >
-                          {chapter.title}
-                        </button>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <%!-- TipTap rich text editor --%>
-                <div
-                  id={"editor-#{@selected_lesson.id}"}
-                  phx-hook="TipTapEditor"
-                  phx-update="ignore"
-                  data-content={
-                    Jason.encode!(@selected_lesson.content || %{"type" => "doc", "content" => []})
-                  }
-                  data-readonly={to_string(@archived)}
-                >
-                  <div
-                    :if={!@archived}
-                    data-toolbar
-                    class="flex flex-wrap gap-0.5 p-2 bg-base-100 border border-base-300 rounded-t-lg"
-                  >
-                  </div>
-                  <div data-editor></div>
-                </div>
-
-                <%!-- Hidden image upload --%>
-                <form
-                  :if={!@archived}
-                  id="image-upload-form"
-                  phx-change="upload_image"
-                  phx-submit="upload_image"
-                  class="hidden"
-                >
-                  <.live_file_input upload={@uploads.image} />
-                </form>
-
-                <%!-- Upload errors --%>
-                <div
-                  :for={entry <- @uploads.image.entries}
-                  :if={entry.valid? == false}
-                  class="text-error text-sm mt-1"
-                >
-                  {error_to_string(entry)}
-                </div>
-
-                <div :if={!@archived} class="mt-4 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    phx-click={JS.dispatch("click", to: "#image-upload-form input[type=file]")}
-                    class="btn btn-ghost"
-                  >
-                    <.icon name="hero-photo" class="size-4 mr-1" />
-                    {gettext("Image")}
-                  </button>
-                  <button
-                    type="button"
-                    phx-click="save_content"
-                    class="btn btn-primary"
-                  >
-                    <.icon name="hero-check" class="size-4 mr-1" />
-                    {gettext("Save")}
-                  </button>
-                </div>
-
-                <%!-- Read-only view for archived courses --%>
-                <div :if={@archived} class="prose max-w-none mt-4">
-                  <div class="text-sm text-base-content bg-base-100 p-4 rounded-lg">
-                    {raw(render_lesson_content(@selected_lesson.content))}
-                  </div>
-                </div>
-              </div>
-            <% else %>
-              <%!-- Empty state --%>
-              <div class="bg-base-200 rounded-2xl p-12 text-center">
-                <.icon name="hero-document-text" class="size-16 text-base-content/20 mx-auto mb-4" />
-                <p class="text-base-content/50 text-lg">
-                  {gettext("Select a lesson to edit its content")}
-                </p>
-                <p :if={@course.chapters == []} class="text-base-content/40 text-sm mt-2">
-                  {gettext("Start by adding a chapter in the sidebar")}
-                </p>
-              </div>
-            <% end %>
-          </div>
+          <.editor_panel
+            selected_lesson={@selected_lesson}
+            course={@course}
+            archived={@archived}
+            uploads={@uploads}
+          />
         </div>
       </div>
     </Layouts.app>
+    """
+  end
+
+  # -- Private function components --
+
+  attr :form, :any, required: true
+  attr :submit_event, :string, required: true
+  attr :placeholder, :string, default: nil
+  attr :class, :string, default: "flex gap-1"
+
+  defp inline_title_form(assigns) do
+    ~H"""
+    <.form for={@form} phx-submit={@submit_event} class={@class}>
+      <.input
+        field={@form[:title]}
+        placeholder={@placeholder}
+        class="input input-xs input-bordered flex-1 bg-base-100"
+        phx-mounted={JS.focus()}
+      />
+      <button type="submit" class="btn btn-ghost btn-xs text-success">
+        <.icon name="hero-check" class="size-3.5" />
+      </button>
+      <button
+        type="button"
+        phx-click="cancel_edit"
+        class="btn btn-ghost btn-xs text-error"
+      >
+        <.icon name="hero-x-mark" class="size-3.5" />
+      </button>
+    </.form>
+    """
+  end
+
+  attr :selected_lesson, :any, required: true
+  attr :course, :any, required: true
+  attr :archived, :boolean, required: true
+  attr :uploads, :any, required: true
+
+  defp editor_panel(assigns) do
+    ~H"""
+    <div class="flex-1 min-w-0">
+      <%= if @selected_lesson do %>
+        <div class="bg-base-200 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold text-base-content">{@selected_lesson.title}</h2>
+            <.move_lesson_dropdown
+              :if={!@archived && length(@course.chapters) > 1}
+              selected_lesson={@selected_lesson}
+              chapters={@course.chapters}
+            />
+          </div>
+
+          <div
+            id={"editor-#{@selected_lesson.id}"}
+            phx-hook="TipTapEditor"
+            phx-update="ignore"
+            data-content={
+              Jason.encode!(@selected_lesson.content || %{"type" => "doc", "content" => []})
+            }
+            data-readonly={to_string(@archived)}
+          >
+            <div
+              :if={!@archived}
+              data-toolbar
+              class="flex flex-wrap gap-0.5 p-2 bg-base-100 border border-base-300 rounded-t-lg"
+            >
+            </div>
+            <div data-editor></div>
+          </div>
+
+          <form
+            :if={!@archived}
+            id="image-upload-form"
+            phx-change="upload_image"
+            phx-submit="upload_image"
+            class="hidden"
+          >
+            <.live_file_input upload={@uploads.image} />
+          </form>
+
+          <div
+            :for={entry <- @uploads.image.entries}
+            :if={entry.valid? == false}
+            class="text-error text-sm mt-1"
+          >
+            {error_to_string(entry)}
+          </div>
+
+          <div :if={!@archived} class="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              phx-click={JS.dispatch("click", to: "#image-upload-form input[type=file]")}
+              class="btn btn-ghost"
+            >
+              <.icon name="hero-photo" class="size-4 mr-1" />
+              {gettext("Image")}
+            </button>
+            <button type="button" phx-click="save_content" class="btn btn-primary">
+              <.icon name="hero-check" class="size-4 mr-1" />
+              {gettext("Save")}
+            </button>
+          </div>
+
+          <div :if={@archived} class="prose max-w-none mt-4">
+            <div class="text-sm text-base-content bg-base-100 p-4 rounded-lg">
+              {raw(render_lesson_content(@selected_lesson.content))}
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="bg-base-200 rounded-2xl p-12 text-center">
+          <.icon name="hero-document-text" class="size-16 text-base-content/20 mx-auto mb-4" />
+          <p class="text-base-content/50 text-lg">
+            {gettext("Select a lesson to edit its content")}
+          </p>
+          <p :if={@course.chapters == []} class="text-base-content/40 text-sm mt-2">
+            {gettext("Start by adding a chapter in the sidebar")}
+          </p>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
+  attr :chapter, :any, required: true
+  attr :archived, :boolean, required: true
+  attr :editing, :any, required: true
+  attr :adding, :any, required: true
+  attr :expanded_chapters, :any, required: true
+  attr :selected_lesson, :any, required: true
+  attr :form, :any, required: true
+
+  defp chapter_item(assigns) do
+    ~H"""
+    <div class="mb-2" id={"chapter-#{@chapter.id}"} data-chapter-id={@chapter.id}>
+      <%!-- Chapter header --%>
+      <div class="flex items-center gap-1 group">
+        <span
+          :if={!@archived}
+          data-drag-handle
+          class="cursor-grab active:cursor-grabbing text-base-content/30 hover:text-base-content/60 px-0.5"
+          title={gettext("Drag to reorder")}
+        >
+          <.icon name="hero-bars-3" class="size-3.5" />
+        </span>
+        <button
+          phx-click="toggle_chapter"
+          phx-value-id={@chapter.id}
+          class="btn btn-ghost btn-xs px-1"
+        >
+          <.icon
+            name={
+              if MapSet.member?(@expanded_chapters, @chapter.id),
+                do: "hero-chevron-down",
+                else: "hero-chevron-right"
+            }
+            class="size-3.5"
+          />
+        </button>
+
+        <%= if @editing == {:chapter, @chapter.id} do %>
+          <.inline_title_form
+            form={@form}
+            submit_event="update_chapter"
+            class="flex-1 flex gap-1"
+          />
+        <% else %>
+          <span class="flex-1 text-sm font-medium text-base-content truncate">
+            {@chapter.title}
+          </span>
+          <div :if={!@archived} class="hidden group-hover:flex items-center gap-0.5">
+            <button
+              phx-click="edit_chapter"
+              phx-value-id={@chapter.id}
+              class="btn btn-ghost btn-xs px-1"
+              title={gettext("Edit")}
+            >
+              <.icon name="hero-pencil" class="size-3" />
+            </button>
+            <button
+              phx-click="delete_chapter"
+              phx-value-id={@chapter.id}
+              data-confirm={gettext("Delete this chapter and all its lessons?")}
+              class="btn btn-ghost btn-xs px-1 text-error"
+              title={gettext("Delete")}
+            >
+              <.icon name="hero-trash" class="size-3" />
+            </button>
+          </div>
+        <% end %>
+      </div>
+
+      <%!-- Lessons list (when expanded) --%>
+      <div
+        :if={MapSet.member?(@expanded_chapters, @chapter.id)}
+        id={"lessons-#{@chapter.id}"}
+        data-chapter-id={@chapter.id}
+        phx-hook={if(!@archived, do: "SortableLessons")}
+        class="ml-6 mt-1 space-y-0.5"
+      >
+        <.lesson_item
+          :for={lesson <- @chapter.lessons}
+          lesson={lesson}
+          archived={@archived}
+          editing={@editing}
+          selected_lesson={@selected_lesson}
+          form={@form}
+        />
+
+        <%= if @adding == {:lesson, @chapter.id} do %>
+          <.inline_title_form
+            form={@form}
+            submit_event="save_new_lesson"
+            placeholder={gettext("Lesson title...")}
+            class="flex gap-1 mt-1"
+          />
+        <% else %>
+          <button
+            :if={!@archived}
+            phx-click="add_lesson"
+            phx-value-chapter-id={@chapter.id}
+            class="btn btn-ghost btn-xs text-primary/60 w-full justify-start mt-1"
+          >
+            <.icon name="hero-plus" class="size-3" />
+            {gettext("Add lesson")}
+          </button>
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  attr :lesson, :any, required: true
+  attr :archived, :boolean, required: true
+  attr :editing, :any, required: true
+  attr :selected_lesson, :any, required: true
+  attr :form, :any, required: true
+
+  defp lesson_item(assigns) do
+    ~H"""
+    <div
+      class="flex items-center gap-1 group/lesson"
+      id={"lesson-#{@lesson.id}"}
+      data-lesson-id={@lesson.id}
+    >
+      <%= if @editing == {:lesson, @lesson.id} do %>
+        <.inline_title_form
+          form={@form}
+          submit_event="update_lesson_title"
+          class="flex-1 flex gap-1"
+        />
+      <% else %>
+        <span
+          :if={!@archived}
+          data-drag-handle
+          class="cursor-grab active:cursor-grabbing text-base-content/30 hover:text-base-content/60 px-0.5"
+          title={gettext("Drag to reorder")}
+        >
+          <.icon name="hero-bars-3" class="size-3" />
+        </span>
+        <button
+          phx-click="select_lesson"
+          phx-value-id={@lesson.id}
+          class={[
+            "flex-1 text-left text-sm px-2 py-1 rounded truncate transition-colors",
+            if(@selected_lesson && @selected_lesson.id == @lesson.id,
+              do: "bg-primary/10 text-primary font-medium border-l-2 border-primary",
+              else: "text-base-content/70 hover:bg-base-300"
+            )
+          ]}
+        >
+          <.icon name="hero-document-text" class="size-3.5 inline mr-1" />
+          {@lesson.title}
+        </button>
+        <div :if={!@archived} class="hidden group-hover/lesson:flex items-center gap-0.5">
+          <button
+            phx-click="edit_lesson_title"
+            phx-value-id={@lesson.id}
+            class="btn btn-ghost btn-xs px-1"
+            title={gettext("Edit")}
+          >
+            <.icon name="hero-pencil" class="size-3" />
+          </button>
+          <button
+            phx-click="delete_lesson"
+            phx-value-id={@lesson.id}
+            data-confirm={gettext("Delete this lesson?")}
+            class="btn btn-ghost btn-xs px-1 text-error"
+            title={gettext("Delete")}
+          >
+            <.icon name="hero-trash" class="size-3" />
+          </button>
+        </div>
+      <% end %>
+    </div>
+    """
+  end
+
+  attr :selected_lesson, :any, required: true
+  attr :chapters, :list, required: true
+
+  defp move_lesson_dropdown(assigns) do
+    ~H"""
+    <div class="dropdown dropdown-end">
+      <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
+        <.icon name="hero-arrows-right-left" class="size-4 mr-1" />
+        {gettext("Move")}
+      </div>
+      <ul
+        tabindex="0"
+        class="dropdown-content menu bg-base-100 rounded-box z-10 w-56 p-2 shadow-lg border border-base-300"
+      >
+        <li :for={chapter <- @chapters} :if={chapter.id != @selected_lesson.chapter_id}>
+          <button
+            phx-click="move_lesson_to_chapter"
+            phx-value-lesson-id={@selected_lesson.id}
+            phx-value-chapter-id={chapter.id}
+          >
+            {chapter.title}
+          </button>
+        </li>
+      </ul>
+    </div>
     """
   end
 

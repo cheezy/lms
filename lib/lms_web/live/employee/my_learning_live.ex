@@ -1,6 +1,8 @@
 defmodule LmsWeb.Employee.MyLearningLive do
   use LmsWeb, :live_view
 
+  import LmsWeb.LiveHelpers, only: [format_progress: 1]
+
   alias Lms.Learning
 
   @impl true
@@ -43,10 +45,6 @@ defmodule LmsWeb.Employee.MyLearningLive do
   defp due_date_sorter(nil, _), do: false
   defp due_date_sorter(_, nil), do: true
   defp due_date_sorter(a, b), do: Date.compare(a, b) != :gt
-
-  defp format_progress(progress) do
-    :erlang.float_to_binary(progress, decimals: 0) <> "%"
-  end
 
   defp total_lessons(enrollment), do: enrollment.total_lessons
 

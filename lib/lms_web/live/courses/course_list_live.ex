@@ -1,6 +1,8 @@
 defmodule LmsWeb.Courses.CourseListLive do
   use LmsWeb, :live_view
 
+  import LmsWeb.LiveHelpers, only: [maybe_put: 3]
+
   alias Lms.Training
 
   @impl true
@@ -110,10 +112,6 @@ defmodule LmsWeb.Courses.CourseListLive do
 
     ~p"/courses?#{params}"
   end
-
-  defp maybe_put(params, _key, nil), do: params
-  defp maybe_put(params, _key, ""), do: params
-  defp maybe_put(params, key, value), do: Map.put(params, key, value)
 
   defp admin?(user) do
     user.role in [:company_admin, :system_admin]

@@ -1,6 +1,8 @@
 defmodule LmsWeb.Employee.CourseViewerLive do
   use LmsWeb, :live_view
 
+  import LmsWeb.LiveHelpers, only: [format_progress: 1]
+
   alias Lms.Learning
   alias Lms.Training
 
@@ -164,10 +166,6 @@ defmodule LmsWeb.Employee.CourseViewerLive do
   end
 
   defp render_lesson_content(content) when is_binary(content), do: content
-
-  defp format_progress(progress) do
-    :erlang.float_to_binary(progress, decimals: 0) <> "%"
-  end
 
   defp total_lessons(course) do
     Enum.reduce(course.chapters, 0, fn ch, acc -> acc + length(ch.lessons) end)

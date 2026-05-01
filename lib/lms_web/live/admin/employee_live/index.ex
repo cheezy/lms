@@ -1,6 +1,9 @@
 defmodule LmsWeb.Admin.EmployeeLive.Index do
   use LmsWeb, :live_view
 
+  import LmsWeb.LiveHelpers, only: [maybe_put: 3, maybe_put: 4, pagination_range: 2]
+  import LmsWeb.SharedComponents, only: [sort_indicator: 1]
+
   alias Lms.Accounts
 
   @sort_fields ~w(name email status role)a
@@ -199,30 +202,6 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
       |> maybe_put(:page, to_string(assigns.page), "1")
 
     ~p"/admin/employees?#{params}"
-  end
-
-  defp maybe_put(params, _key, nil), do: params
-  defp maybe_put(params, _key, ""), do: params
-  defp maybe_put(params, key, value), do: Map.put(params, key, value)
-
-  defp maybe_put(params, _key, default, default), do: params
-  defp maybe_put(params, key, value, _default), do: Map.put(params, key, value)
-
-  defp sort_indicator(assigns) do
-    ~H"""
-    <span :if={@sort_by == @field} class="ml-1">
-      <.icon
-        :if={@sort_order == :asc}
-        name="hero-chevron-up"
-        class="size-3 inline"
-      />
-      <.icon
-        :if={@sort_order == :desc}
-        name="hero-chevron-down"
-        class="size-3 inline"
-      />
-    </span>
-    """
   end
 
   @impl true
@@ -440,11 +419,5 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
       </div>
     </Layouts.app>
     """
-  end
-
-  defp pagination_range(current_page, total_pages) do
-    start_page = max(1, current_page - 2)
-    end_page = min(total_pages, current_page + 2)
-    Enum.to_list(start_page..end_page)
   end
 end
