@@ -1388,11 +1388,6 @@ msgstr "Se connecter"
 msgid "Log out"
 msgstr "Se déconnecter"
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:6
-#, elixir-autogen, elixir-format
-msgid "Manage your account email address and password settings"
-msgstr "Gérez votre adresse courriel et vos paramètres de mot de passe"
-
 #: lib/lms_web/controllers/page_html/home.html.heex:307
 #, elixir-autogen, elixir-format
 msgid "Monitor progress, see completions, and keep your team on track with real-time dashboards."
@@ -1812,3 +1807,8 @@ msgstr "Vous avez été invité à rejoindre Uplift"
 #, elixir-autogen, elixir-format
 msgid "You've been invited to join Uplift. You can set up your account by visiting the URL below:"
 msgstr "Vous avez été invité à rejoindre Uplift. Vous pouvez configurer votre compte en visitant l'URL ci-dessous :"
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:6
+#, elixir-autogen, elixir-format
+msgid "Manage your profile and account security"
+msgstr "Gérez votre profil et la sécurité de votre compte"

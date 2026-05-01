@@ -1388,11 +1388,6 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:6
-#, elixir-autogen, elixir-format
-msgid "Manage your account email address and password settings"
-msgstr ""
-
 #: lib/lms_web/controllers/page_html/home.html.heex:307
 #, elixir-autogen, elixir-format
 msgid "Monitor progress, see completions, and keep your team on track with real-time dashboards."
@@ -1811,4 +1806,9 @@ msgstr ""
 #: lib/lms/accounts/user_notifier.ex:77
 #, elixir-autogen, elixir-format
 msgid "You've been invited to join Uplift. You can set up your account by visiting the URL below:"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:6
+#, elixir-autogen, elixir-format
+msgid "Manage your profile and account security"
 msgstr ""
