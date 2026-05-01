@@ -27,6 +27,13 @@
             required
             phx-mounted={JS.focus()}
           />
+          <.input
+            field={f[:password]}
+            type="password"
+            label={gettext("Password")}
+            autocomplete="new-password"
+            required
+          />
 
           <.button
             phx-disable-with={gettext("Creating account...")}

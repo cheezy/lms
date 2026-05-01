@@ -3,29 +3,26 @@ defmodule LmsWeb.UserRegistrationController do
 
   alias Lms.Accounts
   alias Lms.Accounts.User
+  alias LmsWeb.UserAuth
 
   plug :assign_hide_root_nav
 
   def new(conn, _params) do
-    changeset = Accounts.change_user_email(%User{})
+    # Build a combined changeset that exposes email + password fields to the form.
+    changeset =
+      %User{}
+      |> Accounts.change_user_email(%{})
+      |> User.password_changeset(%{}, hash_password: false)
+
     render(conn, :new, changeset: changeset)
   end
 
   def create(conn, %{"user" => user_params}) do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
-        {:ok, _} =
-          Accounts.deliver_login_instructions(
-            user,
-            &url(~p"/users/log-in/#{&1}")
-          )
-
         conn
-        |> put_flash(
-          :info,
-          "An email was sent to #{user.email}, please access it to confirm your account."
-        )
-        |> redirect(to: ~p"/users/log-in")
+        |> put_flash(:info, gettext("Account created successfully."))
+        |> UserAuth.log_in_user(user)
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, :new, changeset: changeset)

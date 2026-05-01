@@ -14,11 +14,12 @@ defmodule Lms.AccountsFixtures do
 
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
-      email: unique_user_email()
+      email: unique_user_email(),
+      password: valid_user_password()
     })
   end
 
-  def unconfirmed_user_fixture(attrs \\ %{}) do
+  def user_fixture(attrs \\ %{}) do
     {:ok, user} =
       attrs
       |> valid_user_attributes()
@@ -27,18 +28,15 @@ defmodule Lms.AccountsFixtures do
     user
   end
 
-  def user_fixture(attrs \\ %{}) do
-    user = unconfirmed_user_fixture(attrs)
+  def unconfirmed_user_fixture(attrs \\ %{}) do
+    user = user_fixture(attrs)
 
-    token =
-      extract_user_token(fn url ->
-        Accounts.deliver_login_instructions(user, url)
-      end)
+    {1, _} =
+      Accounts.User
+      |> from(where: [id: ^user.id])
+      |> Lms.Repo.update_all(set: [confirmed_at: nil])
 
-    {:ok, {user, _expired_tokens}} =
-      Accounts.login_user_by_magic_link(token)
-
-    user
+    Lms.Repo.get!(Accounts.User, user.id)
   end
 
   def user_with_role_fixture(role, company_id \\ nil) do
@@ -78,12 +76,6 @@ defmodule Lms.AccountsFixtures do
     Accounts.UserToken
     |> from(where: [token: ^token])
     |> Lms.Repo.update_all(set: [authenticated_at: authenticated_at])
-  end
-
-  def generate_user_magic_link_token(user) do
-    {encoded_token, user_token} = Accounts.UserToken.build_email_token(user, "login")
-    Lms.Repo.insert!(user_token)
-    {encoded_token, user_token.token}
   end
 
   def invited_user_fixture(scope, attrs \\ %{}) do

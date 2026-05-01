@@ -412,8 +412,6 @@ defmodule LmsWeb.LocaleIntegrationTest do
       assert html =~ "Bon retour"
       assert html =~ "Vous n&#39;avez pas de compte"
       assert html =~ "Inscrivez-vous"
-      assert html =~ "Se connecter par courriel"
-      assert html =~ "ou"
       assert html =~ "Se connecter et rester connecté"
       assert html =~ "Se connecter cette fois seulement"
     end

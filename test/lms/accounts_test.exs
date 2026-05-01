@@ -78,7 +78,20 @@ defmodule Lms.AccountsTest do
       assert "has already been taken" in errors_on(changeset).email
     end
 
-    test "registers users without password" do
+    test "requires password to be set" do
+      {:error, changeset} = Accounts.register_user(%{email: unique_user_email()})
+
+      assert %{password: ["can't be blank"]} = errors_on(changeset)
+    end
+
+    test "validates password length" do
+      {:error, changeset} =
+        Accounts.register_user(%{email: unique_user_email(), password: "short"})
+
+      assert "should be at least 12 character(s)" in errors_on(changeset).password
+    end
+
+    test "registers users with email and password and confirms them immediately" do
       email = unique_user_email()
 
       {:ok, user} =
@@ -87,8 +100,9 @@ defmodule Lms.AccountsTest do
         |> Accounts.register_user()
 
       assert user.email == email
-      assert is_nil(user.hashed_password)
-      assert is_nil(user.confirmed_at)
+      refute is_nil(user.hashed_password)
+      refute is_nil(user.confirmed_at)
+      # Virtual password field is cleared after hashing
       assert is_nil(user.password)
     end
   end
@@ -313,85 +327,12 @@ defmodule Lms.AccountsTest do
     end
   end
 
-  describe "get_user_by_magic_link_token/1" do
-    setup do
-      user = user_fixture()
-      {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
-      %{user: user, token: encoded_token}
-    end
-
-    test "returns user by token", %{user: user, token: token} do
-      assert session_user = Accounts.get_user_by_magic_link_token(token)
-      assert session_user.id == user.id
-    end
-
-    test "does not return user for invalid token" do
-      refute Accounts.get_user_by_magic_link_token("oops")
-    end
-
-    test "does not return user for expired token", %{token: token} do
-      {1, nil} = Repo.update_all(UserToken, set: [inserted_at: ~N[2020-01-01 00:00:00]])
-      refute Accounts.get_user_by_magic_link_token(token)
-    end
-  end
-
-  describe "login_user_by_magic_link/1" do
-    test "confirms user and expires tokens" do
-      user = unconfirmed_user_fixture()
-      refute user.confirmed_at
-      {encoded_token, hashed_token} = generate_user_magic_link_token(user)
-
-      assert {:ok, {user, [%{token: ^hashed_token}]}} =
-               Accounts.login_user_by_magic_link(encoded_token)
-
-      assert user.confirmed_at
-    end
-
-    test "returns user and (deleted) token for confirmed user" do
-      user = user_fixture()
-      assert user.confirmed_at
-      {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
-      assert {:ok, {^user, []}} = Accounts.login_user_by_magic_link(encoded_token)
-      # one time use only
-      assert {:error, :not_found} = Accounts.login_user_by_magic_link(encoded_token)
-    end
-
-    test "raises when unconfirmed user has password set" do
-      user = unconfirmed_user_fixture()
-      {1, nil} = Repo.update_all(User, set: [hashed_password: "hashed"])
-      {encoded_token, _hashed_token} = generate_user_magic_link_token(user)
-
-      assert_raise RuntimeError, ~r/magic link log in is not allowed/, fn ->
-        Accounts.login_user_by_magic_link(encoded_token)
-      end
-    end
-  end
-
   describe "delete_user_session_token/1" do
     test "deletes the token" do
       user = user_fixture()
       token = Accounts.generate_user_session_token(user)
       assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
-    end
-  end
-
-  describe "deliver_login_instructions/2" do
-    setup do
-      %{user: unconfirmed_user_fixture()}
-    end
-
-    test "sends token through notification", %{user: user} do
-      token =
-        extract_user_token(fn url ->
-          Accounts.deliver_login_instructions(user, url)
-        end)
-
-      {:ok, token} = Base.url_decode64(token, padding: false)
-      assert user_token = Repo.get_by(UserToken, token: :crypto.hash(:sha256, token))
-      assert user_token.user_id == user.id
-      assert user_token.sent_to == user.email
-      assert user_token.context == "login"
     end
   end
 

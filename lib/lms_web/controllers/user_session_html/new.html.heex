@@ -33,7 +33,7 @@
 
     <div class="card bg-base-200 shadow-sm rounded-2xl">
       <div class="card-body">
-        <.form :let={f} for={@form} as={:user} id="login_form_magic" action={~p"/users/log-in"}>
+        <.form :let={f} for={@form} as={:user} id="login_form_password" action={~p"/users/log-in"}>
           <.input
             readonly={!!@current_scope}
             field={f[:email]}
@@ -43,27 +43,12 @@
             required
             phx-mounted={JS.focus()}
           />
-          <.button class="btn btn-primary w-full">
-            {gettext("Log in with email")} <span aria-hidden="true">&rarr;</span>
-          </.button>
-        </.form>
-
-        <div class="divider">{gettext("or")}</div>
-
-        <.form :let={f} for={@form} as={:user} id="login_form_password" action={~p"/users/log-in"}>
-          <.input
-            readonly={!!@current_scope}
-            field={f[:email]}
-            type="email"
-            label={gettext("Email")}
-            autocomplete="email"
-            required
-          />
           <.input
             field={f[:password]}
             type="password"
             label={gettext("Password")}
             autocomplete="current-password"
+            required
           />
           <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
             {gettext("Log in and stay logged in")} <span aria-hidden="true">&rarr;</span>
