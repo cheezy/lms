@@ -106,40 +106,21 @@
               {gettext("Change email")}
             </.link>
           </li>
+          <li class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-medium text-base-content">{gettext("Password")}</p>
+              <p class="text-sm text-base-content/60">
+                {gettext("Last updated when you set or changed your password.")}
+              </p>
+            </div>
+            <.link
+              navigate={~p"/users/settings/password"}
+              class="btn btn-ghost btn-sm text-primary shrink-0"
+            >
+              {gettext("Change password")}
+            </.link>
+          </li>
         </ul>
-      </div>
-    </div>
-
-    <div class="card bg-base-200 shadow-sm rounded-2xl">
-      <div class="card-body">
-        <h2 class="text-sm font-semibold uppercase tracking-wider text-base-content/50 mb-2">
-          {gettext("Password")}
-        </h2>
-        <.form
-          :let={f}
-          for={@password_changeset}
-          action={~p"/users/settings"}
-          id="update_password"
-        >
-          <input type="hidden" name="action" value="update_password" />
-          <.input
-            field={f[:password]}
-            type="password"
-            label={gettext("New password")}
-            autocomplete="new-password"
-            required
-          />
-          <.input
-            field={f[:password_confirmation]}
-            type="password"
-            label={gettext("Confirm new password")}
-            autocomplete="new-password"
-            required
-          />
-          <.button class="btn btn-primary w-full" phx-disable-with={gettext("Changing...")}>
-            {gettext("Save Password")}
-          </.button>
-        </.form>
       </div>
     </div>
   </div>

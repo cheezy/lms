@@ -904,7 +904,7 @@ msgstr ""
 
 #: lib/lms_web/controllers/user_registration_html/new.html.heex:33
 #: lib/lms_web/controllers/user_session_html/new.html.heex:49
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:116
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:111
 #: lib/lms_web/live/company_registration_live.ex:104
 #: lib/lms_web/live/invitation_live/accept.ex:103
 #, elixir-autogen, elixir-format
@@ -1015,6 +1015,7 @@ msgid "Save Course"
 msgstr ""
 
 #: lib/lms_web/controllers/user_settings_html/edit.html.heex:35
+#: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:34
 #: lib/lms_web/live/courses/course_form_live.ex:206
 #, elixir-autogen, elixir-format
 msgid "Saving..."
@@ -1272,12 +1273,7 @@ msgstr ""
 msgid "Change Email"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:139
-#, elixir-autogen, elixir-format
-msgid "Changing..."
-msgstr ""
-
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:135
+#: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:30
 #, elixir-autogen, elixir-format
 msgid "Confirm new password"
 msgstr ""
@@ -1401,7 +1397,7 @@ msgstr ""
 msgid "Monitor progress, see completions, and keep your team on track with real-time dashboards."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:128
+#: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:22
 #, elixir-autogen, elixir-format
 msgid "New password"
 msgstr ""
@@ -1421,7 +1417,7 @@ msgstr ""
 msgid "Ready to Uplift Your Team?"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_html/edit.html.heex:140
+#: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:35
 #, elixir-autogen, elixir-format
 msgid "Save Password"
 msgstr ""
@@ -1571,7 +1567,7 @@ msgstr ""
 msgid "Open menu"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_controller.ex:80
+#: lib/lms_web/controllers/user_settings_controller.ex:86
 #, elixir-autogen, elixir-format
 msgid "A link to confirm your email change has been sent to the new address."
 msgstr ""
@@ -1587,6 +1583,7 @@ msgid "Account Security"
 msgstr ""
 
 #: lib/lms_web/controllers/user_settings_html/edit_email.html.heex:37
+#: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:44
 #, elixir-autogen, elixir-format
 msgid "Back to settings"
 msgstr ""
@@ -1601,12 +1598,12 @@ msgstr ""
 msgid "Confirmed"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_controller.ex:99
+#: lib/lms_web/controllers/user_settings_controller.ex:105
 #, elixir-autogen, elixir-format
 msgid "Email change link is invalid or it has expired."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_controller.ex:94
+#: lib/lms_web/controllers/user_settings_controller.ex:100
 #, elixir-autogen, elixir-format
 msgid "Email changed successfully."
 msgstr ""
@@ -1631,7 +1628,7 @@ msgstr ""
 msgid "Not confirmed"
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_controller.ex:43
+#: lib/lms_web/controllers/user_settings_controller.ex:49
 #, elixir-autogen, elixir-format
 msgid "Password updated successfully."
 msgstr ""
@@ -1661,7 +1658,27 @@ msgstr ""
 msgid "We'll send a confirmation link to the new address."
 msgstr ""
 
-#: lib/lms_web/controllers/user_settings_controller.ex:113
+#: lib/lms_web/controllers/user_settings_controller.ex:119
 #, elixir-autogen, elixir-format
 msgid "You must re-authenticate to access this page."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:4
+#, elixir-autogen, elixir-format
+msgid "Change Password"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:120
+#, elixir-autogen, elixir-format
+msgid "Change password"
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit.html.heex:113
+#, elixir-autogen, elixir-format
+msgid "Last updated when you set or changed your password."
+msgstr ""
+
+#: lib/lms_web/controllers/user_settings_html/edit_password.html.heex:6
+#, elixir-autogen, elixir-format
+msgid "Use a strong password that you don't reuse on other sites."
 msgstr ""

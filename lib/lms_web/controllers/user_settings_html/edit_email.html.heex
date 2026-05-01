@@ -1,0 +1,41 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <div class="mx-auto max-w-md space-y-6">
+    <div class="text-center">
+      <h1 class="text-xl font-semibold text-base-content">{gettext("Change Email")}</h1>
+      <p class="mt-1 text-sm text-base-content/60">
+        {gettext("We'll send a confirmation link to the new address.")}
+      </p>
+    </div>
+
+    <div class="card bg-base-200 shadow-sm rounded-2xl">
+      <div class="card-body">
+        <.form
+          :let={f}
+          for={@email_changeset}
+          action={~p"/users/settings/email"}
+          method="put"
+          id="update_email"
+        >
+          <.input
+            field={f[:email]}
+            type="email"
+            label={gettext("New email")}
+            autocomplete="email"
+            required
+            phx-mounted={JS.focus()}
+          />
+          <.button class="btn btn-primary w-full" phx-disable-with={gettext("Sending...")}>
+            {gettext("Send confirmation link")}
+          </.button>
+        </.form>
+      </div>
+    </div>
+
+    <div class="text-center">
+      <.link navigate={~p"/users/settings"} class="text-sm text-base-content/70 hover:underline">
+        <.icon name="hero-arrow-left" class="size-4 inline" />
+        {gettext("Back to settings")}
+      </.link>
+    </div>
+  </div>
+</Layouts.app>

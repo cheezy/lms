@@ -73,6 +73,8 @@ defmodule LmsWeb.Router do
     put "/users/settings", UserSettingsController, :update
     get "/users/settings/email", UserSettingsController, :edit_email
     put "/users/settings/email", UserSettingsController, :update_email
+    get "/users/settings/password", UserSettingsController, :edit_password
+    put "/users/settings/password", UserSettingsController, :update_password
     get "/users/settings/confirm-email/:token", UserSettingsController, :confirm_email
   end
 

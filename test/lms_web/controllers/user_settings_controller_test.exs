@@ -29,10 +29,16 @@ defmodule LmsWeb.UserSettingsControllerTest do
     end
 
     @tag token_authenticated_at: :second |> DateTime.utc_now() |> DateTime.add(-11, :minute)
-    test "PUT update_password redirects to log-in when not in sudo mode", %{conn: conn} do
+    test "GET password change page redirects to log-in when not in sudo mode", %{conn: conn} do
+      conn = get(conn, ~p"/users/settings/password")
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "re-authenticate"
+    end
+
+    @tag token_authenticated_at: :second |> DateTime.utc_now() |> DateTime.add(-11, :minute)
+    test "PUT password change redirects to log-in when not in sudo mode", %{conn: conn} do
       conn =
-        put(conn, ~p"/users/settings", %{
-          "action" => "update_password",
+        put(conn, ~p"/users/settings/password", %{
           "user" => %{
             "password" => "brand new password",
             "password_confirmation" => "brand new password"
@@ -62,11 +68,25 @@ defmodule LmsWeb.UserSettingsControllerTest do
     end
   end
 
-  describe "PUT /users/settings (change password form)" do
-    test "updates the user password and resets tokens", %{conn: conn, user: user} do
+  describe "GET /users/settings/password" do
+    test "renders the dedicated password change page", %{conn: conn} do
+      conn = get(conn, ~p"/users/settings/password")
+      response = html_response(conn, 200)
+      assert response =~ "Change Password"
+      assert response =~ "New password"
+      assert response =~ "Confirm new password"
+      assert response =~ "Save Password"
+      assert response =~ ~p"/users/settings"
+    end
+  end
+
+  describe "PUT /users/settings/password" do
+    test "updates the password, renews the session, and redirects to settings", %{
+      conn: conn,
+      user: user
+    } do
       new_password_conn =
-        put(conn, ~p"/users/settings", %{
-          "action" => "update_password",
+        put(conn, ~p"/users/settings/password", %{
           "user" => %{
             "password" => "new valid password",
             "password_confirmation" => "new valid password"
@@ -83,10 +103,9 @@ defmodule LmsWeb.UserSettingsControllerTest do
       assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
     end
 
-    test "does not update password on invalid data", %{conn: conn} do
+    test "renders password page with errors on invalid data", %{conn: conn} do
       old_password_conn =
-        put(conn, ~p"/users/settings", %{
-          "action" => "update_password",
+        put(conn, ~p"/users/settings/password", %{
           "user" => %{
             "password" => "too short",
             "password_confirmation" => "does not match"
@@ -94,7 +113,7 @@ defmodule LmsWeb.UserSettingsControllerTest do
         })
 
       response = html_response(old_password_conn, 200)
-      assert response =~ "Settings"
+      assert response =~ "Change Password"
       assert response =~ "should be at least 12 character(s)"
       assert response =~ "does not match password"
 

@@ -448,11 +448,9 @@ defmodule LmsWeb.LocaleIntegrationTest do
       html = html_response(conn, 200)
 
       assert html =~ "Paramètres du compte"
-      assert html =~ "Gérez votre adresse courriel et vos paramètres de mot de passe"
+      assert html =~ "Profil"
       assert html =~ "Changer le courriel"
-      assert html =~ "Nouveau mot de passe"
-      assert html =~ "Confirmer le nouveau mot de passe"
-      assert html =~ "Enregistrer le mot de passe"
+      assert html =~ "Changer le mot de passe"
     end
   end
 

@@ -28,13 +28,19 @@ defmodule LmsWeb.UserSettingsController do
     end
   end
 
-  def update(conn, %{"action" => "update_password"} = params) do
+  def edit_password(conn, _params) do
+    case require_sudo(conn) do
+      {:error, conn} -> conn
+      {:ok, conn} -> render(conn, :edit_password)
+    end
+  end
+
+  def update_password(conn, %{"user" => user_params}) do
     case require_sudo(conn) do
       {:error, conn} ->
         conn
 
       {:ok, conn} ->
-        %{"user" => user_params} = params
         user = conn.assigns.current_scope.user
 
         case Accounts.update_user_password(user, user_params) do
@@ -45,7 +51,7 @@ defmodule LmsWeb.UserSettingsController do
             |> UserAuth.log_in_user(user)
 
           {:error, changeset} ->
-            render(conn, :edit, password_changeset: changeset)
+            render(conn, :edit_password, password_changeset: changeset)
         end
     end
   end
