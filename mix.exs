@@ -115,6 +115,7 @@ defmodule Lms.MixProject do
         LmsWeb.CoreComponents,
         LmsWeb.ErrorHTML,
         LmsWeb.Layouts,
+        Lms.LearningFixtures,
         LmsWeb.PageController,
         LmsWeb.PageHTML,
         LmsWeb.Router,
