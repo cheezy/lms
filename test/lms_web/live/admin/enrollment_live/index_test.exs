@@ -33,6 +33,19 @@ defmodule LmsWeb.Admin.EnrollmentLive.IndexTest do
       assert html =~ "Manage employee course enrollments"
     end
 
+    test "renders both desktop table and mobile card list", %{conn: conn, company: company} do
+      employee = user_with_role_fixture(:employee, company.id)
+      course = course_fixture(%{company: company})
+      _enrollment = enrollment_fixture(%{user: employee, course: course})
+
+      {:ok, _view, html} = live(conn, ~p"/admin/enrollments")
+
+      assert html =~ ~s(id="enrollments")
+      assert html =~ "hidden md:block overflow-x-auto"
+      assert html =~ ~s(id="enrollments-cards")
+      assert html =~ "md:hidden space-y-3"
+    end
+
     test "shows empty state when no enrollments", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/admin/enrollments")
       assert html =~ "No enrollments yet"

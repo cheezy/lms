@@ -21,6 +21,19 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
       assert html =~ employee.email
     end
 
+    test "renders both desktop table and mobile card list", %{conn: conn, company: company} do
+      _employee = user_with_role_fixture(:employee, company.id)
+      {:ok, _view, html} = live(conn, ~p"/admin/employees")
+
+      # Desktop table is hidden on mobile, visible at md+
+      assert html =~ ~s(id="employees")
+      assert html =~ "hidden md:block overflow-x-auto"
+
+      # Mobile cards are visible only at <md
+      assert html =~ ~s(id="employees-cards")
+      assert html =~ "md:hidden space-y-3"
+    end
+
     test "shows empty state when no employees", %{conn: conn} do
       {:ok, _view, html} = live(conn, ~p"/admin/employees")
       assert html =~ "No employees yet"
@@ -132,7 +145,7 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
       {:ok, view, _html} = live(conn, ~p"/admin/employees")
 
       view
-      |> element("button[phx-click='resend_invitation'][phx-value-id='#{invited.id}']")
+      |> element("#employees button[phx-click='resend_invitation'][phx-value-id='#{invited.id}']")
       |> render_click()
 
       html = render(view)
@@ -164,7 +177,7 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
       {:ok, view, _html} = live(conn, ~p"/admin/employees")
 
       view
-      |> element("button[phx-click='promote'][phx-value-id='#{employee.id}']")
+      |> element("#employees button[phx-click='promote'][phx-value-id='#{employee.id}']")
       |> render_click()
 
       html = render(view)
@@ -176,7 +189,7 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
       {:ok, view, _html} = live(conn, ~p"/admin/employees")
 
       view
-      |> element("button[phx-click='demote'][phx-value-id='#{creator.id}']")
+      |> element("#employees button[phx-click='demote'][phx-value-id='#{creator.id}']")
       |> render_click()
 
       html = render(view)

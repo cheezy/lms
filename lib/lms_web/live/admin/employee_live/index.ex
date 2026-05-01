@@ -277,7 +277,74 @@ defmodule LmsWeb.Admin.EmployeeLive.Index do
         </div>
 
         <%!-- Employee table --%>
-        <div :if={@employees != []} class="overflow-x-auto">
+        <%!-- Mobile card list (md:hidden); see desktop table below --%>
+        <div :if={@employees != []} id="employees-cards" class="md:hidden space-y-3">
+          <div
+            :for={employee <- @employees}
+            id={"employee-card-#{employee.id}"}
+            class="card bg-base-100 border border-base-300 p-4"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold text-base-content truncate">
+                  {employee.name || "—"}
+                </p>
+                <p class="text-sm text-base-content/70 truncate">{employee.email}</p>
+              </div>
+              <span class={[
+                "badge badge-sm shrink-0",
+                employee.status == :active && "badge-success",
+                employee.status == :invited && "badge-info"
+              ]}>
+                {employee.status}
+              </span>
+            </div>
+            <p class="mt-2 text-sm text-base-content/60 capitalize">
+              <span class="font-medium">{gettext("Role")}:</span> {employee.role}
+            </p>
+            <div class="mt-3 flex flex-wrap gap-2">
+              <button
+                :if={employee.status == :invited}
+                phx-click="resend_invitation"
+                phx-value-id={employee.id}
+                class="btn btn-ghost btn-xs text-primary"
+              >
+                <.icon name="hero-arrow-path" class="size-3.5 mr-1" />
+                {gettext("Resend")}
+              </button>
+              <button
+                :if={employee.role == :employee && employee.status == :active}
+                phx-click="promote"
+                phx-value-id={employee.id}
+                data-confirm={
+                  gettext("Promote %{name} to Course Creator?",
+                    name: employee.name || employee.email
+                  )
+                }
+                class="btn btn-ghost btn-xs text-primary"
+              >
+                <.icon name="hero-arrow-up-circle" class="size-3.5 mr-1" />
+                {gettext("Promote")}
+              </button>
+              <button
+                :if={employee.role == :course_creator}
+                phx-click="demote"
+                phx-value-id={employee.id}
+                data-confirm={
+                  gettext("Demote %{name} to Employee?",
+                    name: employee.name || employee.email
+                  )
+                }
+                class="btn btn-ghost btn-xs text-warning"
+              >
+                <.icon name="hero-arrow-down-circle" class="size-3.5 mr-1" />
+                {gettext("Demote")}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div :if={@employees != []} class="hidden md:block overflow-x-auto">
           <table class="table table-zebra" id="employees">
             <thead>
               <tr>

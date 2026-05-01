@@ -312,8 +312,92 @@ defmodule LmsWeb.Courses.CourseListLive do
           </div>
         </div>
 
+        <%!-- List layout — mobile card list (md:hidden); see desktop table below --%>
+        <div
+          :if={@courses != [] && @view_mode == "list"}
+          id="courses-cards"
+          class="md:hidden space-y-3"
+        >
+          <div
+            :for={course <- @courses}
+            id={"course-card-#{course.id}"}
+            class="card bg-base-100 border border-base-300 p-4"
+          >
+            <div class="flex items-start gap-3">
+              <div class="avatar shrink-0">
+                <div class="w-12 h-12 rounded-lg bg-base-200 overflow-hidden">
+                  <img
+                    :if={course.cover_image}
+                    src={course.cover_image}
+                    alt={course.title}
+                    class="w-full h-full object-cover"
+                  />
+                  <div
+                    :if={!course.cover_image}
+                    class="flex items-center justify-center w-full h-full"
+                  >
+                    <.icon name="hero-photo" class="size-5 text-base-content/20" />
+                  </div>
+                </div>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="font-semibold text-base-content truncate">{course.title}</div>
+                  <span class={["badge badge-sm shrink-0", status_badge_class(course.status)]}>
+                    {course.status}
+                  </span>
+                </div>
+                <div :if={course.description} class="text-sm text-base-content/60 line-clamp-2">
+                  {course.description}
+                </div>
+              </div>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-1">
+              <.link navigate={~p"/courses/#{course.id}/editor"} class="btn btn-ghost btn-xs">
+                <.icon name="hero-book-open" class="size-3.5" /> {gettext("Content")}
+              </.link>
+              <.link navigate={~p"/courses/#{course.id}/edit"} class="btn btn-ghost btn-xs">
+                <.icon name="hero-pencil" class="size-3.5" /> {gettext("Edit")}
+              </.link>
+              <.link navigate={~p"/courses/#{course.id}/preview"} class="btn btn-ghost btn-xs">
+                <.icon name="hero-eye" class="size-3.5" /> {gettext("Preview")}
+              </.link>
+              <button
+                :if={course.status == :draft}
+                phx-click="publish"
+                phx-value-id={course.id}
+                data-confirm={gettext("Publish this course?")}
+                class="btn btn-ghost btn-xs text-success"
+              >
+                {gettext("Publish")}
+              </button>
+              <button
+                :if={course.status == :published && admin?(@current_scope.user)}
+                phx-click="archive"
+                phx-value-id={course.id}
+                data-confirm={gettext("Archive this course?")}
+                class="btn btn-ghost btn-xs text-warning"
+              >
+                {gettext("Archive")}
+              </button>
+              <button
+                :if={course.status == :draft}
+                phx-click="delete"
+                phx-value-id={course.id}
+                data-confirm={gettext("Delete this course? This cannot be undone.")}
+                class="btn btn-ghost btn-xs text-error"
+              >
+                {gettext("Delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <%!-- List layout --%>
-        <div :if={@courses != [] && @view_mode == "list"} class="overflow-x-auto">
+        <div
+          :if={@courses != [] && @view_mode == "list"}
+          class="hidden md:block overflow-x-auto"
+        >
           <table class="table table-zebra" id="courses-table">
             <thead>
               <tr>

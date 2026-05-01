@@ -286,8 +286,43 @@ defmodule LmsWeb.Admin.EnrollmentLive.Index do
           </p>
         </div>
 
+        <%!-- Mobile card list (md:hidden); see desktop table below --%>
+        <div :if={@enrollments != []} id="enrollments-cards" class="md:hidden space-y-3">
+          <div
+            :for={enrollment <- @enrollments}
+            id={"enrollment-card-#{enrollment.id}"}
+            class="card bg-base-100 border border-base-300 p-4"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold text-base-content truncate">
+                  {enrollment.user.name || enrollment.user.email}
+                </p>
+                <p class="text-sm text-base-content/70 truncate">{enrollment.course.title}</p>
+              </div>
+              <.status_badge status={Learning.enrollment_status(enrollment, enrollment.progress)} />
+            </div>
+            <p class="mt-2 text-sm text-base-content/60">
+              <span class="font-medium">{gettext("Due Date")}:</span>
+              {format_due_date(enrollment.due_date)}
+            </p>
+            <div class="mt-3 flex items-center gap-2">
+              <div class="flex-1 bg-base-300 rounded-full h-2">
+                <div
+                  class="bg-primary h-2 rounded-full transition-all"
+                  style={"width: #{enrollment.progress}%"}
+                >
+                </div>
+              </div>
+              <span class="text-sm text-base-content/70 shrink-0">
+                {format_progress(enrollment.progress)}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <%!-- Enrollment table --%>
-        <div :if={@enrollments != []} class="overflow-x-auto">
+        <div :if={@enrollments != []} class="hidden md:block overflow-x-auto">
           <table class="table table-zebra" id="enrollments">
             <thead>
               <tr>

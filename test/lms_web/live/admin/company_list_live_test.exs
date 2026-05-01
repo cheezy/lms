@@ -23,6 +23,17 @@ defmodule LmsWeb.Admin.CompanyListLiveTest do
       assert html =~ company.name
     end
 
+    test "renders both desktop table and mobile card list", %{conn: conn, company: company} do
+      {:ok, _view, html} = live(conn, ~p"/admin/companies")
+
+      assert html =~ ~s(id="companies")
+      assert html =~ "hidden md:block overflow-x-auto"
+      assert html =~ ~s(id="companies-cards")
+      assert html =~ "md:hidden space-y-3"
+      # Both views render the company
+      assert html |> String.split(company.name) |> length() >= 3
+    end
+
     test "shows employee count", %{conn: conn, company: company} do
       _employee = user_with_role_fixture(:employee, company.id)
 
@@ -99,7 +110,7 @@ defmodule LmsWeb.Admin.CompanyListLiveTest do
 
       html =
         view
-        |> element("a", "View")
+        |> element("#companies a", "View")
         |> render_click()
 
       assert html =~ company.slug

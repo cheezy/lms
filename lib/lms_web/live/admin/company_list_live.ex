@@ -88,7 +88,46 @@ defmodule LmsWeb.Admin.CompanyListLive do
           </p>
         </div>
 
-        <div :if={@companies != []} class="overflow-x-auto">
+        <%!-- Mobile card list (md:hidden); see desktop table below --%>
+        <div :if={@companies != []} id="companies-cards" class="md:hidden space-y-3">
+          <div
+            :for={row <- @companies}
+            id={"company-card-#{row.company.id}"}
+            class="card bg-base-100 border border-base-300 p-4"
+          >
+            <.link
+              patch={~p"/admin/companies/#{row.company.id}"}
+              class="font-semibold text-primary hover:underline"
+            >
+              {row.company.name}
+            </.link>
+            <div class="mt-3 grid grid-cols-3 gap-2 text-sm">
+              <div>
+                <span class="block text-xs text-base-content/60 uppercase tracking-wide">
+                  {gettext("Employees")}
+                </span>
+                <span class="badge badge-ghost badge-sm">{row.employee_count}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-base-content/60 uppercase tracking-wide">
+                  {gettext("Courses")}
+                </span>
+                <span class="badge badge-ghost badge-sm">{row.course_count}</span>
+              </div>
+              <div>
+                <span class="block text-xs text-base-content/60 uppercase tracking-wide">
+                  {gettext("Enrollments")}
+                </span>
+                <span class="badge badge-ghost badge-sm">{row.enrollment_count}</span>
+              </div>
+            </div>
+            <p class="mt-3 text-xs text-base-content/60">
+              {gettext("Created")} {Calendar.strftime(row.company.inserted_at, "%b %d, %Y")}
+            </p>
+          </div>
+        </div>
+
+        <div :if={@companies != []} class="hidden md:block overflow-x-auto">
           <.table id="companies" rows={@companies} row_id={fn row -> "company-#{row.company.id}" end}>
             <:col :let={row} label={gettext("Company")}>
               <.link
