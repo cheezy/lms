@@ -162,6 +162,104 @@ defmodule LmsWeb.Courses.CourseFormLiveTest do
     end
   end
 
+  describe "Cover image cancel and submit" do
+    setup do
+      uploads_dir = Path.join(["priv/static/uploads"])
+      File.mkdir_p!(uploads_dir)
+
+      on_exit(fn ->
+        uploads_dir
+        |> File.ls!()
+        |> Enum.filter(&String.contains?(&1, "test-cover"))
+        |> Enum.each(fn name ->
+          uploads_dir
+          |> Path.join(name)
+          |> File.rm!()
+        end)
+      end)
+
+      :ok
+    end
+
+    test "cancels in-progress upload", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/courses/new")
+
+      cover =
+        file_input(view, "#course-form", :cover_image, [
+          %{name: "test-cover-cancel.jpg", content: "fake jpg", type: "image/jpeg"}
+        ])
+
+      render_upload(cover, "test-cover-cancel.jpg", 50)
+
+      # Cancel the upload (the entry has a ref we can target via the cancel button)
+      html =
+        view
+        |> element("button[phx-click='cancel-upload']")
+        |> render_click()
+
+      # Cancelling removes the preview
+      refute html =~ "test-cover-cancel.jpg"
+    end
+
+    test "saves course with uploaded cover image", %{conn: conn, company: company} do
+      {:ok, view, _html} = live(conn, ~p"/courses/new")
+
+      cover =
+        file_input(view, "#course-form", :cover_image, [
+          %{
+            name: "test-cover-save.jpg",
+            content: "fake jpg content",
+            type: "image/jpeg"
+          }
+        ])
+
+      render_upload(cover, "test-cover-save.jpg")
+
+      view
+      |> form("#course-form", course: %{title: "Course With Cover", description: "x"})
+      |> render_submit()
+
+      assert_redirect(view, ~p"/courses")
+
+      course =
+        Lms.Training.list_courses(company.id, %{})
+        |> Enum.find(&(&1.title == "Course With Cover"))
+
+      assert course.cover_image
+      assert String.starts_with?(course.cover_image, "/uploads/")
+      assert String.ends_with?(course.cover_image, "test-cover-save.jpg")
+    end
+
+    test "rejects multiple files (only one allowed)", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/courses/new")
+
+      cover =
+        file_input(view, "#course-form", :cover_image, [
+          %{name: "first.jpg", content: "a", type: "image/jpeg"},
+          %{name: "second.jpg", content: "b", type: "image/jpeg"}
+        ])
+
+      render_upload(cover, "first.jpg")
+      html = render(view)
+      assert html =~ "Only one file allowed" or html =~ "too_many_files"
+    end
+  end
+
+  describe "Edit form with existing cover image" do
+    test "renders existing cover image when no new upload", %{conn: conn, company: company} do
+      course =
+        course_fixture(%{
+          company: company,
+          title: "Has Cover",
+          cover_image: "/uploads/existing-cover.jpg"
+        })
+
+      {:ok, _view, html} = live(conn, ~p"/courses/#{course.id}/edit")
+      assert html =~ "/uploads/existing-cover.jpg"
+      assert html =~ "Current cover"
+    end
+  end
+
   describe "Authorization" do
     test "course creators can access the form", %{conn: conn, company: company} do
       creator = user_with_role_fixture(:course_creator, company.id)

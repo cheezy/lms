@@ -105,5 +105,27 @@ defmodule LmsWeb.Plugs.AuthorizationHooksTest do
 
       assert socket.redirected
     end
+
+    test "redirects to root path when halting" do
+      company = company_fixture()
+      user = user_with_role_fixture(:employee, company.id)
+      scope = user_scope_fixture(user)
+      socket = build_socket(%{current_scope: scope})
+
+      assert {:halt, socket} =
+               AuthorizationHooks.on_mount({:require_role, [:system_admin]}, %{}, %{}, socket)
+
+      assert {:redirect, %{to: "/"}} = socket.redirected
+    end
+
+    test "halts with empty roles list" do
+      company = company_fixture()
+      user = user_with_role_fixture(:company_admin, company.id)
+      scope = user_scope_fixture(user)
+      socket = build_socket(%{current_scope: scope})
+
+      assert {:halt, _socket} =
+               AuthorizationHooks.on_mount({:require_role, []}, %{}, %{}, socket)
+    end
   end
 end

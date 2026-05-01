@@ -207,6 +207,119 @@ defmodule LmsWeb.Courses.CourseListLiveTest do
     end
   end
 
+  describe "Publish errors" do
+    test "shows error when course has no chapters", %{conn: conn, company: company} do
+      course = course_fixture(%{company: company, status: :draft, title: "Empty Course"})
+      {:ok, view, _html} = live(conn, ~p"/courses")
+
+      html =
+        view
+        |> element("button[phx-click='publish'][phx-value-id='#{course.id}']")
+        |> render_click()
+
+      assert html =~ "Cannot publish"
+      assert html =~ "needs at least one chapter"
+    end
+
+    test "preserves status filter after publishing", %{conn: conn, company: company} do
+      course = course_fixture(%{company: company, status: :draft, title: "Filter Pub Course"})
+      chapter = chapter_fixture(%{course: course})
+      lesson_fixture(%{chapter: chapter})
+
+      {:ok, view, _html} = live(conn, ~p"/courses?status=draft")
+
+      view
+      |> element("button[phx-click='publish'][phx-value-id='#{course.id}']")
+      |> render_click()
+
+      assert_patch(view, ~p"/courses?status=draft")
+    end
+  end
+
+  describe "List view actions" do
+    test "publish button works in list view", %{conn: conn, company: company} do
+      course = course_fixture(%{company: company, status: :draft, title: "List Pub Course"})
+      chapter = chapter_fixture(%{course: course})
+      lesson_fixture(%{chapter: chapter})
+      {:ok, view, _html} = live(conn, ~p"/courses")
+
+      view
+      |> element("button[phx-value-layout='list']")
+      |> render_click()
+
+      html =
+        view
+        |> element("#courses-table button[phx-click='publish']")
+        |> render_click()
+
+      assert html =~ "Course published successfully"
+    end
+
+    test "archive button works in list view", %{conn: conn, company: company} do
+      course_fixture(%{company: company, status: :published, title: "List Archive Course"})
+      {:ok, view, _html} = live(conn, ~p"/courses")
+
+      view
+      |> element("button[phx-value-layout='list']")
+      |> render_click()
+
+      html =
+        view
+        |> element("#courses-table button[phx-click='archive']")
+        |> render_click()
+
+      assert html =~ "Course archived successfully"
+    end
+
+    test "delete button works in list view", %{conn: conn, company: company} do
+      course_fixture(%{company: company, status: :draft, title: "List Delete Course"})
+      {:ok, view, _html} = live(conn, ~p"/courses")
+
+      view
+      |> element("button[phx-value-layout='list']")
+      |> render_click()
+
+      html =
+        view
+        |> element("#courses-table button[phx-click='delete']")
+        |> render_click()
+
+      assert html =~ "Course deleted successfully"
+    end
+
+    test "renders course with cover image in list view", %{conn: conn, company: company} do
+      course_fixture(%{
+        company: company,
+        title: "Cover List Course",
+        cover_image: "/uploads/cover.jpg"
+      })
+
+      {:ok, view, _html} = live(conn, ~p"/courses")
+
+      html =
+        view
+        |> element("button[phx-value-layout='list']")
+        |> render_click()
+
+      assert html =~ "/uploads/cover.jpg"
+      assert html =~ "Cover List Course"
+    end
+  end
+
+  describe "Grid view with cover image" do
+    test "renders course with cover image in grid view", %{conn: conn, company: company} do
+      course_fixture(%{
+        company: company,
+        title: "Grid Cover Course",
+        cover_image: "/uploads/grid-cover.jpg"
+      })
+
+      {:ok, _view, html} = live(conn, ~p"/courses")
+      assert html =~ "/uploads/grid-cover.jpg"
+      assert html =~ "Grid Cover Course"
+    end
+  end
+
   describe "Authorization" do
     test "redirects unauthenticated users" do
       conn = build_conn()

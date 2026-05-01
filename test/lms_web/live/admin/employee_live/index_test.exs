@@ -217,6 +217,19 @@ defmodule LmsWeb.Admin.EmployeeLive.IndexTest do
 
       assert html =~ "can&#39;t be blank" or html =~ "must have the @ sign"
     end
+
+    test "validates input on change", %{conn: conn} do
+      {:ok, view, _html} = live(conn, ~p"/admin/employees")
+
+      view |> element("button", "Invite Employee") |> render_click()
+
+      html =
+        view
+        |> form("#invite-form", invite: %{name: "", email: "not-an-email"})
+        |> render_change()
+
+      assert html =~ "can&#39;t be blank" or html =~ "must have the @ sign"
+    end
   end
 
   describe "Bulk Upload" do

@@ -481,5 +481,107 @@ defmodule Lms.Training.LessonRendererTest do
       assert LessonRenderer.render("not a map") == ""
       assert LessonRenderer.render(42) == ""
     end
+
+    test "renders block-level hard break" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{"type" => "paragraph", "content" => [%{"type" => "text", "text" => "Above"}]},
+          %{"type" => "hardBreak"},
+          %{"type" => "paragraph", "content" => [%{"type" => "text", "text" => "Below"}]}
+        ]
+      }
+
+      assert LessonRenderer.render(doc) == "<p>Above</p><br/><p>Below</p>"
+    end
+
+    test "renders bulletList with no content key as empty list" do
+      doc = %{
+        "type" => "doc",
+        "content" => [%{"type" => "bulletList"}]
+      }
+
+      assert LessonRenderer.render(doc) == "<ul></ul>"
+    end
+
+    test "renders heading with no content key" do
+      doc = %{
+        "type" => "doc",
+        "content" => [%{"type" => "heading", "attrs" => %{"level" => 2}}]
+      }
+
+      assert LessonRenderer.render(doc) == "<h2></h2>"
+    end
+
+    test "renders paragraph with no content key" do
+      doc = %{
+        "type" => "doc",
+        "content" => [%{"type" => "paragraph"}]
+      }
+
+      assert LessonRenderer.render(doc) == "<p></p>"
+    end
+
+    test "ignores unknown inline nodes" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "paragraph",
+            "content" => [
+              %{"type" => "text", "text" => "before"},
+              %{"type" => "mention", "attrs" => %{"id" => "123"}},
+              %{"type" => "text", "text" => "after"}
+            ]
+          }
+        ]
+      }
+
+      assert LessonRenderer.render(doc) == "<p>beforeafter</p>"
+    end
+
+    test "ignores unknown marks but preserves text" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "paragraph",
+            "content" => [
+              %{
+                "type" => "text",
+                "text" => "underlined",
+                "marks" => [%{"type" => "underline"}]
+              }
+            ]
+          }
+        ]
+      }
+
+      assert LessonRenderer.render(doc) == "<p>underlined</p>"
+    end
+
+    test "renders image with non-binary alt as empty alt" do
+      doc = %{
+        "type" => "doc",
+        "content" => [
+          %{
+            "type" => "image",
+            "attrs" => %{"src" => "/uploads/photo.jpg", "alt" => 42}
+          }
+        ]
+      }
+
+      assert LessonRenderer.render(doc) ==
+               ~s(<img src="/uploads/photo.jpg" alt=""/>)
+    end
+
+    test "rejects video embed with non-binary src" do
+      doc = %{
+        "type" => "doc",
+        "content" => [%{"type" => "videoEmbed", "attrs" => %{"src" => nil}}]
+      }
+
+      assert LessonRenderer.render(doc) == ""
+    end
   end
 end
