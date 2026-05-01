@@ -21,12 +21,38 @@ defmodule LmsWeb.UserSettingsControllerTest do
     end
 
     @tag token_authenticated_at: :second |> DateTime.utc_now() |> DateTime.add(-11, :minute)
-    test "redirects if user is not in sudo mode", %{conn: conn} do
+    test "is reachable for non-sudo users (sudo no longer required for view)", %{conn: conn} do
       conn = get(conn, ~p"/users/settings")
-      assert redirected_to(conn) == ~p"/users/log-in"
+      response = html_response(conn, 200)
+      assert response =~ "Account Settings"
+      assert response =~ "Profile"
+    end
 
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
-               "You must re-authenticate to access this page."
+    @tag token_authenticated_at: :second |> DateTime.utc_now() |> DateTime.add(-11, :minute)
+    test "PUT update_password redirects to log-in when not in sudo mode", %{conn: conn} do
+      conn =
+        put(conn, ~p"/users/settings", %{
+          "action" => "update_password",
+          "user" => %{
+            "password" => "brand new password",
+            "password_confirmation" => "brand new password"
+          }
+        })
+
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "re-authenticate"
+    end
+
+    @tag token_authenticated_at: :second |> DateTime.utc_now() |> DateTime.add(-11, :minute)
+    test "PUT update_email redirects to log-in when not in sudo mode", %{conn: conn} do
+      conn =
+        put(conn, ~p"/users/settings", %{
+          "action" => "update_email",
+          "user" => %{"email" => "newaddress@example.com"}
+        })
+
+      assert redirected_to(conn) == ~p"/users/log-in"
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "re-authenticate"
     end
   end
 
@@ -147,43 +173,70 @@ defmodule LmsWeb.UserSettingsControllerTest do
     end
   end
 
-  describe "PUT /users/settings (change locale form)" do
-    test "updates the user locale and sets session", %{conn: conn, user: user} do
+  describe "PUT /users/settings (update profile form)" do
+    test "updates the user name and locale and sets session locale", %{conn: conn, user: user} do
       conn =
         put(conn, ~p"/users/settings", %{
-          "action" => "update_locale",
-          "user" => %{"locale" => "fr"}
+          "action" => "update_profile",
+          "user" => %{"name" => "Jane Doe", "locale" => "fr"}
         })
 
       assert redirected_to(conn) == ~p"/users/settings"
-      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Language preference updated"
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Profile updated"
       assert get_session(conn, :locale) == "fr"
 
       updated_user = Accounts.get_user!(user.id)
+      assert updated_user.name == "Jane Doe"
       assert updated_user.locale == "fr"
     end
 
     test "rejects invalid locale values", %{conn: conn, user: user} do
       conn =
         put(conn, ~p"/users/settings", %{
-          "action" => "update_locale",
-          "user" => %{"locale" => "de"}
+          "action" => "update_profile",
+          "user" => %{"name" => "Jane", "locale" => "de"}
         })
 
-      assert redirected_to(conn) == ~p"/users/settings"
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) =~ "Could not update"
+      response = html_response(conn, 200)
+      assert response =~ "Account Settings"
 
       updated_user = Accounts.get_user!(user.id)
       assert updated_user.locale == "en"
+      assert is_nil(updated_user.name)
     end
 
-    test "renders locale dropdown on settings page", %{conn: conn} do
+    test "renders profile form on settings page", %{conn: conn} do
       conn = get(conn, ~p"/users/settings")
       response = html_response(conn, 200)
+      assert response =~ "Profile"
+      assert response =~ "Full name"
       assert response =~ "Preferred language"
       assert response =~ "English"
       assert response =~ "Français"
-      assert response =~ "Save Language"
+      assert response =~ "Save Profile"
+    end
+
+    test "renders read-only Account Info card", %{conn: conn} do
+      conn = get(conn, ~p"/users/settings")
+      response = html_response(conn, 200)
+      assert response =~ "Account Info"
+      assert response =~ "Role"
+      assert response =~ "Company"
+      assert response =~ "Member since"
+      assert response =~ "Email status"
+    end
+
+    test "settings page is reachable WITHOUT sudo mode", %{user: user} do
+      # Force the user out of sudo mode by aging their session token
+      token = Accounts.generate_user_session_token(user)
+      Lms.AccountsFixtures.override_token_authenticated_at(token, ~U[2020-01-01 00:00:00Z])
+
+      conn =
+        build_conn()
+        |> Plug.Test.init_test_session(%{user_token: token})
+        |> get(~p"/users/settings")
+
+      assert html_response(conn, 200) =~ "Account Settings"
     end
   end
 end

@@ -163,6 +163,20 @@ defmodule Lms.Accounts.User do
   end
 
   @doc """
+  A changeset for updating the user's profile (name + locale).
+
+  Bundled together because both are low-risk preference fields presented in
+  one form on the settings page.
+  """
+  def profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:name, :locale])
+    |> validate_required([:locale])
+    |> validate_inclusion(:locale, @allowed_locales)
+    |> validate_length(:name, max: 255)
+  end
+
+  @doc """
   Confirms the account by setting `confirmed_at`.
   """
   def confirm_changeset(user) do

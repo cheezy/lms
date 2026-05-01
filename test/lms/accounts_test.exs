@@ -126,6 +126,48 @@ defmodule Lms.AccountsTest do
     end
   end
 
+  describe "change_user_profile/2 and update_user_profile/2" do
+    test "change_user_profile returns a profile changeset" do
+      assert %Ecto.Changeset{} = changeset = Accounts.change_user_profile(%User{})
+      assert :locale in changeset.required
+    end
+
+    test "update_user_profile updates name and locale together" do
+      user = user_fixture()
+
+      assert {:ok, updated} =
+               Accounts.update_user_profile(user, %{"name" => "Jane Doe", "locale" => "fr"})
+
+      assert updated.name == "Jane Doe"
+      assert updated.locale == "fr"
+    end
+
+    test "update_user_profile rejects invalid locales" do
+      user = user_fixture()
+      assert {:error, changeset} = Accounts.update_user_profile(user, %{"locale" => "xx"})
+      assert "is invalid" in errors_on(changeset).locale
+    end
+
+    test "update_user_profile rejects names longer than 255 chars" do
+      user = user_fixture()
+      long_name = String.duplicate("a", 256)
+
+      assert {:error, changeset} =
+               Accounts.update_user_profile(user, %{"name" => long_name, "locale" => "en"})
+
+      assert "should be at most 255 character(s)" in errors_on(changeset).name
+    end
+
+    test "update_user_profile allows blank name (name is optional)" do
+      user = user_fixture()
+
+      assert {:ok, updated} =
+               Accounts.update_user_profile(user, %{"name" => "", "locale" => "en"})
+
+      assert is_nil(updated.name) or updated.name == ""
+    end
+  end
+
   describe "change_user_email/3" do
     test "returns a user changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_email(%User{})

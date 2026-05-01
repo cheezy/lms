@@ -206,6 +206,24 @@ defmodule Lms.Accounts do
     |> Repo.update()
   end
 
+  @doc """
+  Returns a changeset for updating the user's profile (name + locale).
+  """
+  def change_user_profile(%User{} = user, attrs \\ %{}) do
+    User.profile_changeset(user, attrs)
+  end
+
+  @doc """
+  Updates the user's profile (name + locale).
+
+  Returns `{:ok, user}` on success or `{:error, changeset}` on failure.
+  """
+  def update_user_profile(%User{} = user, attrs) do
+    user
+    |> User.profile_changeset(attrs)
+    |> Repo.update()
+  end
+
   ## Session
 
   @doc """

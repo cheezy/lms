@@ -7,29 +7,81 @@
       </p>
     </div>
 
+    <%!-- Profile: editable name + locale --%>
     <div class="card bg-base-200 shadow-sm rounded-2xl">
       <div class="card-body">
         <h2 class="text-sm font-semibold uppercase tracking-wider text-base-content/50 mb-2">
-          {gettext("Language")}
+          {gettext("Profile")}
         </h2>
         <.form
-          for={%{}}
-          as={:user}
+          :let={f}
+          for={@profile_changeset}
           action={~p"/users/settings"}
-          id="update_locale"
+          id="update_profile"
         >
-          <input type="hidden" name="action" value="update_locale" />
+          <input type="hidden" name="action" value="update_profile" />
           <.input
-            name="user[locale]"
+            field={f[:name]}
+            type="text"
+            label={gettext("Full name")}
+            autocomplete="name"
+          />
+          <.input
+            field={f[:locale]}
             type="select"
             label={gettext("Preferred language")}
-            value={@current_scope.user.locale}
             options={[{"English", "en"}, {"Français", "fr"}]}
           />
           <.button class="btn btn-primary w-full" phx-disable-with={gettext("Saving...")}>
-            {gettext("Save Language")}
+            {gettext("Save Profile")}
           </.button>
         </.form>
+      </div>
+    </div>
+
+    <%!-- Account Info: read-only role/company/membership/confirmation --%>
+    <div class="card bg-base-200 shadow-sm rounded-2xl">
+      <div class="card-body">
+        <h2 class="text-sm font-semibold uppercase tracking-wider text-base-content/50 mb-2">
+          {gettext("Account Info")}
+        </h2>
+        <dl class="space-y-2 text-sm">
+          <div class="flex justify-between gap-3">
+            <dt class="text-base-content/60">{gettext("Role")}</dt>
+            <dd class="text-base-content capitalize">
+              {String.replace(to_string(@current_scope.user.role), "_", " ")}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-base-content/60">{gettext("Company")}</dt>
+            <dd class="text-base-content text-right truncate">
+              {(@user_with_company.company && @user_with_company.company.name) || "—"}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-base-content/60">{gettext("Member since")}</dt>
+            <dd class="text-base-content">
+              {Calendar.strftime(@current_scope.user.inserted_at, "%b %d, %Y")}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-3">
+            <dt class="text-base-content/60">{gettext("Email status")}</dt>
+            <dd>
+              <span
+                :if={@current_scope.user.confirmed_at}
+                class="badge badge-success badge-sm"
+              >
+                {gettext("Confirmed")}
+              </span>
+              <span
+                :if={!@current_scope.user.confirmed_at}
+                class="badge badge-warning badge-sm"
+              >
+                {gettext("Not confirmed")}
+              </span>
+            </dd>
+          </div>
+        </dl>
       </div>
     </div>
 
