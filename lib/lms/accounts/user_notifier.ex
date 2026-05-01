@@ -1,4 +1,16 @@
 defmodule Lms.Accounts.UserNotifier do
+  @moduledoc """
+  Sends transactional emails to users.
+
+  Each `deliver_*` function wraps subject and body construction in
+  `Gettext.with_locale/2` using the recipient user's stored `locale`. Because
+  emails may be delivered asynchronously (Oban-style), the locale must be
+  applied at *render time*, not just at delivery time — otherwise the body
+  would be built in whatever locale the calling process happened to have.
+  """
+
+  use Gettext, backend: LmsWeb.Gettext
+
   import Swoosh.Email
 
   alias Lms.Mailer
@@ -8,7 +20,7 @@ defmodule Lms.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Lms", "contact@example.com"})
+      |> from({"Uplift", "contact@example.com"})
       |> subject(subject)
       |> text_body(body)
 
@@ -17,63 +29,88 @@ defmodule Lms.Accounts.UserNotifier do
     end
   end
 
+  # Run the given function with Gettext locale set to the user's stored
+  # locale, falling back to "en" when the user has no locale set.
+  defp with_user_locale(user, fun) do
+    Gettext.with_locale(LmsWeb.Gettext, user.locale || "en", fun)
+  end
+
   @doc """
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, "Update email instructions", """
+    with_user_locale(user, fn ->
+      subject = gettext("Update email instructions")
 
-    ==============================
+      body = """
 
-    Hi #{user.email},
+      ==============================
 
-    You can change your email by visiting the URL below:
+      #{gettext("Hi %{email},", email: user.email)}
 
-    #{url}
+      #{gettext("You can change your email by visiting the URL below:")}
 
-    If you didn't request this change, please ignore this.
+      #{url}
 
-    ==============================
-    """)
+      #{gettext("If you didn't request this change, please ignore this.")}
+
+      ==============================
+      """
+
+      deliver(user.email, subject, body)
+    end)
   end
 
   @doc """
   Deliver invitation instructions to a new employee.
   """
   def deliver_invitation_instructions(user, url) do
-    deliver(user.email, "You've been invited to join Lms", """
+    with_user_locale(user, fn ->
+      subject = gettext("You've been invited to join Uplift")
 
-    ==============================
+      body = """
 
-    Hi #{user.name},
+      ==============================
 
-    You've been invited to join Lms. You can set up your account by visiting the URL below:
+      #{gettext("Hi %{name},", name: user.name)}
 
-    #{url}
+      #{gettext("You've been invited to join Uplift. You can set up your account by visiting the URL below:")}
 
-    This invitation will expire in 7 days.
+      #{url}
 
-    If you weren't expecting this invitation, please ignore this email.
+      #{gettext("This invitation will expire in 7 days.")}
 
-    ==============================
-    """)
+      #{gettext("If you weren't expecting this invitation, please ignore this email.")}
+
+      ==============================
+      """
+
+      deliver(user.email, subject, body)
+    end)
   end
 
   @doc """
   Deliver enrollment notification to an employee.
   """
   def deliver_enrollment_notification(user, course_title) do
-    deliver(user.email, "You've been enrolled in #{course_title}", """
+    with_user_locale(user, fn ->
+      subject = gettext("You've been enrolled in %{course}", course: course_title)
+      greeting_name = user.name || user.email
 
-    ==============================
+      body = """
 
-    Hi #{user.name || user.email},
+      ==============================
 
-    You have been enrolled in the course "#{course_title}".
+      #{gettext("Hi %{name},", name: greeting_name)}
 
-    Log in to your account to start learning.
+      #{gettext("You have been enrolled in the course \"%{course}\".", course: course_title)}
 
-    ==============================
-    """)
+      #{gettext("Log in to your account to start learning.")}
+
+      ==============================
+      """
+
+      deliver(user.email, subject, body)
+    end)
   end
 end

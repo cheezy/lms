@@ -1690,17 +1690,17 @@ msgstr "Utilisez un mot de passe fort que vous ne réutilisez pas sur d'autres s
 msgid "Company registered successfully!"
 msgstr "Entreprise enregistrée avec succès !"
 
-#: lib/lms/accounts.ex:581
+#: lib/lms/accounts.ex:579
 #, elixir-autogen, elixir-format
 msgid "Duplicate email in CSV"
 msgstr "Courriel dupliqué dans le CSV"
 
-#: lib/lms/accounts.ex:586
+#: lib/lms/accounts.ex:580
 #, elixir-autogen, elixir-format
 msgid "Employee already exists"
 msgstr "L'employé existe déjà"
 
-#: lib/lms/accounts.ex:577
+#: lib/lms/accounts.ex:578
 #, elixir-autogen, elixir-format
 msgid "Invalid email format"
 msgstr "Format de courriel invalide"
@@ -1720,7 +1720,7 @@ msgstr "Déconnexion réussie."
 msgid "Login link is invalid or has expired."
 msgstr "Le lien de connexion est invalide ou a expiré."
 
-#: lib/lms/accounts.ex:571
+#: lib/lms/accounts.ex:577
 #, elixir-autogen, elixir-format
 msgid "Name is required"
 msgstr "Le nom est requis"
@@ -1751,3 +1751,64 @@ msgstr "Vous n'êtes pas autorisé à accéder à cette ressource."
 #, elixir-autogen, elixir-format
 msgid "You must log in to access this page."
 msgstr "Vous devez vous connecter pour accéder à cette page."
+
+#: lib/lms/accounts/user_notifier.ex:49
+#, elixir-autogen, elixir-format
+msgid "Hi %{email},"
+msgstr "Bonjour %{email},"
+
+#: lib/lms/accounts/user_notifier.ex:75
+#: lib/lms/accounts/user_notifier.ex:104
+#, elixir-autogen, elixir-format
+msgid "Hi %{name},"
+msgstr "Bonjour %{name},"
+
+#: lib/lms/accounts/user_notifier.ex:55
+#, elixir-autogen, elixir-format
+msgid "If you didn't request this change, please ignore this."
+msgstr "Si vous n'avez pas demandé ce changement, veuillez ignorer ce message."
+
+#: lib/lms/accounts/user_notifier.ex:83
+#, elixir-autogen, elixir-format
+msgid "If you weren't expecting this invitation, please ignore this email."
+msgstr "Si vous n'attendiez pas cette invitation, veuillez ignorer ce courriel."
+
+#: lib/lms/accounts/user_notifier.ex:108
+#, elixir-autogen, elixir-format
+msgid "Log in to your account to start learning."
+msgstr "Connectez-vous à votre compte pour commencer à apprendre."
+
+#: lib/lms/accounts/user_notifier.ex:81
+#, elixir-autogen, elixir-format
+msgid "This invitation will expire in 7 days."
+msgstr "Cette invitation expirera dans 7 jours."
+
+#: lib/lms/accounts/user_notifier.ex:43
+#, elixir-autogen, elixir-format
+msgid "Update email instructions"
+msgstr "Instructions de mise à jour du courriel"
+
+#: lib/lms/accounts/user_notifier.ex:51
+#, elixir-autogen, elixir-format
+msgid "You can change your email by visiting the URL below:"
+msgstr "Vous pouvez changer votre courriel en visitant l'URL ci-dessous :"
+
+#: lib/lms/accounts/user_notifier.ex:106
+#, elixir-autogen, elixir-format
+msgid "You have been enrolled in the course \"%{course}\"."
+msgstr "Vous avez été inscrit au cours « %{course} »."
+
+#: lib/lms/accounts/user_notifier.ex:97
+#, elixir-autogen, elixir-format
+msgid "You've been enrolled in %{course}"
+msgstr "Vous avez été inscrit à %{course}"
+
+#: lib/lms/accounts/user_notifier.ex:69
+#, elixir-autogen, elixir-format
+msgid "You've been invited to join Uplift"
+msgstr "Vous avez été invité à rejoindre Uplift"
+
+#: lib/lms/accounts/user_notifier.ex:77
+#, elixir-autogen, elixir-format
+msgid "You've been invited to join Uplift. You can set up your account by visiting the URL below:"
+msgstr "Vous avez été invité à rejoindre Uplift. Vous pouvez configurer votre compte en visitant l'URL ci-dessous :"
