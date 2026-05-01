@@ -126,10 +126,24 @@ defmodule LmsWeb.Layouts do
             </div>
             <.locale_selector />
             <.theme_toggle />
+            <button
+              :if={@current_scope}
+              id="mobile-menu-toggle"
+              type="button"
+              phx-click={JS.dispatch("mobile-menu:toggle")}
+              aria-label={gettext("Open menu")}
+              aria-expanded="false"
+              aria-controls="mobile-menu"
+              class="md:hidden btn btn-ghost btn-sm"
+            >
+              <.icon name="hero-bars-3" class="size-5" />
+            </button>
           </div>
         </div>
       </div>
     </header>
+
+    <.mobile_drawer :if={@current_scope} current_scope={@current_scope} />
 
     <main class="px-4 py-8 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-7xl space-y-4">
@@ -138,6 +152,132 @@ defmodule LmsWeb.Layouts do
     </main>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  attr :current_scope, :map, required: true
+
+  defp mobile_drawer(assigns) do
+    ~H"""
+    <div id="mobile-menu-wrapper" phx-hook="MobileMenu" class="md:hidden">
+      <div
+        id="mobile-menu-backdrop"
+        phx-click={JS.dispatch("mobile-menu:close")}
+        class="fixed inset-0 bg-base-200/80 z-40 hidden"
+        aria-hidden="true"
+      >
+      </div>
+
+      <aside
+        id="mobile-menu"
+        class="fixed inset-y-0 left-0 w-72 bg-base-100 shadow-xl p-4 overflow-y-auto z-50 hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-label={gettext("Mobile navigation")}
+      >
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xl font-bold text-primary tracking-tight">Uplift</span>
+          <button
+            type="button"
+            phx-click={JS.dispatch("mobile-menu:close")}
+            aria-label={gettext("Close menu")}
+            class="btn btn-ghost btn-sm"
+          >
+            <.icon name="hero-x-mark" class="size-5" />
+          </button>
+        </div>
+
+        <nav class="flex flex-col gap-1" aria-label={gettext("Mobile primary")}>
+          <.link
+            :if={@current_scope.user.role == :system_admin}
+            navigate={~p"/admin/companies"}
+            phx-click={JS.dispatch("mobile-menu:close")}
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            <.icon name="hero-building-office-2" class="size-4" /> {gettext("Companies")}
+          </.link>
+
+          <.link
+            :if={@current_scope.user.role in [:company_admin, :system_admin]}
+            navigate={~p"/dashboard"}
+            phx-click={JS.dispatch("mobile-menu:close")}
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            <.icon name="hero-squares-2x2" class="size-4" /> {gettext("Dashboard")}
+          </.link>
+
+          <.link
+            :if={@current_scope.user.role in [:company_admin, :system_admin]}
+            navigate={~p"/admin/employees"}
+            phx-click={JS.dispatch("mobile-menu:close")}
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            <.icon name="hero-users" class="size-4" /> {gettext("Employees")}
+          </.link>
+
+          <.link
+            :if={@current_scope.user.role in [:course_creator, :company_admin, :system_admin]}
+            navigate={~p"/courses"}
+            phx-click={JS.dispatch("mobile-menu:close")}
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            <.icon name="hero-academic-cap" class="size-4" /> {gettext("Courses")}
+          </.link>
+
+          <.link
+            :if={@current_scope.user.role in [:company_admin, :system_admin]}
+            navigate={~p"/admin/enrollments"}
+            phx-click={JS.dispatch("mobile-menu:close")}
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            <.icon name="hero-clipboard-document-check" class="size-4" /> {gettext("Enrollments")}
+          </.link>
+
+          <.link
+            :if={
+              @current_scope.user.role in [
+                :employee,
+                :course_creator,
+                :company_admin,
+                :system_admin
+              ]
+            }
+            navigate={~p"/my-learning"}
+            phx-click={JS.dispatch("mobile-menu:close")}
+            class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            <.icon name="hero-book-open" class="size-4" /> {gettext("My Learning")}
+          </.link>
+        </nav>
+
+        <div class="mt-6 pt-4 border-t border-base-300">
+          <p
+            class="px-3 text-sm font-medium text-base-content truncate"
+            title={@current_scope.user.email}
+          >
+            {@current_scope.user.email}
+          </p>
+          <div class="mt-2 flex flex-col gap-1">
+            <.link
+              href={~p"/users/settings"}
+              phx-click={JS.dispatch("mobile-menu:close")}
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+            >
+              <.icon name="hero-cog-6-tooth" class="size-4" /> {gettext("Settings")}
+            </.link>
+            <.link
+              href={~p"/users/log-out"}
+              method="delete"
+              phx-click={JS.dispatch("mobile-menu:close")}
+              class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-base-content hover:text-primary rounded-lg hover:bg-primary/10 transition-colors"
+            >
+              <.icon name="hero-arrow-right-start-on-rectangle" class="size-4" />
+              {gettext("Log out")}
+            </.link>
+          </div>
+        </div>
+      </aside>
+    </div>
     """
   end
 

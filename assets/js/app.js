@@ -26,8 +26,9 @@ import {hooks as colocatedHooks} from "phoenix-colocated/lms"
 import topbar from "../vendor/topbar"
 import TipTapEditor from "./hooks/tiptap_editor"
 import {SortableChapters, SortableLessons} from "./hooks/sortable"
+import MobileMenu from "./hooks/mobile_menu"
 
-const Hooks = {...colocatedHooks, TipTapEditor, SortableChapters, SortableLessons}
+const Hooks = {...colocatedHooks, TipTapEditor, SortableChapters, SortableLessons, MobileMenu}
 
 import { initLanding } from "./landing"
 
