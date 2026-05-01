@@ -25,6 +25,7 @@ defmodule LmsWeb.Courses.CourseEditorLive do
         |> assign(:expanded_chapters, expand_all(course))
         |> assign(:form, nil)
         |> assign(:editor_content, nil)
+        |> assign(:sidebar_open, false)
         |> allow_upload(:image,
           accept: ~w(.jpg .jpeg .png .gif .webp),
           max_entries: 1,
@@ -218,7 +219,8 @@ defmodule LmsWeb.Courses.CourseEditorLive do
      |> assign(:editor_content, lesson.content)
      |> assign(:editing, nil)
      |> assign(:adding, nil)
-     |> assign(:form, nil)}
+     |> assign(:form, nil)
+     |> assign(:sidebar_open, false)}
   end
 
   def handle_event("editor_updated", %{"content" => content_json}, socket) do
@@ -405,6 +407,12 @@ defmodule LmsWeb.Courses.CourseEditorLive do
      |> assign(:form, nil)}
   end
 
+  # -- Sidebar toggle (mobile) --
+
+  def handle_event("toggle_sidebar", _params, socket) do
+    {:noreply, assign(socket, :sidebar_open, !socket.assigns.sidebar_open)}
+  end
+
   # -- Render --
 
   @impl true
@@ -429,12 +437,33 @@ defmodule LmsWeb.Courses.CourseEditorLive do
               </p>
             </div>
           </div>
+          <button
+            phx-click="toggle_sidebar"
+            class="lg:hidden btn btn-ghost btn-sm"
+            aria-label={gettext("Toggle navigation")}
+          >
+            <.icon name="hero-bars-3" class="size-5" />
+          </button>
         </div>
 
         <%!-- Main layout: sidebar + content --%>
-        <div class="flex gap-6">
+        <div class="flex gap-6 relative">
+          <%!-- Mobile sidebar overlay --%>
+          <div
+            :if={@sidebar_open}
+            class="fixed inset-0 bg-base-200/80 z-40 lg:hidden"
+            phx-click="toggle_sidebar"
+            aria-hidden="true"
+          >
+          </div>
+
           <%!-- Sidebar --%>
-          <div class="w-80 shrink-0">
+          <div class={[
+            "w-80 shrink-0 z-50",
+            "lg:relative lg:block",
+            @sidebar_open && "fixed inset-y-0 left-0 bg-base-100 shadow-xl overflow-y-auto",
+            !@sidebar_open && "hidden lg:block"
+          ]}>
             <div class="bg-base-200 rounded-2xl p-4">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="font-semibold text-base-content">{gettext("Contents")}</h2>

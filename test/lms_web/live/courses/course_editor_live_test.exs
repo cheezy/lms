@@ -749,6 +749,48 @@ defmodule LmsWeb.Courses.CourseEditorLiveTest do
 
       assert has_element?(view, "#lesson-#{lesson.id}")
     end
+
+    test "mobile sidebar starts closed and toggles open", %{conn: conn, course: course} do
+      {:ok, view, html} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      # Mobile hamburger button is present
+      assert html =~ ~s(phx-click="toggle_sidebar")
+      # Sidebar wrapper has hidden lg:block class when closed
+      assert html =~ "hidden lg:block"
+      # No backdrop overlay yet
+      refute html =~ "bg-base-200/80 z-40 lg:hidden"
+
+      # Open the sidebar
+      html =
+        view
+        |> element("button[phx-click='toggle_sidebar'].lg\\:hidden")
+        |> render_click()
+
+      # Backdrop now visible
+      assert html =~ "bg-base-200/80 z-40 lg:hidden"
+      # Sidebar now has fixed positioning
+      assert html =~ "fixed inset-y-0 left-0"
+    end
+
+    test "selecting a lesson closes the mobile sidebar", %{conn: conn, course: course} do
+      chapter = chapter_fixture(%{course: course})
+      lesson = lesson_fixture(%{chapter: chapter, title: "Open Me"})
+      {:ok, view, _} = live(conn, ~p"/courses/#{course.id}/editor")
+
+      # Open the sidebar
+      view
+      |> element("button[phx-click='toggle_sidebar'].lg\\:hidden")
+      |> render_click()
+
+      # Select the lesson
+      html =
+        view
+        |> element("button[phx-click='select_lesson'][phx-value-id='#{lesson.id}']")
+        |> render_click()
+
+      # Sidebar should be closed (backdrop gone, hidden lg:block restored)
+      refute html =~ "bg-base-200/80 z-40 lg:hidden"
+    end
   end
 
   describe "Archived course" do
