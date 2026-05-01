@@ -7,6 +7,26 @@
     <.live_title default="Uplift" suffix=" · LMS">
       {assigns[:page_title]}
     </.live_title>
+
+    <%!-- Icons --%>
+    <link rel="icon" type="image/x-icon" href={~p"/favicon.ico"} />
+    <link rel="icon" type="image/png" sizes="16x16" href={~p"/images/favicon-16x16.png"} />
+    <link rel="icon" type="image/png" sizes="32x32" href={~p"/images/favicon-32x32.png"} />
+    <link rel="apple-touch-icon" sizes="180x180" href={~p"/images/apple-touch-icon.png"} />
+    <link rel="manifest" href={~p"/manifest.webmanifest"} />
+    <meta name="theme-color" content="#1E1B4B" />
+
+    <%!-- Open Graph / Twitter Card --%>
+    <meta property="og:title" content={assigns[:page_title] || "Uplift"} />
+    <meta
+      property="og:description"
+      content="Uplift — modern learning management for modern teams."
+    />
+    <meta property="og:image" content={url(~p"/images/og-image.png")} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={url(~p"/images/og-image.png")} />
+
     <link phx-track-static rel="stylesheet" href={~p"/assets/css/app.css"} />
     <script defer phx-track-static type="text/javascript" src={~p"/assets/js/app.js"}>
     </script>
