@@ -27,8 +27,9 @@ import topbar from "../vendor/topbar"
 import TipTapEditor from "./hooks/tiptap_editor"
 import {SortableChapters, SortableLessons} from "./hooks/sortable"
 import MobileMenu from "./hooks/mobile_menu"
+import AutoDismiss from "./hooks/auto_dismiss"
 
-const Hooks = {...colocatedHooks, TipTapEditor, SortableChapters, SortableLessons, MobileMenu}
+const Hooks = {...colocatedHooks, TipTapEditor, SortableChapters, SortableLessons, MobileMenu, AutoDismiss}
 
 import { initLanding } from "./landing"
 
